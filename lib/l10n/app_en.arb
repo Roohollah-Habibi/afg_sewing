@@ -1,0 +1,7 @@
+{
+  "helloWorld": "Hello World!",
+  "centerContent": "your have pressed the button this many times",
+  "@helloWorld": {
+    "description": "The conventional newborn programmer greeting"
+  }
+}
