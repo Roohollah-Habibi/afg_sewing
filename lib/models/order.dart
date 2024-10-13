@@ -1,31 +1,91 @@
-class Order {
+import 'package:equatable/equatable.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+part 'order.g.dart';
+
+@HiveType(typeId: 2)
+class Order extends HiveObject with EquatableMixin {
+  @HiveField(0)
   final String id;
+
+  @HiveField(1)
   final DateTime orderDate;
+
+  @HiveField(2)
   final DateTime deliveryDate;
+
+  @HiveField(3)
   final String idNumber;
+
+  @HiveField(4)
   final String qad;
+
+  @HiveField(5)
   final String shana;
+
+  @HiveField(6)
   final String astinSada;
+
+  @HiveField(7)
   final String astinKaf;
+
+  @HiveField(8)
   final String yeqa;
+
+  @HiveField(9)
   final String beghal;
+
+  @HiveField(10)
   final String shalwar;
+
+  @HiveField(11)
   final String parcha;
+
+  @HiveField(12)
   final String qout;
+
+  @HiveField(13)
   final String damAstin;
+
+  @HiveField(14)
   final String barAstin;
+
+  @HiveField(15)
   final String jibShalwar;
+
+  @HiveField(16)
   final String qadPuti;
+
+  @HiveField(17)
   final String barShalwar;
+
+  @HiveField(18)
   final String faq;
+
+  @HiveField(19)
   final String doorezano;
+
+  @HiveField(20)
   final String kaf;
+
+  @HiveField(21)
   final String jibRoo;
+
+  @HiveField(22)
   final String damanRast;
+
+  @HiveField(23)
   final String damanGerd;
+
+  @HiveField(24)
   final String model;
+
+  @HiveField(25)
   final double totalCost;
+
+  @HiveField(26)
   final double receivedMoney;
+
+  @HiveField(27)
   final double remainingMoney;
 
   Order({
@@ -59,5 +119,39 @@ class Order {
     required this.remainingMoney,
   });
 
-  Order.temp({required this.id, required this.orderDate, required this.deliveryDate, this.idNumber = '', this.qad = '', this.shana = '', this.astinSada = '', this.astinKaf = '', this.yeqa = '', this.beghal = '', this.shalwar = '', this.parcha = '', this.qout = '', this.damAstin = '', this.barAstin = '', this.jibShalwar = '', this.qadPuti = '', this.barShalwar = '', this.faq = '', this.doorezano = '', this.kaf = '', this.jibRoo = '', this.damanRast = '', this.damanGerd = '', this.model = '', this.totalCost = 0, this.receivedMoney = 0, this.remainingMoney = 0});
+  Order.temp(
+      {required this.id,
+      required this.orderDate,
+      required this.deliveryDate,
+      this.idNumber = '',
+      this.qad = '',
+      this.shana = '',
+      this.astinSada = '',
+      this.astinKaf = '',
+      this.yeqa = '',
+      this.beghal = '',
+      this.shalwar = '',
+      this.parcha = '',
+      this.qout = '',
+      this.damAstin = '',
+      this.barAstin = '',
+      this.jibShalwar = '',
+      this.qadPuti = '',
+      this.barShalwar = '',
+      this.faq = '',
+      this.doorezano = '',
+      this.kaf = '',
+      this.jibRoo = '',
+      this.damanRast = '',
+      this.damanGerd = '',
+      this.model = '',
+      this.totalCost = 0,
+      this.receivedMoney = 0,
+      this.remainingMoney = 0});
+
+  @override
+  List<Object?> get props => [id];
+  @override
+  // TODO: implement stringify
+  bool? get stringify => true;
 }

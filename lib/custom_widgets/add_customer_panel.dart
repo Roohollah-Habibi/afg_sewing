@@ -1,7 +1,12 @@
 import 'dart:ffi';
 
 import 'package:afg_sewing/custom_widgets/text_field.dart';
+import 'package:afg_sewing/models/customer.dart';
+import 'package:afg_sewing/page_routing/rout_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+
+const String appDb = 'SwingDb';
 
 class CustomShowModelSheet extends StatefulWidget {
   const CustomShowModelSheet({super.key});
@@ -19,7 +24,28 @@ class _CustomShowModelSheetState extends State<CustomShowModelSheet> {
   late final List<DropdownMenuItem<String>> userStatus;
   bool? showFirstNameError, showLastNameError, showPhoneError;
 
-  void onSave() {
+  final Box swingDB = Hive.box(appDb);
+
+  Future<void> addNewCustomer(Customer customer) async {
+    await swingDB.put(customer.id, customer);
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    lastNameController.dispose();
+    phoneOneController.dispose();
+    phoneTwoController.dispose();
+    super.dispose();
+
+  }
+
+  Future<void> onSave() async {
+    String name = nameController.value.text;
+    String lastName = lastNameController.value.text;
+    String phoneOne = phoneOneController.value.text;
+    String phoneTwo = phoneTwoController.value.text;
+
     bool nameIsEmpty = nameController.text.isEmpty;
     bool lastNameIsEmpty = lastNameController.text.isEmpty;
     bool phoneIsEmpty = phoneOneController.text.isEmpty;
@@ -40,8 +66,21 @@ class _CustomShowModelSheetState extends State<CustomShowModelSheet> {
     }
     setState(() {});
     if (!nameIsEmpty && !lastNameIsEmpty && !phoneIsEmpty) {
-      Navigator.of(context).pop();
+      Customer newCustomer = Customer(
+          id: '$name+$phoneOne',
+          firstName: name,
+          lastName: lastName,
+          phoneNumber1: phoneOne,
+          phoneNumber2: phoneTwo);
+      await addNewCustomer(newCustomer);
+      if (mounted) {
+        Navigator.of(context).pushReplacementNamed(RouteManager.root);
+      }
     }
+  }
+
+  void _onCancel(){
+    Navigator.of(context).pushReplacementNamed(RouteManager.root);
   }
 
   @override
@@ -121,6 +160,10 @@ class _CustomShowModelSheetState extends State<CustomShowModelSheet> {
               ElevatedButton(
                 onPressed: onSave,
                 child: const Text('Save profile'),
+              ),
+              ElevatedButton(
+                onPressed: _onCancel,
+                child: const Text('Cancel'),
               ),
             ],
           ),
