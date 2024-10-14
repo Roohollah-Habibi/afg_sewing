@@ -1,5 +1,6 @@
 import 'package:afg_sewing/models/customer.dart';
 import 'package:afg_sewing/models/order.dart';
+import 'package:afg_sewing/page_routing/rout_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
@@ -92,7 +93,9 @@ class _CustomerProfileState extends State<CustomerProfile> {
         ),
       ),
       floatingActionButton: ElevatedButton.icon(
-        onPressed: () {},
+        onPressed: () {
+          Navigator.of(context).pushNamed(RouteManager.orderPage);
+        },
         label: const Text('New Order'),
         icon: const Icon(Icons.add),
       ),
