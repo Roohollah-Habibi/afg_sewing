@@ -152,6 +152,5 @@ class Order extends HiveObject with EquatableMixin {
   @override
   List<Object?> get props => [id];
   @override
-  // TODO: implement stringify
   bool? get stringify => true;
 }
