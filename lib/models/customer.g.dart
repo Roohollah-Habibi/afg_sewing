@@ -21,9 +21,9 @@ class CustomerAdapter extends TypeAdapter<Customer> {
       firstName: fields[1] as String,
       lastName: fields[2] as String,
       phoneNumber1: fields[3] as String,
-      phoneNumber2: fields[4] as String?,
-      customerOrder: (fields[5] as List?)?.cast<Order>(),
-      customerStatus: fields[6] as bool?,
+      phoneNumber2: fields[4] as String,
+      customerOrder: (fields[5] as List).cast<Order>(),
+      status: fields[6] as bool,
     );
   }
 
@@ -44,7 +44,7 @@ class CustomerAdapter extends TypeAdapter<Customer> {
       ..writeByte(5)
       ..write(obj.customerOrder)
       ..writeByte(6)
-      ..write(obj.customerStatus);
+      ..write(obj.status);
   }
 
   @override

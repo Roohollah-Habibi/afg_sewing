@@ -2,7 +2,11 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'order.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:uuid/uuid.dart';
 part 'customer.g.dart';
+
+const String swingDb = 'SwingDb';
+var uuid = const Uuid();
 
 @HiveType(typeId: 1)
 class Customer extends HiveObject with EquatableMixin{
@@ -19,27 +23,36 @@ class Customer extends HiveObject with EquatableMixin{
   final String phoneNumber1;
 
   @HiveField(4)
-  final String? phoneNumber2;
+  final String phoneNumber2;
 
   @HiveField(5)
-  final List<Order>? customerOrder;
+  final List<Order> customerOrder;
 
   @HiveField(6)
-  bool? customerStatus;
+  final bool status;
 
   Customer({
     required this.id,
     required this.firstName,
     required this.lastName,
     required this.phoneNumber1,
-    this.phoneNumber2,
-    this.customerOrder,
-    this.customerStatus = false
+    required this.phoneNumber2,
+    required this.customerOrder,
+    required this.status,
   });
-  void addNewOrder(Order newOrder){
-    customerOrder!.add(newOrder);
-    debugPrint('=======> Successfully ADDED <========');
+
+  static Future <void> addNewOrder({required Order newOrder,required String customerId}) async{
+    if(Hive.isBoxOpen(swingDb)){
+      final swingBox = Hive.box(swingDb);
+      final Customer customer = swingBox.get(customerId) as Customer;
+      customer.customerOrder.add(newOrder);
+      swingBox.put(customerId, customer);
+    }else{
+      throw const FormatException('====CUSTOMER PAGE======>BOX [$swingDb] IS NOT EXISTS OR OPENED <=========');
+    }
   }
+
+
   void removeOrder(Order order){
     customerOrder!.removeWhere((foundOrder) => foundOrder == order,);
     debugPrint('=======> Successfully REMOVED <========');
@@ -56,7 +69,7 @@ class Customer extends HiveObject with EquatableMixin{
   }
 
   @override
-  List<Object?> get props => [id,firstName,lastName,phoneNumber1,phoneNumber2];
+  List<Object?> get props => [id,firstName,lastName,phoneNumber1,phoneNumber2,customerOrder,status];
 
   @override
   bool? get stringify => true;

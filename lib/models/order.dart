@@ -1,7 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:uuid/uuid.dart';
 part 'order.g.dart';
-
+var _uuid = const Uuid();
 @HiveType(typeId: 2)
 class Order extends HiveObject with EquatableMixin {
   @HiveField(0)
@@ -14,85 +15,81 @@ class Order extends HiveObject with EquatableMixin {
   final DateTime deliveryDate;
 
   @HiveField(3)
-  final String idNumber;
-
-  @HiveField(4)
   final String qad;
 
-  @HiveField(5)
+  @HiveField(4)
   final String shana;
 
-  @HiveField(6)
+  @HiveField(5)
   final String astinSada;
 
-  @HiveField(7)
+  @HiveField(6)
   final String astinKaf;
 
-  @HiveField(8)
+  @HiveField(7)
   final String yeqa;
 
-  @HiveField(9)
+  @HiveField(8)
   final String beghal;
 
-  @HiveField(10)
+  @HiveField(9)
   final String shalwar;
 
-  @HiveField(11)
+  @HiveField(10)
   final String parcha;
 
-  @HiveField(12)
+  @HiveField(11)
   final String qout;
 
-  @HiveField(13)
+  @HiveField(12)
   final String damAstin;
 
-  @HiveField(14)
+  @HiveField(13)
   final String barAstin;
 
-  @HiveField(15)
+  @HiveField(14)
   final String jibShalwar;
 
-  @HiveField(16)
+  @HiveField(15)
   final String qadPuti;
 
-  @HiveField(17)
+  @HiveField(16)
   final String barShalwar;
 
-  @HiveField(18)
+  @HiveField(17)
   final String faq;
 
-  @HiveField(19)
+  @HiveField(18)
   final String doorezano;
 
-  @HiveField(20)
+  @HiveField(19)
   final String kaf;
 
-  @HiveField(21)
+  @HiveField(20)
   final String jibRoo;
 
-  @HiveField(22)
+  @HiveField(21)
   final String damanRast;
 
-  @HiveField(23)
+  @HiveField(22)
   final String damanGerd;
 
-  @HiveField(24)
+  @HiveField(23)
   final String model;
 
+  @HiveField(24)
+  final int totalCost;
+
   @HiveField(25)
-  final double totalCost;
+  final int receivedMoney;
 
   @HiveField(26)
-  final double receivedMoney;
-
-  @HiveField(27)
-  final double remainingMoney;
+  final int remainingMoney;
 
   Order({
     required this.id,
     required this.orderDate,
     required this.deliveryDate,
-    required this.idNumber,
     required this.qad,
     required this.shana,
     required this.astinSada,
@@ -120,10 +117,10 @@ class Order extends HiveObject with EquatableMixin {
   });
 
   Order.temp(
-      {required this.id,
+      {
+        required this.id,
       required this.orderDate,
       required this.deliveryDate,
-      this.idNumber = '',
       this.qad = '',
       this.shana = '',
       this.astinSada = '',
@@ -150,7 +147,7 @@ class Order extends HiveObject with EquatableMixin {
       this.remainingMoney = 0});
 
   @override
-  List<Object?> get props => [id];
+  List<Object?> get props => [id,qad];
   @override
   bool? get stringify => true;
 }

@@ -20,38 +20,37 @@ class OrderAdapter extends TypeAdapter<Order> {
       id: fields[0] as String,
       orderDate: fields[1] as DateTime,
       deliveryDate: fields[2] as DateTime,
-      idNumber: fields[3] as String,
-      qad: fields[4] as String,
-      shana: fields[5] as String,
-      astinSada: fields[6] as String,
-      astinKaf: fields[7] as String,
-      yeqa: fields[8] as String,
-      beghal: fields[9] as String,
-      shalwar: fields[10] as String,
-      parcha: fields[11] as String,
-      qout: fields[12] as String,
-      damAstin: fields[13] as String,
-      barAstin: fields[14] as String,
-      jibShalwar: fields[15] as String,
-      qadPuti: fields[16] as String,
-      barShalwar: fields[17] as String,
-      faq: fields[18] as String,
-      doorezano: fields[19] as String,
-      kaf: fields[20] as String,
-      jibRoo: fields[21] as String,
-      damanRast: fields[22] as String,
-      damanGerd: fields[23] as String,
-      model: fields[24] as String,
-      totalCost: fields[25] as double,
-      receivedMoney: fields[26] as double,
-      remainingMoney: fields[27] as double,
+      qad: fields[3] as String,
+      shana: fields[4] as String,
+      astinSada: fields[5] as String,
+      astinKaf: fields[6] as String,
+      yeqa: fields[7] as String,
+      beghal: fields[8] as String,
+      shalwar: fields[9] as String,
+      parcha: fields[10] as String,
+      qout: fields[11] as String,
+      damAstin: fields[12] as String,
+      barAstin: fields[13] as String,
+      jibShalwar: fields[14] as String,
+      qadPuti: fields[15] as String,
+      barShalwar: fields[16] as String,
+      faq: fields[17] as String,
+      doorezano: fields[18] as String,
+      kaf: fields[19] as String,
+      jibRoo: fields[20] as String,
+      damanRast: fields[21] as String,
+      damanGerd: fields[22] as String,
+      model: fields[23] as String,
+      totalCost: fields[24] as int,
+      receivedMoney: fields[25] as int,
+      remainingMoney: fields[26] as int,
     );
   }
 
   @override
   void write(BinaryWriter writer, Order obj) {
     writer
-      ..writeByte(28)
+      ..writeByte(27)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -59,54 +58,52 @@ class OrderAdapter extends TypeAdapter<Order> {
       ..writeByte(2)
       ..write(obj.deliveryDate)
       ..writeByte(3)
-      ..write(obj.idNumber)
-      ..writeByte(4)
       ..write(obj.qad)
-      ..writeByte(5)
+      ..writeByte(4)
       ..write(obj.shana)
-      ..writeByte(6)
+      ..writeByte(5)
       ..write(obj.astinSada)
-      ..writeByte(7)
+      ..writeByte(6)
       ..write(obj.astinKaf)
-      ..writeByte(8)
+      ..writeByte(7)
       ..write(obj.yeqa)
-      ..writeByte(9)
+      ..writeByte(8)
       ..write(obj.beghal)
-      ..writeByte(10)
+      ..writeByte(9)
       ..write(obj.shalwar)
-      ..writeByte(11)
+      ..writeByte(10)
       ..write(obj.parcha)
-      ..writeByte(12)
+      ..writeByte(11)
       ..write(obj.qout)
-      ..writeByte(13)
+      ..writeByte(12)
       ..write(obj.damAstin)
-      ..writeByte(14)
+      ..writeByte(13)
       ..write(obj.barAstin)
-      ..writeByte(15)
+      ..writeByte(14)
       ..write(obj.jibShalwar)
-      ..writeByte(16)
+      ..writeByte(15)
       ..write(obj.qadPuti)
-      ..writeByte(17)
+      ..writeByte(16)
       ..write(obj.barShalwar)
-      ..writeByte(18)
+      ..writeByte(17)
       ..write(obj.faq)
-      ..writeByte(19)
+      ..writeByte(18)
       ..write(obj.doorezano)
-      ..writeByte(20)
+      ..writeByte(19)
       ..write(obj.kaf)
-      ..writeByte(21)
+      ..writeByte(20)
       ..write(obj.jibRoo)
-      ..writeByte(22)
+      ..writeByte(21)
       ..write(obj.damanRast)
-      ..writeByte(23)
+      ..writeByte(22)
       ..write(obj.damanGerd)
-      ..writeByte(24)
+      ..writeByte(23)
       ..write(obj.model)
-      ..writeByte(25)
+      ..writeByte(24)
       ..write(obj.totalCost)
-      ..writeByte(26)
+      ..writeByte(25)
       ..write(obj.receivedMoney)
-      ..writeByte(27)
+      ..writeByte(26)
       ..write(obj.remainingMoney);
   }
 

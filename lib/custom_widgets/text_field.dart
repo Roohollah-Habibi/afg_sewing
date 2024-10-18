@@ -5,30 +5,39 @@ class CustomTextField extends StatelessWidget {
   final String label;
   final Color? enabledBorderColor;
   final Color? focusedBorderColor;
-  final Icon prefixIcon;
+  final Icon? prefixIcon;
   final TextInputType? keyboardType;
   final bool? showError;
-
+  final InputDecoration? customInputDecoration;
+  final bool readOnly;
 
   const CustomTextField({
     super.key,
+    this.readOnly = false,
     this.showError,
     this.keyboardType,
+    this.customInputDecoration,
+    this.prefixIcon,
     required this.txtEditingController,
     required this.label,
-    required this.prefixIcon,
     this.enabledBorderColor,
     this.focusedBorderColor,
-  });
 
+  });
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all( 8.0),
       child: TextField(
+        readOnly: readOnly,
         controller: txtEditingController,
-        keyboardType: keyboardType,
-        decoration: inputDecoration(
+        keyboardType: keyboardType ?? TextInputType.text,
+        decoration: customInputDecoration?.copyWith(
+          labelText: label,
+          enabledBorder: enableInputBorder(Colors.blue),
+          focusedBorder: focusInputBorder(Colors.lightBlueAccent),
+        )??
+          inputDecoration(
             labelText: label,
             prefixIcon: prefixIcon,
             enableBorderColor: enabledBorderColor,
@@ -40,7 +49,7 @@ class CustomTextField extends StatelessWidget {
 }
 
 InputDecoration inputDecoration({
-  required Icon prefixIcon,
+  Icon? prefixIcon,
   required String labelText,
   bool? errorText,
   Color? enableBorderColor,

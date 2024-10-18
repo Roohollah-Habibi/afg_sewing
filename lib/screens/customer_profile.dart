@@ -17,14 +17,15 @@ class CustomerProfile extends StatefulWidget {
 
 class _CustomerProfileState extends State<CustomerProfile> {
   final Box swingBox = Hive.box(swingDb);
-  late Customer customer;
-  late List<Order>? customerOrders;
+  late final Customer customer;
+  late final List<Order>? customerOrders;
 
   @override
   void initState() {
     super.initState();
     customer = swingBox.get(widget.customerId);
-    customerOrders = customer.customerOrder ?? [];
+    customerOrders = (customer.customerOrder == null || customer.customerOrder!.isEmpty) ? [] : customer.customerOrder;
+
   }
 
   @override
@@ -70,8 +71,8 @@ class _CustomerProfileState extends State<CustomerProfile> {
                 ),
               ],
             ),
-            SizedBox(height: 16),
-            Divider(),
+            const SizedBox(height: 16),
+            const Divider(),
             Expanded(
               child: Center(
                 child: customerOrders!.isEmpty
@@ -81,8 +82,8 @@ class _CustomerProfileState extends State<CustomerProfile> {
                         itemBuilder: (context, index) {
                           return Card(
                             child: ListTile(
-                              title: Text(customerOrders![index].model),
-                              subtitle: Text(customerOrders![index].parcha),
+                              title: Text(customerOrders![index].qad),
+                              subtitle: Text('${customerOrders![index].remainingMoney}'),
                             ),
                           );
                         },
@@ -94,7 +95,7 @@ class _CustomerProfileState extends State<CustomerProfile> {
       ),
       floatingActionButton: ElevatedButton.icon(
         onPressed: () {
-          Navigator.of(context).pushNamed(RouteManager.orderPage);
+          Navigator.of(context).pushReplacementNamed(RouteManager.orderPage,arguments: {'id': customer.id});
         },
         label: const Text('New Order'),
         icon: const Icon(Icons.add),

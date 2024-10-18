@@ -5,21 +5,46 @@ import 'package:afg_sewing/models/customer.dart';
 import 'package:afg_sewing/page_routing/rout_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:uuid/uuid.dart';
 
 const String appDb = 'SwingDb';
 
 class CustomShowModelSheet extends StatefulWidget {
-  const CustomShowModelSheet({super.key});
+  final Customer? customer;
+
+  const CustomShowModelSheet({super.key, this.customer});
 
   @override
   State<CustomShowModelSheet> createState() => _CustomShowModelSheetState();
 }
 
 class _CustomShowModelSheetState extends State<CustomShowModelSheet> {
-  final nameController = TextEditingController();
-  final lastNameController = TextEditingController();
-  final phoneOneController = TextEditingController();
-  final phoneTwoController = TextEditingController();
+  late TextEditingController nameController;
+  late TextEditingController lastNameController;
+  late TextEditingController phoneOneController;
+  late TextEditingController phoneTwoController;
+  late bool customerStatus ;
+
+  @override
+  void initState() {
+    super.initState();
+    customerStatus= widget.customer != null ? widget.customer!.status : true;
+    nameController = TextEditingController(text: widget.customer?.firstName);
+    lastNameController = TextEditingController(text: widget.customer?.lastName);
+    phoneOneController =
+        TextEditingController(text: widget.customer?.phoneNumber1);
+    phoneTwoController =
+        TextEditingController(text: widget.customer?.phoneNumber2);
+    userStatus = List.of(_status).map(
+      (myItem) {
+        return DropdownMenuItem(
+          value: myItem,
+          child: Text(myItem),
+        );
+      },
+    ).toList();
+  }
+
   final List<String> _status = ['Active', 'Inactive'];
   late final List<DropdownMenuItem<String>> userStatus;
   bool? showFirstNameError, showLastNameError, showPhoneError;
@@ -37,7 +62,6 @@ class _CustomShowModelSheetState extends State<CustomShowModelSheet> {
     phoneOneController.dispose();
     phoneTwoController.dispose();
     super.dispose();
-
   }
 
   Future<void> onSave() async {
@@ -66,12 +90,18 @@ class _CustomShowModelSheetState extends State<CustomShowModelSheet> {
     }
     setState(() {});
     if (!nameIsEmpty && !lastNameIsEmpty && !phoneIsEmpty) {
+      var uuid = const Uuid();
       Customer newCustomer = Customer(
-          id: '$name+$phoneOne',
+          id: widget.customer != null ? widget.customer!.id : uuid.v4(),
           firstName: name,
           lastName: lastName,
           phoneNumber1: phoneOne,
-          phoneNumber2: phoneTwo);
+          phoneNumber2: phoneTwo,
+          customerOrder:
+              widget.customer != null ? widget.customer!.customerOrder : [],
+          status: customerStatus);
+      print(
+          '=====ADD CUSTOMER PANEL=========== ${swingDB.values.toList().toString()}');
       await addNewCustomer(newCustomer);
       if (mounted) {
         Navigator.of(context).pushReplacementNamed(RouteManager.root);
@@ -79,19 +109,8 @@ class _CustomShowModelSheetState extends State<CustomShowModelSheet> {
     }
   }
 
-  void _onCancel(){
+  void _onCancel() {
     Navigator.of(context).pushReplacementNamed(RouteManager.root);
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    userStatus = List.of(_status)
-        .map((myItem) => DropdownMenuItem(
-              value: myItem,
-              child: Text(myItem),
-            ))
-        .toList();
   }
 
   @override
@@ -136,14 +155,17 @@ class _CustomShowModelSheetState extends State<CustomShowModelSheet> {
                   prefixIcon: const Icon(Icons.mobile_screen_share)),
               const SizedBox(height: 10),
               CustomTextField(
-                  showError: showPhoneError,
                   keyboardType: TextInputType.number,
                   txtEditingController: phoneTwoController,
                   label: 'Phone two[Optional]',
                   prefixIcon: const Icon(Icons.phone_android)),
               const SizedBox(height: 10),
               DropdownButtonFormField<String>(
-                value: _status[0],
+                value: widget.customer != null
+                    ? widget.customer!.status == true
+                        ? _status[0]
+                        : _status[1]
+                    : _status[0],
                 decoration: InputDecoration(
                   labelText: 'Status',
                   enabledBorder: enableInputBorder(Colors.purple),
@@ -154,12 +176,15 @@ class _CustomShowModelSheetState extends State<CustomShowModelSheet> {
                   (_status[0] == value)
                       ? _status[1] = value!
                       : _status[0] == value;
+                  value == 'Active' ? customerStatus = true :customerStatus = false;
+                  print('============> VALUE: $value ==> $customerStatus');
                 },
               ),
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: onSave,
-                child: const Text('Save profile'),
+                child: Text(
+                    widget.customer != null ? 'Edit profile' : 'Save profile'),
               ),
               ElevatedButton(
                 onPressed: _onCancel,

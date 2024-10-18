@@ -1,5 +1,4 @@
 import 'package:afg_sewing/custom_widgets/add_customer_panel.dart';
-import 'package:afg_sewing/custom_widgets/text_field.dart';
 import 'package:afg_sewing/models/customer.dart';
 import 'package:afg_sewing/models/order.dart';
 import 'package:afg_sewing/page_routing/rout_manager.dart';
@@ -7,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
-const String appDb = 'SwingDb';
+const String swingDb = 'SwingDb';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -18,23 +17,22 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   late List<Customer> _customerList;
-  final Box swingBox = Hive.box(appDb);
+  final Box swingBox = Hive.box(swingDb);
 
+  @override
+  void initState() {
+    super.initState();
+    _customerList = swingBox.values.toList().cast<Customer>();
+  }
   Future<void> deleteCustomer(Customer customer) async {
     _customerList.removeWhere(
-      (element) => element == customer,
+          (element) => element == customer,
     );
     await swingBox.delete(customer.id);
     setState(() {});
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _customerList = swingBox.values.cast<Customer>().toList();
-  }
-
-  void _addNewProfile(BuildContext context) {
+  void _addNewProfile(BuildContext context,{Customer? customer}) {
     showModalBottomSheet(
       scrollControlDisabledMaxHeightRatio: 800,
       useSafeArea: true,
@@ -42,7 +40,7 @@ class _HomePageState extends State<HomePage> {
       enableDrag: true,
       context: context,
       isScrollControlled: true,
-      builder: (BuildContext context) => const CustomShowModelSheet(),
+      builder: (BuildContext context) => CustomShowModelSheet(customer: customer,),
     );
   }
 
@@ -50,7 +48,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.helloWorld),
+        title: const Text('Home'),
       ),
       floatingActionButton: ElevatedButton.icon(
         onPressed: () {
@@ -65,20 +63,20 @@ class _HomePageState extends State<HomePage> {
             : ListView.separated(
                 itemBuilder: (context, index) {
                   Customer customer = _customerList[index];
-                  final List<Order>? customerOrder =
-                      _customerList[index].customerOrder;
                   return Card(
                     child: ListTile(
-                      onTap: () => Navigator.of(context).pushNamed(
+                      onTap: () {
+                        Navigator.of(context).pushNamed(
                           RouteManager.customerProfile,
-                          arguments: {'id': customer.id}),
+                          arguments: {'id': customer.id});
+                      },
                       title: Text(customer.firstName),
                       subtitle:
-                          Text('${customerOrder?.length ?? 'No Order yet'}'),
+                          Text('STATUS: ${customer.status}'),
                       trailing: PopupMenuButton<String>(
                         onSelected: (String value) async {
                           if (value == 'edit') {
-                            // Add your edit action here
+                            _addNewProfile(context,customer: customer);
                           } else if (value == 'delete') {
                             showDialog(
                               context: context,

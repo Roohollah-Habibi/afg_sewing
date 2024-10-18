@@ -25,7 +25,7 @@ class RouteManager {
             builder: (context) => CustomerProfile(customerId: arguments['id']));
       case orderPage:
         return MaterialPageRoute(
-            builder: (context) => const OrderPage());
+            builder: (context) => OrderPage(customerId: arguments['id']));
       default:
         throw const FormatException(
             'RoutManager ============ Page not found ===========');
