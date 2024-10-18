@@ -100,9 +100,8 @@ class _CustomShowModelSheetState extends State<CustomShowModelSheet> {
           customerOrder:
               widget.customer != null ? widget.customer!.customerOrder : [],
           status: customerStatus);
-      print(
-          '=====ADD CUSTOMER PANEL=========== ${swingDB.values.toList().toString()}');
       await addNewCustomer(newCustomer);
+      print('=====ADD CUSTOMER PANEL=========== ${swingDB.values.toList().toString()}');
       if (mounted) {
         Navigator.of(context).pushReplacementNamed(RouteManager.root);
       }
@@ -129,10 +128,11 @@ class _CustomShowModelSheetState extends State<CustomShowModelSheet> {
           child: Column(
             // mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
-                'Profile',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
+              Text(
+                widget.customer != null ? 'Edite profile' : 'Profile',
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
               ),
+              const SizedBox(height: 30),
               CustomTextField(
                 txtEditingController: nameController,
                 label: 'First Name',
@@ -173,11 +173,7 @@ class _CustomShowModelSheetState extends State<CustomShowModelSheet> {
                 ),
                 items: userStatus,
                 onChanged: (value) {
-                  (_status[0] == value)
-                      ? _status[1] = value!
-                      : _status[0] == value;
                   value == 'Active' ? customerStatus = true :customerStatus = false;
-                  print('============> VALUE: $value ==> $customerStatus');
                 },
               ),
               const SizedBox(height: 20),

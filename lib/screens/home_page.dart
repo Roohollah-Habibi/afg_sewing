@@ -24,15 +24,16 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     _customerList = swingBox.values.toList().cast<Customer>();
   }
+
   Future<void> deleteCustomer(Customer customer) async {
     _customerList.removeWhere(
-          (element) => element == customer,
+      (element) => element == customer,
     );
     await swingBox.delete(customer.id);
     setState(() {});
   }
 
-  void _addNewProfile(BuildContext context,{Customer? customer}) {
+  void _addNewProfile(BuildContext context, {Customer? customer}) {
     showModalBottomSheet(
       scrollControlDisabledMaxHeightRatio: 800,
       useSafeArea: true,
@@ -40,7 +41,9 @@ class _HomePageState extends State<HomePage> {
       enableDrag: true,
       context: context,
       isScrollControlled: true,
-      builder: (BuildContext context) => CustomShowModelSheet(customer: customer,),
+      builder: (BuildContext context) => CustomShowModelSheet(
+        customer: customer,
+      ),
     );
   }
 
@@ -67,16 +70,26 @@ class _HomePageState extends State<HomePage> {
                     child: ListTile(
                       onTap: () {
                         Navigator.of(context).pushNamed(
-                          RouteManager.customerProfile,
-                          arguments: {'id': customer.id});
+                            RouteManager.customerProfile,
+                            arguments: {'id': customer.id});
+
                       },
                       title: Text(customer.firstName),
+                      leading: customer.status
+                          ? const Icon(
+                              Icons.online_prediction_outlined,
+                              color: Colors.green,
+                            )
+                          : const Icon(
+                              Icons.online_prediction,
+                              color: Colors.red,
+                            ),
                       subtitle:
-                          Text('STATUS: ${customer.status}'),
+                          Text('Orders: ${customer.customerOrder.length}'),
                       trailing: PopupMenuButton<String>(
                         onSelected: (String value) async {
                           if (value == 'edit') {
-                            _addNewProfile(context,customer: customer);
+                            _addNewProfile(context, customer: customer);
                           } else if (value == 'delete') {
                             showDialog(
                               context: context,
@@ -99,9 +112,9 @@ class _HomePageState extends State<HomePage> {
                                   ),
                                   TextButton(
                                     onPressed: () async {
-                                      if(mounted){
+                                      if (mounted) {
                                         Navigator.of(context).pop();
-                                      await deleteCustomer(customer);
+                                        await deleteCustomer(customer);
                                       }
                                     },
                                     child: const Text('OKey'),

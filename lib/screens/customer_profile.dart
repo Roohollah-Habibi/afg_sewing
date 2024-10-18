@@ -18,14 +18,13 @@ class CustomerProfile extends StatefulWidget {
 class _CustomerProfileState extends State<CustomerProfile> {
   final Box swingBox = Hive.box(swingDb);
   late final Customer customer;
-  late final List<Order>? customerOrders;
+  late final List<Order> customerOrders;
 
   @override
   void initState() {
     super.initState();
     customer = swingBox.get(widget.customerId);
-    customerOrders = (customer.customerOrder == null || customer.customerOrder!.isEmpty) ? [] : customer.customerOrder;
-
+    customerOrders = customer.customerOrder;
   }
 
   @override
@@ -55,18 +54,30 @@ class _CustomerProfileState extends State<CustomerProfile> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'Phone:${customer.phoneNumber1}',
-                  style: TextStyle(
-                    fontSize: 20,
-                    color: Colors.grey[600],
+                Expanded(
+                  child: Card(
+                    color: Colors.lightBlueAccent,
+                    child: ListTile(
+                      leading: const Icon(
+                        Icons.phone_android,
+                        color: Colors.blue,
+                      ),
+                      title: Text(customer.phoneNumber1),
+                    ),
                   ),
                 ),
-                Text(
-                  'Phone:${(customer.phoneNumber2!.isEmpty)? 'Not available' : customer.phoneNumber2!}',
-                  style: TextStyle(
-                    fontSize: 20,
-                    color: Colors.grey[600],
+                Expanded(
+                  child: Card(
+                    color: Colors.lightBlueAccent,
+                    child: ListTile(
+                      leading: const Icon(
+                        Icons.phone_android,
+                        color: Colors.blue,
+                      ),
+                      title: Text(customer.phoneNumber2.isNotEmpty
+                          ? customer.phoneNumber2
+                          : 'Not Available'),
+                    ),
                   ),
                 ),
               ],
@@ -75,15 +86,89 @@ class _CustomerProfileState extends State<CustomerProfile> {
             const Divider(),
             Expanded(
               child: Center(
-                child: customerOrders!.isEmpty
+                child: customerOrders.isEmpty
                     ? Text('No available Order for ${customer.firstName}')
                     : ListView.builder(
-                        itemCount: customerOrders?.length,
+                        itemCount: customerOrders.length,
                         itemBuilder: (context, index) {
-                          return Card(
-                            child: ListTile(
-                              title: Text(customerOrders![index].qad),
-                              subtitle: Text('${customerOrders![index].remainingMoney}'),
+                          Order order = customerOrders[index];
+                          return Dismissible(
+                            key: Key(order.id),
+                            onDismissed: (direction) {
+                              setState(() {
+                                customerOrders.removeAt(index);
+                              });
+                              Customer.updateOrderList(
+                                  customer: customer,
+                                  newOrderList: customerOrders);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  action: SnackBarAction(
+                                    label: 'Undo',
+                                    onPressed: () async {
+                                      setState(() {
+                                        customerOrders.add(order);
+                                      });
+                                      await Customer.updateOrderList(
+                                          customer: customer,
+                                          newOrderList: customerOrders);
+                                    },
+                                  ),
+                                  content: const Text(
+                                      'Order is removed successfully'),
+                                ),
+                              );
+                            },
+                            confirmDismiss: (direction) async {
+                              return await showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: const Icon(
+                                    Icons.warning_amber_outlined,
+                                    size: 100,
+                                  ),
+                                  alignment: Alignment.center,
+                                  content: const Text(
+                                    'Are you sure you wanna remove the order?',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.of(context).pop(false),
+                                      child: const Text('Cancel'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.of(context).pop(true),
+                                      child: const Text('Delete'),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                            background: Container(
+                              color: Colors.red,
+                              alignment: Alignment.center,
+                              child: const Text(
+                                'order removed',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 20,
+                                ),
+                              ),
+                            ),
+                            direction: DismissDirection.endToStart,
+                            child: Card(
+                              child: ListTile(
+                                title: Text(customerOrders[index].qad),
+                                subtitle: Text(
+                                    '${customerOrders[index].remainingMoney}'),
+                              ),
                             ),
                           );
                         },
@@ -95,7 +180,8 @@ class _CustomerProfileState extends State<CustomerProfile> {
       ),
       floatingActionButton: ElevatedButton.icon(
         onPressed: () {
-          Navigator.of(context).pushReplacementNamed(RouteManager.orderPage,arguments: {'id': customer.id});
+          Navigator.of(context).pushReplacementNamed(RouteManager.orderPage,
+              arguments: {'id': customer.id});
         },
         label: const Text('New Order'),
         icon: const Icon(Icons.add),

@@ -76,7 +76,7 @@ class _OrderPageState extends State<OrderPage> {
     customer = swingBox.get(widget.customerId);
   }
 
-  Future <void> addNewOrder() async {
+  Future<void> addNewOrder({required bool saveAndNew}) async {
     final String userGhad = ghad.value.text;
     final String userShane = shane.value.text;
     final String userAstinSade = astinSade.value.text;
@@ -134,10 +134,44 @@ class _OrderPageState extends State<OrderPage> {
       remainingMoney: userRemaining,
     );
 
-    await Customer.addNewOrder(newOrder: newOrder, customerId: widget.customerId);
-    Navigator.of(context).pushReplacementNamed(
-        RouteManager.customerProfile,
-        arguments: {'id': widget.customerId});
+    await Customer.addNewOrder(
+        newOrder: newOrder, customerId: widget.customerId);
+    if (saveAndNew) {
+      final controllers = [
+        ghad,
+        shane,
+        astinSade,
+        astinKaf,
+        yegha,
+        baghal,
+        shalwar,
+        parche,
+        ghot,
+        damAstin,
+        barAstin,
+        jibShalwar,
+        ghadPuti,
+        barShalwar,
+        fagh,
+        doorezano,
+        kaf,
+        jibroo,
+        damanRast,
+        damanGerd,
+        model,
+        total,
+        received,
+        remaining
+      ];
+      for (var controller in controllers) {
+        controller.clear();
+      }
+    } else {
+      if (mounted) {
+        Navigator.of(context).pushReplacementNamed(RouteManager.customerProfile,
+            arguments: {'id': widget.customerId});
+      }
+    }
   }
 
   @override
@@ -459,11 +493,18 @@ class _OrderPageState extends State<OrderPage> {
 
               //Save Button
               ElevatedButton(
-                  onPressed: () async=> await addNewOrder(),
+                  onPressed: () async => await addNewOrder(saveAndNew: false),
                   child: const Text('Save')),
-              ElevatedButton(onPressed: () {}, child: const Text('Save & New')),
+              ElevatedButton(
+                  onPressed: () async => await addNewOrder(saveAndNew: true),
+                  child: const Text('Save & New')),
               const SizedBox(width: 50),
-              ElevatedButton(onPressed: () {Navigator.of(context).pop();}, child: const Text('Cancel')),
+              ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context)
+                        .pushNamed(RouteManager.customerProfile,arguments: {'id': customer.id});
+                  },
+                  child: const Text('Cancel')),
             ],
           ),
         ),
