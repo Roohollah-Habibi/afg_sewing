@@ -70,22 +70,6 @@ class Customer extends HiveObject with EquatableMixin {
     }
   }
 
-  void removeOrder(Order order) {
-    customerOrder!.removeWhere((foundOrder) => foundOrder == order,);
-    debugPrint('=======> Successfully REMOVED <========');
-  }
-
-  void editOrder(Order oldOrder, Order replacedOrder) {
-    final oldOrderIndex = customerOrder!.indexWhere((element) =>
-    element == oldOrder,);
-    if (oldOrderIndex < 0) {
-      debugPrint('=======> OLD ORDER NOT FOUND <========');
-      return;
-    }
-    customerOrder!.removeAt(oldOrderIndex);
-    customerOrder!.insert(oldOrderIndex, replacedOrder);
-    debugPrint('=======> Successfully Replaced <========');
-  }
 
   @override
   List<Object?> get props =>

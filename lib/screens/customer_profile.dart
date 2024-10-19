@@ -31,6 +31,10 @@ class _CustomerProfileState extends State<CustomerProfile> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(onPressed: () {
+          Navigator.of(context).pushReplacementNamed(
+              RouteManager.root);
+        }, icon: const Icon(Icons.arrow_back)),
         title: const Text('Profile'),
       ),
       body: Padding(
@@ -89,90 +93,91 @@ class _CustomerProfileState extends State<CustomerProfile> {
                 child: customerOrders.isEmpty
                     ? Text('No available Order for ${customer.firstName}')
                     : ListView.builder(
-                        itemCount: customerOrders.length,
-                        itemBuilder: (context, index) {
-                          Order order = customerOrders[index];
-                          return Dismissible(
-                            key: Key(order.id),
-                            onDismissed: (direction) {
-                              setState(() {
-                                customerOrders.removeAt(index);
-                              });
-                              Customer.updateOrderList(
-                                  customer: customer,
-                                  newOrderList: customerOrders);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  action: SnackBarAction(
-                                    label: 'Undo',
-                                    onPressed: () async {
-                                      setState(() {
-                                        customerOrders.add(order);
-                                      });
-                                      await Customer.updateOrderList(
-                                          customer: customer,
-                                          newOrderList: customerOrders);
-                                    },
-                                  ),
-                                  content: const Text(
-                                      'Order is removed successfully'),
-                                ),
-                              );
-                            },
-                            confirmDismiss: (direction) async {
-                              return await showDialog(
-                                context: context,
-                                builder: (context) => AlertDialog(
-                                  title: const Icon(
-                                    Icons.warning_amber_outlined,
-                                    size: 100,
-                                  ),
-                                  alignment: Alignment.center,
-                                  content: const Text(
-                                    'Are you sure you wanna remove the order?',
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () =>
-                                          Navigator.of(context).pop(false),
-                                      child: const Text('Cancel'),
-                                    ),
-                                    TextButton(
-                                      onPressed: () =>
-                                          Navigator.of(context).pop(true),
-                                      child: const Text('Delete'),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                            background: Container(
-                              color: Colors.red,
-                              alignment: Alignment.center,
-                              child: const Text(
-                                'order removed',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 20,
-                                ),
-                              ),
+                  itemCount: customerOrders.length,
+                  itemBuilder: (context, index) {
+                    Order order = customerOrders[index];
+                    return Dismissible(
+                      key: Key(order.id),
+                      onDismissed: (direction) {
+                        setState(() {
+                          customerOrders.removeAt(index);
+                        });
+                        Customer.updateOrderList(
+                            customer: customer,
+                            newOrderList: customerOrders);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            action: SnackBarAction(
+                              label: 'Undo',
+                              onPressed: () async {
+                                setState(() {
+                                  customerOrders.add(order);
+                                });
+                                await Customer.updateOrderList(
+                                    customer: customer,
+                                    newOrderList: customerOrders);
+                              },
                             ),
-                            direction: DismissDirection.endToStart,
-                            child: Card(
-                              child: ListTile(
-                                title: Text(customerOrders[index].qad),
-                                subtitle: Text(
-                                    '${customerOrders[index].remainingMoney}'),
+                            content: const Text(
+                                'Order is removed successfully'),
+                          ),
+                        );
+                      },
+                      confirmDismiss: (direction) async {
+                        return await showDialog(
+                          context: context,
+                          builder: (context) =>
+                              AlertDialog(
+                                title: const Icon(
+                                  Icons.warning_amber_outlined,
+                                  size: 100,
+                                ),
+                                alignment: Alignment.center,
+                                content: const Text(
+                                  'Are you sure you wanna remove the order?',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.of(context).pop(false),
+                                    child: const Text('Cancel'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.of(context).pop(true),
+                                    child: const Text('Delete'),
+                                  ),
+                                ],
                               ),
-                            ),
-                          );
-                        },
+                        );
+                      },
+                      background: Container(
+                        color: Colors.red,
+                        alignment: Alignment.center,
+                        child: const Text(
+                          'order removed',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20,
+                          ),
+                        ),
                       ),
+                      direction: DismissDirection.endToStart,
+                      child: Card(
+                        child: ListTile(
+                          title: Text(customerOrders[index].qad),
+                          subtitle: Text(
+                              '${customerOrders[index].remainingMoney}'),
+                        ),
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
           ],

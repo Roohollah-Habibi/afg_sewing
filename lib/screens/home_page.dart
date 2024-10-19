@@ -18,11 +18,13 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   late List<Customer> _customerList;
   final Box swingBox = Hive.box(swingDb);
+  String dataTest = '';
 
   @override
   void initState() {
     super.initState();
     _customerList = swingBox.values.toList().cast<Customer>();
+    print('inti state in Home page ======================');
   }
 
   Future<void> deleteCustomer(Customer customer) async {
@@ -51,7 +53,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Home'),
+        title: const Text('Customers'),
       ),
       floatingActionButton: ElevatedButton.icon(
         onPressed: () {
@@ -72,7 +74,7 @@ class _HomePageState extends State<HomePage> {
                         Navigator.of(context).pushNamed(
                             RouteManager.customerProfile,
                             arguments: {'id': customer.id});
-
+                        setState(() {});
                       },
                       title: Text(customer.firstName),
                       leading: customer.status
@@ -144,8 +146,8 @@ class _HomePageState extends State<HomePage> {
                       height: 10,
                       color: Colors.orange,
                       thickness: 3,
-                      endIndent: 20,
-                      indent: 20,
+                      endIndent: 50,
+                      indent: 50,
                     ),
                 itemCount: _customerList.length),
       ),

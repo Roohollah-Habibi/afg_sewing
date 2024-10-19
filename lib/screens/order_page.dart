@@ -493,10 +493,10 @@ class _OrderPageState extends State<OrderPage> {
 
               //Save Button
               ElevatedButton(
-                  onPressed: () async => await addNewOrder(saveAndNew: false),
+                  onPressed: () => addNewOrder(saveAndNew: false),
                   child: const Text('Save')),
               ElevatedButton(
-                  onPressed: () async => await addNewOrder(saveAndNew: true),
+                  onPressed: () => addNewOrder(saveAndNew: true),
                   child: const Text('Save & New')),
               const SizedBox(width: 50),
               ElevatedButton(
