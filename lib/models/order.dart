@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:uuid/uuid.dart';
 part 'order.g.dart';
-var _uuid = const Uuid();
+
 @HiveType(typeId: 2)
 class Order extends HiveObject with EquatableMixin {
   @HiveField(0)
@@ -86,8 +86,16 @@ class Order extends HiveObject with EquatableMixin {
   @HiveField(26)
   final int remainingMoney;
 
+  @HiveField(27)
+   bool isDone;
+
+  @HiveField(28)
+   bool isDelivered;
+
   Order({
     required this.id,
+    this.isDone = false,
+    this.isDelivered = false,
     required this.orderDate,
     required this.deliveryDate,
     required this.qad,
@@ -116,38 +124,9 @@ class Order extends HiveObject with EquatableMixin {
     required this.remainingMoney,
   });
 
-  Order.temp(
-      {
-        required this.id,
-      required this.orderDate,
-      required this.deliveryDate,
-      this.qad = '',
-      this.shana = '',
-      this.astinSada = '',
-      this.astinKaf = '',
-      this.yeqa = '',
-      this.beghal = '',
-      this.shalwar = '',
-      this.parcha = '',
-      this.qout = '',
-      this.damAstin = '',
-      this.barAstin = '',
-      this.jibShalwar = '',
-      this.qadPuti = '',
-      this.barShalwar = '',
-      this.faq = '',
-      this.doorezano = '',
-      this.kaf = '',
-      this.jibRoo = '',
-      this.damanRast = '',
-      this.damanGerd = '',
-      this.model = '',
-      this.totalCost = 0,
-      this.receivedMoney = 0,
-      this.remainingMoney = 0});
-
   @override
   List<Object?> get props => [id,qad];
   @override
   bool? get stringify => true;
+
 }

@@ -1,4 +1,3 @@
-import 'dart:ffi';
 
 import 'package:afg_sewing/custom_widgets/text_field.dart';
 import 'package:afg_sewing/models/customer.dart';
@@ -101,15 +100,14 @@ class _CustomShowModelSheetState extends State<CustomShowModelSheet> {
               widget.customer != null ? widget.customer!.customerOrder : [],
           status: customerStatus);
       await addNewCustomer(newCustomer);
-      print('=====ADD CUSTOMER PANEL=========== ${swingDB.values.toList().toString()}');
       if (mounted) {
-        Navigator.of(context).pushReplacementNamed(RouteManager.root);
+        Navigator.of(context).pushReplacementNamed(RouteManager.customers);
       }
     }
   }
 
   void _onCancel() {
-    Navigator.of(context).pushReplacementNamed(RouteManager.root);
+    Navigator.of(context).pushReplacementNamed(RouteManager.customers);
   }
 
   @override

@@ -34,49 +34,111 @@ const swingDb = 'SwingDb';
 
 class OrderPage extends StatefulWidget {
   final String customerId;
+  final String orderId;
 
-  const OrderPage({super.key, required this.customerId});
+  const OrderPage({super.key, required this.customerId, required this.orderId});
 
   @override
   State<OrderPage> createState() => _OrderPageState();
 }
 
 class _OrderPageState extends State<OrderPage> {
-  TextEditingController ghad = TextEditingController();
-  TextEditingController shane = TextEditingController();
-  TextEditingController astinSade = TextEditingController();
-  TextEditingController astinKaf = TextEditingController();
-  TextEditingController yegha = TextEditingController();
-  TextEditingController baghal = TextEditingController();
-  TextEditingController shalwar = TextEditingController();
-  TextEditingController parche = TextEditingController();
-  TextEditingController ghot = TextEditingController();
-  TextEditingController damAstin = TextEditingController();
-  TextEditingController barAstin = TextEditingController();
-  TextEditingController jibShalwar = TextEditingController();
-  TextEditingController ghadPuti = TextEditingController();
-  TextEditingController barShalwar = TextEditingController();
-  TextEditingController fagh = TextEditingController();
-  TextEditingController doorezano = TextEditingController();
-  TextEditingController kaf = TextEditingController();
-  TextEditingController jibroo = TextEditingController();
-  TextEditingController damanRast = TextEditingController();
-  TextEditingController damanGerd = TextEditingController();
-  TextEditingController model = TextEditingController();
-  TextEditingController total = TextEditingController();
-  TextEditingController received = TextEditingController();
-  TextEditingController remaining = TextEditingController();
+  late TextEditingController ghad;
+
+  late TextEditingController shane;
+
+  late TextEditingController astinSade;
+
+  late TextEditingController astinKaf;
+
+  late TextEditingController yegha;
+
+  late TextEditingController baghal;
+
+  late TextEditingController shalwar;
+
+  late TextEditingController parche;
+
+  late TextEditingController ghot;
+
+  late TextEditingController damAstin;
+
+  late TextEditingController barAstin;
+
+  late TextEditingController jibShalwar;
+
+  late TextEditingController ghadPuti;
+
+  late TextEditingController barShalwar;
+
+  late TextEditingController fagh;
+
+  late TextEditingController doorezano;
+
+  late TextEditingController kaf;
+
+  late TextEditingController jibroo;
+
+  late TextEditingController damanRast;
+
+  late TextEditingController damanGerd;
+
+  late TextEditingController model;
+
+  late TextEditingController total;
+
+  late TextEditingController received;
+
+  late TextEditingController remaining;
+
+  bool disableButton = false;
 
   final Box swingBox = Hive.box(swingDb);
   late final Customer customer;
+  DateTime? _selectedDate;
 
   @override
   void initState() {
     super.initState();
+    widget.orderId.isEmpty ? disableButton = false : disableButton = true;
     customer = swingBox.get(widget.customerId);
+    Order? foundOrder = widget.orderId.isEmpty
+        ? null
+        : customer.customerOrder
+            .firstWhere((element) => element.id == widget.orderId);
+    widget.orderId.isEmpty
+        ? _selectedDate = null
+        : _selectedDate = foundOrder?.deliveryDate;
+    ghad = TextEditingController(text: foundOrder?.qad ?? '');
+    shane = TextEditingController(text: foundOrder?.shana ?? '');
+    astinSade = TextEditingController(text: foundOrder?.astinSada ?? '');
+    astinKaf = TextEditingController(text: foundOrder?.astinKaf ?? '');
+    yegha = TextEditingController(text: foundOrder?.yeqa ?? '');
+    baghal = TextEditingController(text: foundOrder?.beghal ?? '');
+    shalwar = TextEditingController(text: foundOrder?.shalwar ?? '');
+    parche = TextEditingController(text: foundOrder?.parcha ?? '');
+    ghot = TextEditingController(text: foundOrder?.qout ?? '');
+    damAstin = TextEditingController(text: foundOrder?.damAstin ?? '');
+    barAstin = TextEditingController(text: foundOrder?.barAstin ?? '');
+    jibShalwar = TextEditingController(text: foundOrder?.jibShalwar ?? '');
+    ghadPuti = TextEditingController(text: foundOrder?.qadPuti ?? '');
+    barShalwar = TextEditingController(text: foundOrder?.barShalwar ?? '');
+    fagh = TextEditingController(text: foundOrder?.faq ?? '');
+    doorezano = TextEditingController(text: foundOrder?.doorezano ?? '');
+    kaf = TextEditingController(text: foundOrder?.kaf ?? '');
+    jibroo = TextEditingController(text: foundOrder?.jibRoo ?? '');
+    damanRast = TextEditingController(text: foundOrder?.damanRast ?? '');
+    damanGerd = TextEditingController(text: foundOrder?.damanGerd ?? '');
+    model = TextEditingController(text: foundOrder?.model ?? '');
+    total = TextEditingController(text: foundOrder?.totalCost.toString() ?? '');
+    received =
+        TextEditingController(text: foundOrder?.receivedMoney.toString() ?? '');
+    remaining = TextEditingController(
+        text: foundOrder?.remainingMoney.toString() ?? '');
   }
 
   Future<void> addNewOrder({required bool saveAndNew}) async {
+    var uuid = const Uuid();
     final String userGhad = ghad.value.text;
     final String userShane = shane.value.text;
     final String userAstinSade = astinSade.value.text;
@@ -103,11 +165,22 @@ class _OrderPageState extends State<OrderPage> {
     final int userReceived =
         (received.value.text.isEmpty) ? 0 : int.parse(received.value.text);
     final int userRemaining = userTotal - userReceived;
-    var uuid = const Uuid();
+    if (_selectedDate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          duration: Duration(milliseconds: 400),
+          content: Text('Pick a delivery date'),
+        ),
+      );
+      return;
+    }
+
     final Order newOrder = Order(
-      id: uuid.v4(),
+      isDone: false,
+      isDelivered: false,
+      id: widget.orderId.isEmpty ? uuid.v4() : widget.orderId,
       orderDate: DateTime.now(),
-      deliveryDate: DateTime.now().add(Duration(days: 3)),
+      deliveryDate: _selectedDate!,
       qad: userGhad,
       shana: userShane,
       astinSada: userAstinSade,
@@ -133,9 +206,10 @@ class _OrderPageState extends State<OrderPage> {
       receivedMoney: userReceived,
       remainingMoney: userRemaining,
     );
-
     await Customer.addNewOrder(
-        newOrder: newOrder, customerId: widget.customerId);
+        newOrder: newOrder,
+        customerId: widget.customerId,
+        replaceOrderId: widget.orderId);
     if (saveAndNew) {
       final controllers = [
         ghad,
@@ -172,13 +246,30 @@ class _OrderPageState extends State<OrderPage> {
             arguments: {'id': widget.customerId});
       }
     }
+    setState(() {});
+  }
+
+  Future<void> _pickDate(BuildContext context) async {
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000), // Set the earliest date
+      lastDate: DateTime(2100), // Set the latest date
+    );
+
+    if (pickedDate != null && pickedDate != _selectedDate) {
+      setState(() {
+        _selectedDate = pickedDate;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Orders'),
+        title: Text(disableButton ? 'Edit Order' : 'Order'),
+        automaticallyImplyLeading: false,
       ),
       body: Center(
           child: Form(
@@ -194,12 +285,15 @@ class _OrderPageState extends State<OrderPage> {
                     style: const TextStyle(
                         fontSize: 30, fontWeight: FontWeight.bold),
                   )),
-              const SizedBox(
+              SizedBox(
                   width: 300,
                   child: Text(
-                    'Order Num: 0 ',
+                    'Order Num: ${disableButton ? customer.customerOrder.indexWhere(
+                          (element) => element.id == widget.orderId,
+                        ) + 1 : customer.customerOrder.length + 1}',
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        fontSize: 20, fontWeight: FontWeight.bold),
                   )),
               //todo: this should be better inside a dropdown menu to choose customer
 
@@ -489,22 +583,36 @@ class _OrderPageState extends State<OrderPage> {
                       const InputDecoration(suffixText: 'AF'),
                 ),
               ),
-              const SizedBox(height: 100),
-
+              SizedBox(
+                width: 350,
+                child: ElevatedButton.icon(
+                  onPressed: () => _pickDate(context),
+                  label: const Text('Pick a Delivery Date'),
+                  icon: const Icon(Icons.date_range),
+                ),
+              ),
+              const SizedBox(height: 70),
               //Save Button
-              ElevatedButton(
-                  onPressed: () => addNewOrder(saveAndNew: false),
-                  child: const Text('Save')),
-              ElevatedButton(
-                  onPressed: () => addNewOrder(saveAndNew: true),
-                  child: const Text('Save & New')),
-              const SizedBox(width: 50),
-              ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context)
-                        .pushNamed(RouteManager.customerProfile,arguments: {'id': customer.id});
-                  },
-                  child: const Text('Cancel')),
+              ElevatedButton.icon(
+                onPressed: () => addNewOrder(saveAndNew: false),
+                label: Text(disableButton ? 'Save Edit' : 'Save'),
+                icon: const Icon(Icons.save),
+              ),
+              ElevatedButton.icon(
+                onPressed:
+                    disableButton ? null : () => addNewOrder(saveAndNew: true),
+                label: const Text('Save & New'),
+                icon: const Icon(Icons.save_alt),
+              ),
+              const SizedBox(width: 10),
+              ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.of(context).pushNamed(RouteManager.customerProfile,
+                      arguments: {'id': customer.id});
+                },
+                label: const Text('Cancel'),
+                icon: const Icon(Icons.cancel_outlined),
+              ),
             ],
           ),
         ),

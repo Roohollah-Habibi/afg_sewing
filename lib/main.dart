@@ -11,7 +11,7 @@ void main() async{
   await Hive.initFlutter();
  Hive.registerAdapter(OrderAdapter());
  Hive.registerAdapter(CustomerAdapter());
-  await Hive.openBox('SwingDb');
+ await Hive.openBox('SwingDb');
   runApp(const MyApp());
 }
 

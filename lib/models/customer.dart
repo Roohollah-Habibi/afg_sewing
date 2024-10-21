@@ -43,11 +43,18 @@ class Customer extends HiveObject with EquatableMixin {
   });
 
   static Future <void> addNewOrder(
-      {required Order newOrder, required String customerId}) async {
+      {required Order newOrder, required String customerId,required String replaceOrderId}) async {
     if (Hive.isBoxOpen(swingDb)) {
       final swingBox = Hive.box(swingDb);
       final Customer customer = swingBox.get(customerId) as Customer;
+      if(replaceOrderId.isEmpty){
       customer.customerOrder.add(newOrder);
+      }else{
+        Order foundOrder= customer.customerOrder.firstWhere((element) => element.id == replaceOrderId);
+        int orderIndex = customer.customerOrder.indexOf(foundOrder);
+        customer.customerOrder.removeAt(orderIndex);
+        customer.customerOrder.insert(orderIndex, newOrder);
+      }
       await swingBox.put(customerId, customer);
     } else {
       throw const FormatException(
