@@ -1,6 +1,7 @@
 import 'package:afg_sewing/models/customer.dart';
 import 'package:afg_sewing/models/order.dart';
 import 'package:afg_sewing/page_routing/rout_manager.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
@@ -35,58 +36,29 @@ class _CustomerProfileState extends State<CustomerProfile> {
   ];
   late String selectedFilter;
 
-  // final List<PopupMenuEntry<String>> orderStatus = [
-  //   PopupMenuItem<String>(
-  //     onTap: () {
-  //       changeOrderStatusValues(value: );
-  //       print('============ Swen Not Delivered =============');
-  //     },
-  //     child: Text('Swen NOT Delivered'),
-  //     value: 'Swen NOT Delivered',
-  //   ),
-  //   PopupMenuItem<String>(
-  //     onTap: () {
-  //       print('============ Sewn & Delivered =============');
-  //     },
-  //     child: Text('Sewn & Delivered'),
-  //     value: 'Sewn & Delivered',
-  //   ),
-  //   PopupMenuItem<String>(
-  //     onTap: () {
-  //       print('============ In Progress =============');
-  //     },
-  //     child: Text('In Progress'),
-  //     value: 'In Progress',
-  //   ),
-  // ];
 
   @override
   void initState() {
     super.initState();
     customer = swingBox.get(widget.customerId);
     customerOrders = customer.customerOrder;
-    selectedFilter = 'In Progress';
+    selectedFilter = swingBox.get('filterValueKey') as String;
+    filterValues(selectedFilter);
   }
 
-  // SHOW FILTER VALUES FOR DROPDOWN BUTTON IN ACTION APP BAR
-  void filterValues(String? value) {
-    Map<String, dynamic> filters = {};
+  // SHOW FILTER VALUES FOR DROPDOWN BUTTON
+  void filterValues(String? value) async {
     switch (value) {
       case 'All':
         customerOrders = customer.customerOrder;
-        filters['all'] = customerOrders.length;
-        print('------${filters['all']}------------');
-        print('================ ALL ========================');
-
+        break;
       case 'Swen NOT Delivered':
         customerOrders = customer.customerOrder.where(
           (foundOrder) {
             return foundOrder.isDone == true && foundOrder.isDelivered == false;
           },
         ).toList();
-        filters['snd'] = customerOrders.length;
-        print('------${filters['snd']}------------');
-        print('================ DONE ========================');
+        break;
       case 'Sewn & Delivered':
         customerOrders = customer.customerOrder
             .where(
@@ -94,19 +66,13 @@ class _CustomerProfileState extends State<CustomerProfile> {
                   foundOrder.isDelivered == true && foundOrder.isDone == true,
             )
             .toList();
-        filters['sd'] = customerOrders.length;
-        print('------${filters['sd']}------------');
-        print('================ DELIVERED ========================');
+        break;
       case 'In Progress':
         customerOrders = customer.customerOrder
             .where((foundOrder) =>
                 foundOrder.isDone == false && foundOrder.isDelivered == false)
             .toList();
-        filters['p'] = customerOrders.length;
-        print('------${filters['p']}------------');
-        print('================ IN PROGRESS ========================');
-      default:
-        customerOrders = customer.customerOrder;
+        break;
     }
     setState(() {});
   }
@@ -122,7 +88,7 @@ class _CustomerProfileState extends State<CustomerProfile> {
             newOrder: selectedOrder,
             customerId: customer.id,
             replaceOrderId: selectedOrder.id);
-        setState(() {});
+
       case 'Sewn & Delivered':
         selectedOrder.isDone = true;
         selectedOrder.isDelivered = true;
@@ -130,7 +96,6 @@ class _CustomerProfileState extends State<CustomerProfile> {
             newOrder: selectedOrder,
             customerId: customer.id,
             replaceOrderId: selectedOrder.id);
-        setState(() {});
 
       case 'In Progress':
         selectedOrder.isDone = false;
@@ -139,7 +104,6 @@ class _CustomerProfileState extends State<CustomerProfile> {
             newOrder: selectedOrder,
             customerId: customer.id,
             replaceOrderId: selectedOrder.id);
-        setState(() {});
 
       default:
         selectedOrder.isDone = false;
@@ -148,21 +112,53 @@ class _CustomerProfileState extends State<CustomerProfile> {
             newOrder: selectedOrder,
             customerId: customer.id,
             replaceOrderId: selectedOrder.id);
-        setState(() {});
     }
-    setState(() {
-      onChangeFilterValue(selectedFilter);
-    });
+    onChangeDropdownFilterValue(selectedFilter);
   }
 
-  void onChangeFilterValue(String? newValue) {
+  void onChangeDropdownFilterValue(String? newValue) async {
     if (newValue != null) {
       setState(() {
         selectedFilter = newValue;
         filterValues(newValue);
       });
+      await swingBox.put('filterValueKey', newValue);
     }
   }
+
+  List<PopupMenuEntry<String>> orderStatusSelection(
+          BuildContext context, Order order) =>
+      [
+        PopupMenuItem<String>(
+            onTap: () {
+              changeOrderStatusValues(
+                  value: selectableOrderStatus[1], selectedOrder: order);
+              setState(() {});
+              print('============ ${selectableOrderStatus[1]}==============');
+            },
+            child: Text('Swen NOT Delivered'),
+            value: selectableOrderStatus[1]),
+        PopupMenuItem<String>(
+          onTap: () {
+            changeOrderStatusValues(
+                value: selectableOrderStatus[2], selectedOrder: order);
+            print('============ ${selectableOrderStatus[2]}==============');
+            setState(() {});
+          },
+          child: Text('Sewn & Delivered'),
+          value: selectableOrderStatus[2],
+        ),
+        PopupMenuItem<String>(
+          onTap: () {
+            changeOrderStatusValues(
+                value: selectableOrderStatus[0], selectedOrder: order);
+            print('============ ${selectableOrderStatus[0]}==============');
+            setState(() {});
+          },
+          child: Text('In Progress'),
+          value: selectableOrderStatus[0],
+        ),
+      ];
 
   @override
   Widget build(BuildContext context) {
@@ -252,7 +248,7 @@ class _CustomerProfileState extends State<CustomerProfile> {
                   alignment: Alignment.center,
                   iconSize: 30,
                   value: selectedFilter,
-                  onChanged: onChangeFilterValue,
+                  onChanged: onChangeDropdownFilterValue,
                   items: filterOptions
                       .map<DropdownMenuItem<String>>((String value) {
                     return DropdownMenuItem<String>(
@@ -359,43 +355,8 @@ class _CustomerProfileState extends State<CustomerProfile> {
                                       buildAlertDialog(customerOrders[index]),
                                 ),
                                 trailing: PopupMenuButton(
-                                  itemBuilder: (context) => [
-                                    PopupMenuItem<String>(
-                                        onTap: () {
-                                          changeOrderStatusValues(
-                                              value: selectableOrderStatus[1],
-                                              selectedOrder: order);
-                                          setState(() {});
-                                          print(
-                                              '============ ${selectableOrderStatus[1]}==============');
-                                        },
-                                        child: Text('Swen NOT Delivered'),
-                                        value: selectableOrderStatus[1]),
-                                    PopupMenuItem<String>(
-                                      onTap: () {
-                                        changeOrderStatusValues(
-                                            value: selectableOrderStatus[2],
-                                            selectedOrder: order);
-                                        print(
-                                            '============ ${selectableOrderStatus[2]}==============');
-                                        setState(() {});
-                                      },
-                                      child: Text('Sewn & Delivered'),
-                                      value: selectableOrderStatus[2],
-                                    ),
-                                    PopupMenuItem<String>(
-                                      onTap: () {
-                                        changeOrderStatusValues(
-                                            value: selectableOrderStatus[0],
-                                            selectedOrder: order);
-                                        print(
-                                            '============ ${selectableOrderStatus[0]}==============');
-                                        setState(() {});
-                                      },
-                                      child: Text('In Progress'),
-                                      value: selectableOrderStatus[0],
-                                    ),
-                                  ],
+                                  itemBuilder: (context) =>
+                                      orderStatusSelection(context, order),
                                 ),
                                 title: Text(
                                   'ID: ${customerOrders[index].id.substring(customerOrders[index].id.length - 5)}',

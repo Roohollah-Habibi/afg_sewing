@@ -22,7 +22,7 @@ class _CustomersState extends State<Customers> {
   @override
   void initState() {
     super.initState();
-    _customerList = swingBox.values.toList().cast<Customer>();
+    _customerList = swingBox.values.whereType<Customer>().toList().cast<Customer>();
   }
 
   Future<void> deleteCustomer(Customer customer) async {
