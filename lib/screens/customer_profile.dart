@@ -23,48 +23,144 @@ class _CustomerProfileState extends State<CustomerProfile> {
   late final Customer customer;
   late List<Order> customerOrders;
   final List<String> filterOptions = [
-    'All',
-    'Done',
-    'Delivered',
-    'In Progress'
+    'In Progress',
+    'Swen NOT Delivered',
+    'Sewn & Delivered',
+    'All'
   ];
-  String selectedFilter = 'All';
+  final List<String> selectableOrderStatus = [
+    'In Progress',
+    'Swen NOT Delivered',
+    'Sewn & Delivered',
+  ];
+  late String selectedFilter;
+
+  // final List<PopupMenuEntry<String>> orderStatus = [
+  //   PopupMenuItem<String>(
+  //     onTap: () {
+  //       changeOrderStatusValues(value: );
+  //       print('============ Swen Not Delivered =============');
+  //     },
+  //     child: Text('Swen NOT Delivered'),
+  //     value: 'Swen NOT Delivered',
+  //   ),
+  //   PopupMenuItem<String>(
+  //     onTap: () {
+  //       print('============ Sewn & Delivered =============');
+  //     },
+  //     child: Text('Sewn & Delivered'),
+  //     value: 'Sewn & Delivered',
+  //   ),
+  //   PopupMenuItem<String>(
+  //     onTap: () {
+  //       print('============ In Progress =============');
+  //     },
+  //     child: Text('In Progress'),
+  //     value: 'In Progress',
+  //   ),
+  // ];
 
   @override
   void initState() {
     super.initState();
     customer = swingBox.get(widget.customerId);
     customerOrders = customer.customerOrder;
+    selectedFilter = 'In Progress';
   }
 
+  // SHOW FILTER VALUES FOR DROPDOWN BUTTON IN ACTION APP BAR
   void filterValues(String? value) {
+    Map<String, dynamic> filters = {};
     switch (value) {
       case 'All':
         customerOrders = customer.customerOrder;
+        filters['all'] = customerOrders.length;
+        print('------${filters['all']}------------');
         print('================ ALL ========================');
-      case 'Done':
-        customerOrders = customer.customerOrder
-            .where(
-              (foundOrder) => foundOrder.isDone == true,
-            )
-            .toList();
+
+      case 'Swen NOT Delivered':
+        customerOrders = customer.customerOrder.where(
+          (foundOrder) {
+            return foundOrder.isDone == true && foundOrder.isDelivered == false;
+          },
+        ).toList();
+        filters['snd'] = customerOrders.length;
+        print('------${filters['snd']}------------');
         print('================ DONE ========================');
-      case 'Delivered':
+      case 'Sewn & Delivered':
         customerOrders = customer.customerOrder
             .where(
-              (foundOrder) => foundOrder.isDelivered == true,
+              (foundOrder) =>
+                  foundOrder.isDelivered == true && foundOrder.isDone == true,
             )
             .toList();
+        filters['sd'] = customerOrders.length;
+        print('------${filters['sd']}------------');
         print('================ DELIVERED ========================');
       case 'In Progress':
         customerOrders = customer.customerOrder
-            .where(
-              (foundOrder) => foundOrder.isDone == false,
-            )
+            .where((foundOrder) =>
+                foundOrder.isDone == false && foundOrder.isDelivered == false)
             .toList();
+        filters['p'] = customerOrders.length;
+        print('------${filters['p']}------------');
         print('================ IN PROGRESS ========================');
       default:
         customerOrders = customer.customerOrder;
+    }
+    setState(() {});
+  }
+
+  // CHANGE THE ORDER STATUS [Swen NOT Delivered , Sewn & Delivered , In Progress]
+  void changeOrderStatusValues(
+      {required String value, required Order selectedOrder}) {
+    switch (value) {
+      case 'Swen NOT Delivered':
+        selectedOrder.isDone = true;
+        selectedOrder.isDelivered = false;
+        Customer.addNewOrder(
+            newOrder: selectedOrder,
+            customerId: customer.id,
+            replaceOrderId: selectedOrder.id);
+        setState(() {});
+      case 'Sewn & Delivered':
+        selectedOrder.isDone = true;
+        selectedOrder.isDelivered = true;
+        Customer.addNewOrder(
+            newOrder: selectedOrder,
+            customerId: customer.id,
+            replaceOrderId: selectedOrder.id);
+        setState(() {});
+
+      case 'In Progress':
+        selectedOrder.isDone = false;
+        selectedOrder.isDelivered = false;
+        Customer.addNewOrder(
+            newOrder: selectedOrder,
+            customerId: customer.id,
+            replaceOrderId: selectedOrder.id);
+        setState(() {});
+
+      default:
+        selectedOrder.isDone = false;
+        selectedOrder.isDelivered = false;
+        Customer.addNewOrder(
+            newOrder: selectedOrder,
+            customerId: customer.id,
+            replaceOrderId: selectedOrder.id);
+        setState(() {});
+    }
+    setState(() {
+      onChangeFilterValue(selectedFilter);
+    });
+  }
+
+  void onChangeFilterValue(String? newValue) {
+    if (newValue != null) {
+      setState(() {
+        selectedFilter = newValue;
+        filterValues(newValue);
+      });
     }
   }
 
@@ -79,36 +175,6 @@ class _CustomerProfileState extends State<CustomerProfile> {
             },
             icon: const Icon(Icons.arrow_back)),
         title: const Text('Profile'),
-        actions: [
-          const Text(
-            'Filter by:',
-            style: TextStyle(
-                fontSize: 16,
-                color: Colors.blueGrey,
-                fontWeight: FontWeight.bold),
-          ),
-          DropdownButton<String>(
-            padding: const EdgeInsets.only(right: 30),
-            icon: const Icon(Icons.filter_alt),
-            alignment: Alignment.center,
-            iconSize: 30,
-            value: selectedFilter,
-            onChanged: (String? newValue) {
-              if (newValue != null) {
-                setState(() {
-                  selectedFilter = newValue;
-                  filterValues(newValue);
-                });
-              }
-            },
-            items: filterOptions.map<DropdownMenuItem<String>>((String value) {
-              return DropdownMenuItem<String>(
-                value: value,
-                child: Text(value),
-              );
-            }).toList(),
-          ),
-        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -160,6 +226,43 @@ class _CustomerProfileState extends State<CustomerProfile> {
               ],
             ),
             const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Flexible(
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 20),
+                    child: Text(
+                      'Total Orders: ${customerOrders.length}',
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+                const Text(
+                  'Filter by:',
+                  style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.blueGrey,
+                      fontWeight: FontWeight.bold),
+                ),
+                DropdownButton<String>(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  icon: const Icon(Icons.filter_alt),
+                  alignment: Alignment.center,
+                  iconSize: 30,
+                  value: selectedFilter,
+                  onChanged: onChangeFilterValue,
+                  items: filterOptions
+                      .map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                ),
+              ],
+            ),
             const Divider(),
             Expanded(
               child: Center(
@@ -255,19 +358,45 @@ class _CustomerProfileState extends State<CustomerProfile> {
                                   builder: (context) =>
                                       buildAlertDialog(customerOrders[index]),
                                 ),
-                                trailing: (customerOrders[index].isDone &&
-                                        customerOrders[index].isDelivered)
-                                    ? Icon(
-                                        Icons.monetization_on_outlined,
-                                        color: Colors.green[700],
-                                      )
-                                    : customerOrders[index].isDone
-                                        ? const Icon(Icons.check_circle_outline,
-                                            color: Colors.indigo)
-                                        : const Icon(
-                                            Icons.timer_outlined,
-                                            color: Colors.red,
-                                          ),
+                                trailing: PopupMenuButton(
+                                  itemBuilder: (context) => [
+                                    PopupMenuItem<String>(
+                                        onTap: () {
+                                          changeOrderStatusValues(
+                                              value: selectableOrderStatus[1],
+                                              selectedOrder: order);
+                                          setState(() {});
+                                          print(
+                                              '============ ${selectableOrderStatus[1]}==============');
+                                        },
+                                        child: Text('Swen NOT Delivered'),
+                                        value: selectableOrderStatus[1]),
+                                    PopupMenuItem<String>(
+                                      onTap: () {
+                                        changeOrderStatusValues(
+                                            value: selectableOrderStatus[2],
+                                            selectedOrder: order);
+                                        print(
+                                            '============ ${selectableOrderStatus[2]}==============');
+                                        setState(() {});
+                                      },
+                                      child: Text('Sewn & Delivered'),
+                                      value: selectableOrderStatus[2],
+                                    ),
+                                    PopupMenuItem<String>(
+                                      onTap: () {
+                                        changeOrderStatusValues(
+                                            value: selectableOrderStatus[0],
+                                            selectedOrder: order);
+                                        print(
+                                            '============ ${selectableOrderStatus[0]}==============');
+                                        setState(() {});
+                                      },
+                                      child: Text('In Progress'),
+                                      value: selectableOrderStatus[0],
+                                    ),
+                                  ],
+                                ),
                                 title: Text(
                                   'ID: ${customerOrders[index].id.substring(customerOrders[index].id.length - 5)}',
                                   style: const TextStyle(
@@ -321,7 +450,9 @@ class _CustomerProfileState extends State<CustomerProfile> {
                 customerId: customer.id,
                 replaceOrderId: orderStatus.id);
             print('============ ALERT SHOULD YES =============');
-            setState(() {customerOrders = customer.customerOrder;});
+            setState(() {
+              customerOrders = customer.customerOrder;
+            });
             Navigator.of(context).pop();
           },
           label: Text('YES', style: alertActionButtonStyles),
