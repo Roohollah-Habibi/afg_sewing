@@ -34,7 +34,7 @@ class _CustomerProfileState extends State<CustomerProfile> {
     'Swen NOT Delivered',
     'Sewn & Delivered',
   ];
-  late String selectedFilter;
+  late String? selectedFilter;
 
 
   @override
@@ -42,7 +42,7 @@ class _CustomerProfileState extends State<CustomerProfile> {
     super.initState();
     customer = swingBox.get(widget.customerId);
     customerOrders = customer.customerOrder;
-    selectedFilter = swingBox.get('filterValueKey') as String;
+    selectedFilter = swingBox.get('filterValueKey') ?? 'All';
     filterValues(selectedFilter);
   }
 
@@ -235,13 +235,6 @@ class _CustomerProfileState extends State<CustomerProfile> {
                     ),
                   ),
                 ),
-                const Text(
-                  'Filter by:',
-                  style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.blueGrey,
-                      fontWeight: FontWeight.bold),
-                ),
                 DropdownButton<String>(
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   icon: const Icon(Icons.filter_alt),
@@ -268,15 +261,14 @@ class _CustomerProfileState extends State<CustomerProfile> {
                         itemCount: customerOrders.length,
                         itemBuilder: (context, index) {
                           Order order = customerOrders[index];
+
                           return Dismissible(
                             key: Key(order.id),
                             onDismissed: (direction) {
                               setState(() {
-                                customerOrders.removeAt(index);
+                                customerOrders.removeWhere((element) => element.id == order.id,);
+                                Customer.removeOrder(customerId: widget.customerId, removableOrder: order);
                               });
-                              Customer.updateOrderList(
-                                  customer: customer,
-                                  newOrderList: customerOrders);
                               ScaffoldMessenger.of(context)
                                   .hideCurrentSnackBar();
                               ScaffoldMessenger.of(context).showSnackBar(
@@ -349,11 +341,6 @@ class _CustomerProfileState extends State<CustomerProfile> {
                                       'customerId': widget.customerId,
                                       'orderId': customerOrders[index].id
                                     }),
-                                onLongPress: () async => await showDialog(
-                                  context: context,
-                                  builder: (context) =>
-                                      buildAlertDialog(customerOrders[index]),
-                                ),
                                 trailing: PopupMenuButton(
                                   itemBuilder: (context) =>
                                       orderStatusSelection(context, order),
@@ -366,7 +353,7 @@ class _CustomerProfileState extends State<CustomerProfile> {
                                       color: Colors.green),
                                 ),
                                 subtitle: Text(
-                                  '${customerOrders[index].deliveryDate.day}-${customerOrders[index].deliveryDate.month}-${customerOrders[index].deliveryDate.year}',
+                                  '${customerOrders[index].deadLineDate.day}-${customerOrders[index].deadLineDate.month}-${customerOrders[index].deadLineDate.year}',
                                   style: const TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 18,
@@ -390,55 +377,6 @@ class _CustomerProfileState extends State<CustomerProfile> {
         label: const Text('New Order'),
         icon: const Icon(Icons.add),
       ),
-    );
-  }
-
-  Widget buildAlertDialog(Order orderStatus) {
-    return AlertDialog(
-      alignment: Alignment.center,
-      actionsAlignment: MainAxisAlignment.center,
-      title: const Icon(Icons.warning_amber, color: Colors.yellow, size: 100),
-      content: const Text('Are you paid? ',
-          textAlign: TextAlign.center,
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 23)),
-      actions: [
-        TextButton.icon(
-          onPressed: () {
-            orderStatus.isDelivered = true;
-            orderStatus.isDone = true;
-            Customer.addNewOrder(
-                newOrder: orderStatus,
-                customerId: customer.id,
-                replaceOrderId: orderStatus.id);
-            print('============ ALERT SHOULD YES =============');
-            setState(() {
-              customerOrders = customer.customerOrder;
-            });
-            Navigator.of(context).pop();
-          },
-          label: Text('YES', style: alertActionButtonStyles),
-        ),
-        TextButton.icon(
-          onPressed: () {
-            print('============ ALERT SHOULD POP =============');
-            Navigator.of(context).pop();
-          },
-          label: Text('NO', style: alertActionButtonStyles),
-        ),
-        TextButton.icon(
-          onPressed: () {
-            orderStatus.isDelivered = false;
-            Customer.addNewOrder(
-                newOrder: orderStatus,
-                customerId: customer.id,
-                replaceOrderId: orderStatus.id);
-            print('============ ALERT SHOULD UNDO =============');
-            Navigator.of(context).pop();
-            setState(() {});
-          },
-          label: Text('Undo', style: alertActionButtonStyles),
-        ),
-      ],
     );
   }
 }

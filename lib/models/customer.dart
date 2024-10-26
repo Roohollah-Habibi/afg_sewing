@@ -62,8 +62,7 @@ class Customer extends HiveObject with EquatableMixin {
     }
   }
 
-  static Future<void> updateOrderList(
-      {required Customer customer, required List<Order> newOrderList}) async {
+  static Future<void> updateOrderList({required Customer customer, required List<Order> newOrderList}) async {
     if (Hive.isBoxOpen(swingDb)) {
       final swingBox = Hive.box(swingDb);
       final updatedCustomer= Customer(id: customer.id,
@@ -74,6 +73,15 @@ class Customer extends HiveObject with EquatableMixin {
           customerOrder: newOrderList,
           status: customer.status);
       await swingBox.put(customer.id, updatedCustomer);
+    }
+  }
+
+  static Future<void> removeOrder({required String customerId, required Order removableOrder})async{
+    if (Hive.isBoxOpen(swingDb)) {
+      final swingBox = Hive.box(swingDb);
+      final Customer cs = swingBox.get(customerId);
+      cs.customerOrder.removeWhere((element) => element.id == removableOrder.id);
+      await swingBox.put(customerId, cs);
     }
   }
 

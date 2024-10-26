@@ -22,6 +22,7 @@ class _HomePageState extends State<HomePage> {
         child: GridView(
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
+            mainAxisSpacing: 20,
           ),
           children: [
             CustomContainer(
@@ -40,7 +41,7 @@ class _HomePageState extends State<HomePage> {
               backgroundImg: orderImgSrc,
               childText: 'Orders',
               onTap: () => Navigator.of(context)
-                  .pushReplacementNamed(RouteManager.samples),
+                  .pushReplacementNamed(RouteManager.allOrdersScreen),
             ),
             CustomContainer(
               backgroundImg: reportsImgSrc,

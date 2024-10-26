@@ -20,8 +20,9 @@ class OrderAdapter extends TypeAdapter<Order> {
       id: fields[0] as String,
       isDone: fields[27] as bool,
       isDelivered: fields[28] as bool,
-      orderDate: fields[1] as DateTime,
-      deliveryDate: fields[2] as DateTime,
+      customerId: fields[29] as String,
+      registeredDate: fields[1] as DateTime,
+      deadLineDate: fields[2] as DateTime,
       qad: fields[3] as String,
       shana: fields[4] as String,
       astinSada: fields[5] as String,
@@ -52,13 +53,13 @@ class OrderAdapter extends TypeAdapter<Order> {
   @override
   void write(BinaryWriter writer, Order obj) {
     writer
-      ..writeByte(29)
+      ..writeByte(30)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
-      ..write(obj.orderDate)
+      ..write(obj.registeredDate)
       ..writeByte(2)
-      ..write(obj.deliveryDate)
+      ..write(obj.deadLineDate)
       ..writeByte(3)
       ..write(obj.qad)
       ..writeByte(4)
@@ -110,7 +111,9 @@ class OrderAdapter extends TypeAdapter<Order> {
       ..writeByte(27)
       ..write(obj.isDone)
       ..writeByte(28)
-      ..write(obj.isDelivered);
+      ..write(obj.isDelivered)
+      ..writeByte(29)
+      ..write(obj.customerId);
   }
 
   @override

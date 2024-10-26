@@ -1,6 +1,8 @@
+import 'package:afg_sewing/models/customer.dart';
 import 'package:equatable/equatable.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:uuid/uuid.dart';
+
 part 'order.g.dart';
 
 @HiveType(typeId: 2)
@@ -9,10 +11,10 @@ class Order extends HiveObject with EquatableMixin {
   final String id;
 
   @HiveField(1)
-  final DateTime orderDate;
+  final DateTime registeredDate;
 
   @HiveField(2)
-  final DateTime deliveryDate;
+  final DateTime deadLineDate;
 
   @HiveField(3)
   final String qad;
@@ -87,17 +89,21 @@ class Order extends HiveObject with EquatableMixin {
   final int remainingMoney;
 
   @HiveField(27)
-   bool isDone;
+  bool isDone;
 
   @HiveField(28)
-   bool isDelivered;
+  bool isDelivered;
+
+  @HiveField(29)
+  final String customerId;
 
   Order({
     required this.id,
     this.isDone = false,
     this.isDelivered = false,
-    required this.orderDate,
-    required this.deliveryDate,
+    required this.customerId,
+    required this.registeredDate,
+    required this.deadLineDate,
     required this.qad,
     required this.shana,
     required this.astinSada,
@@ -124,8 +130,51 @@ class Order extends HiveObject with EquatableMixin {
     required this.remainingMoney,
   });
 
+  factory Order.fromId({required String orderId}){
+    late Order foundOrder;
+    if (Hive.isBoxOpen(swingDb)) {
+      final Box swingBox = Hive.box(swingDb);
+      List<Customer> customers = swingBox.values.whereType<Customer>()
+          .toList()
+          .cast<Customer>();
+      List<Order> orderList = [
+        for(var order in customers)...order.customerOrder
+      ];
+      foundOrder = orderList.firstWhere((element) => element.id == orderId,);
+    }
+    return Order(id: orderId,
+        customerId: foundOrder.customerId,
+        registeredDate: foundOrder.registeredDate,
+        deadLineDate: foundOrder.deadLineDate,
+        qad: foundOrder.qad,
+        shana: foundOrder.shana,
+        astinSada: foundOrder.astinSada,
+        astinKaf: foundOrder.astinKaf,
+        yeqa: foundOrder.yeqa,
+        beghal: foundOrder.beghal,
+        shalwar: foundOrder.shalwar,
+        parcha: foundOrder.parcha,
+        qout: foundOrder.qout,
+        damAstin: foundOrder.damAstin,
+        barAstin: foundOrder.barAstin,
+        jibShalwar: foundOrder.jibShalwar,
+        qadPuti: foundOrder.qadPuti,
+        barShalwar: foundOrder.barShalwar,
+        faq: foundOrder.faq,
+        doorezano: foundOrder.doorezano,
+        kaf: foundOrder.kaf,
+        jibRoo: foundOrder.jibRoo,
+        damanRast: foundOrder.damanRast,
+        damanGerd: foundOrder.damanGerd,
+        model: foundOrder.model,
+        totalCost: foundOrder.totalCost,
+        receivedMoney: foundOrder.receivedMoney,
+        remainingMoney: foundOrder.remainingMoney);
+  }
+
   @override
-  List<Object?> get props => [id,qad];
+  List<Object?> get props => [id, qad];
+
   @override
   bool? get stringify => true;
 

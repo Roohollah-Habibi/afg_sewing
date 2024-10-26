@@ -1,3 +1,4 @@
+import 'package:afg_sewing/screens/all_order_screens.dart';
 import 'package:afg_sewing/screens/customer_profile.dart';
 import 'package:afg_sewing/screens/customer_page.dart';
 import 'package:afg_sewing/screens/home_page.dart';
@@ -7,6 +8,7 @@ import 'package:flutter/material.dart';
 
 class RouteManager {
   static const root = '/';
+  static const allOrdersScreen = '/allOrdersScreen';
   static const customers = '/customers';
   static const samples = '/samplePage';
   static const customerProfile = '/customerProfile';
@@ -23,6 +25,10 @@ class RouteManager {
       case root:
         return MaterialPageRoute(
           builder: (context) => const HomePage(),
+        );
+      case allOrdersScreen:
+        return MaterialPageRoute(
+          builder: (context) => const AllOrderScreens(),
         );
       case samples:
         return MaterialPageRoute(

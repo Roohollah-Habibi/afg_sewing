@@ -14,8 +14,8 @@ class CustomContainer extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: const EdgeInsets.all(15),
-        alignment: const Alignment(0, 1.5),
+        margin: const EdgeInsets.all(20),
+        alignment: const Alignment(0, 1.8),
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: Colors.red,

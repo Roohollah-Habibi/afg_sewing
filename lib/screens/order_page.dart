@@ -108,7 +108,7 @@ class _OrderPageState extends State<OrderPage> {
             .firstWhere((element) => element.id == widget.orderId);
     widget.orderId.isEmpty
         ? _selectedDate = null
-        : _selectedDate = foundOrder?.deliveryDate;
+        : _selectedDate = foundOrder?.deadLineDate;
     ghad = TextEditingController(text: foundOrder?.qad ?? '');
     shane = TextEditingController(text: foundOrder?.shana ?? '');
     astinSade = TextEditingController(text: foundOrder?.astinSada ?? '');
@@ -176,11 +176,12 @@ class _OrderPageState extends State<OrderPage> {
     }
 
     final Order newOrder = Order(
+      customerId: customer.id,
       isDone: false,
       isDelivered: false,
       id: widget.orderId.isEmpty ? uuid.v4() : widget.orderId,
-      orderDate: DateTime.now(),
-      deliveryDate: _selectedDate!,
+      registeredDate: DateTime.now(),
+      deadLineDate: _selectedDate!,
       qad: userGhad,
       shana: userShane,
       astinSada: userAstinSade,
