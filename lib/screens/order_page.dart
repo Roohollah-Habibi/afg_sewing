@@ -2,30 +2,7 @@ import 'package:afg_sewing/custom_widgets/text_field.dart';
 import 'package:afg_sewing/models/customer.dart';
 import 'package:afg_sewing/models/order.dart';
 import 'package:afg_sewing/page_routing/rout_manager.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:uuid/uuid.dart';
@@ -95,7 +72,7 @@ class _OrderPageState extends State<OrderPage> {
 
   final Box swingBox = Hive.box(swingDb);
   late final Customer customer;
-  DateTime? _selectedDate;
+  DateTime? deadline;
 
   @override
   void initState() {
@@ -107,8 +84,8 @@ class _OrderPageState extends State<OrderPage> {
         : customer.customerOrder
             .firstWhere((element) => element.id == widget.orderId);
     widget.orderId.isEmpty
-        ? _selectedDate = null
-        : _selectedDate = foundOrder?.deadLineDate;
+        ? deadline = null
+        : deadline = foundOrder?.deadLineDate;
     ghad = TextEditingController(text: foundOrder?.qad ?? '');
     shane = TextEditingController(text: foundOrder?.shana ?? '');
     astinSade = TextEditingController(text: foundOrder?.astinSada ?? '');
@@ -165,7 +142,7 @@ class _OrderPageState extends State<OrderPage> {
     final int userReceived =
         (received.value.text.isEmpty) ? 0 : int.parse(received.value.text);
     final int userRemaining = userTotal - userReceived;
-    if (_selectedDate == null) {
+    if (deadline == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           duration: Duration(milliseconds: 400),
@@ -174,14 +151,18 @@ class _OrderPageState extends State<OrderPage> {
       );
       return;
     }
-
+    final today = DateTime.now();
+    final registerDateStr = DateFormat('yyyy-MM-dd').format(today);
+    final registerDate = DateFormat('yyyy-MM-dd').parse(registerDateStr);
+    final deadLineStr = DateFormat('yyyy-MM-dd').format(deadline!);
+    deadline = DateFormat('yyyy-MM-dd').parse(deadLineStr);
     final Order newOrder = Order(
       customerId: customer.id,
       isDone: false,
       isDelivered: false,
       id: widget.orderId.isEmpty ? uuid.v4() : widget.orderId,
-      registeredDate: DateTime.now(),
-      deadLineDate: _selectedDate!,
+      registeredDate: registerDate,
+      deadLineDate: deadline!,
       qad: userGhad,
       shana: userShane,
       astinSada: userAstinSade,
@@ -258,9 +239,9 @@ class _OrderPageState extends State<OrderPage> {
       lastDate: DateTime(2100), // Set the latest date
     );
 
-    if (pickedDate != null && pickedDate != _selectedDate) {
+    if (pickedDate != null && pickedDate != deadline) {
       setState(() {
-        _selectedDate = pickedDate;
+        deadline = pickedDate;
       });
     }
   }

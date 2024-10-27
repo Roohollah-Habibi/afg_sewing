@@ -18,6 +18,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white70,
       body: Center(
         child: GridView(
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -47,7 +48,7 @@ class _HomePageState extends State<HomePage> {
               backgroundImg: reportsImgSrc,
               childText: 'Reports',
               onTap: () => Navigator.of(context)
-                  .pushReplacementNamed(RouteManager.samples),
+                  .pushReplacementNamed(RouteManager.reports),
             ),
           ],
         ),

@@ -3,6 +3,7 @@ import 'package:afg_sewing/screens/customer_profile.dart';
 import 'package:afg_sewing/screens/customer_page.dart';
 import 'package:afg_sewing/screens/home_page.dart';
 import 'package:afg_sewing/screens/order_page.dart';
+import 'package:afg_sewing/screens/reports.dart';
 import 'package:afg_sewing/screens/sample_page.dart';
 import 'package:flutter/material.dart';
 
@@ -13,6 +14,7 @@ class RouteManager {
   static const samples = '/samplePage';
   static const customerProfile = '/customerProfile';
   static const orderPage = '/orderPage';
+  static const reports = '/reportPage';
 
   // static const homePage = '/home';
 
@@ -46,6 +48,8 @@ class RouteManager {
             orderId: arguments['orderId'],
           ),
         );
+      case reports:
+        return MaterialPageRoute(builder: (context) => const Reports(),);
       default:
         throw const FormatException(
             'RoutManager ============ Page not found ===========');

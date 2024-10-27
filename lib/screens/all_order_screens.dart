@@ -3,7 +3,7 @@ import 'package:afg_sewing/models/order.dart';
 import 'package:afg_sewing/page_routing/rout_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-
+import 'package:intl/intl.dart';
 const String swingDb = 'SwingDb';
 
 class AllOrderScreens extends StatefulWidget {
@@ -26,21 +26,25 @@ class _AllOrderScreensState extends State<AllOrderScreens> {
     'In Progress',
     'Swen NOT Delivered',
     'Sewn & Delivered',
+    'expired',
+    '2 days left',
+    'just today',
     'All'
   ];
   late String? selectedFilter;
+
   @override
   void initState() {
     super.initState();
     allCustomers =
         swingBox.values.whereType<Customer>().toList().cast<Customer>();
-    allOrders = [for(var order in allCustomers)...order.customerOrder];
-    selectedFilter = swingBox.get('filterValueKey') ?? 'All';
+    allOrders = [for (var order in allCustomers) ...order.customerOrder];
+    selectedFilter = swingBox.get('filterValueKey') ?? 'In Progress';
     filterValues(selectedFilter);
   }
 
   void changeOrderStatusValues(
-      {required String value, required Order selectedOrder}) {
+      {required String value, required Order selectedOrder}){
     switch (value) {
       case 'Swen NOT Delivered':
         selectedOrder.isDone = true;
@@ -78,13 +82,13 @@ class _AllOrderScreensState extends State<AllOrderScreens> {
   }
 
   List<PopupMenuEntry<String>> orderStatusSelection(
-      BuildContext context, Order order) => [
+          BuildContext context, Order order) =>
+      [
         PopupMenuItem<String>(
             onTap: () {
               changeOrderStatusValues(
                   value: selectableOrderStatus[1], selectedOrder: order);
               setState(() {});
-              print('============ ${selectableOrderStatus[1]}==============');
             },
             value: selectableOrderStatus[1],
             child: const Text('Swen NOT Delivered')),
@@ -92,50 +96,68 @@ class _AllOrderScreensState extends State<AllOrderScreens> {
           onTap: () {
             changeOrderStatusValues(
                 value: selectableOrderStatus[2], selectedOrder: order);
-            print('============ ${selectableOrderStatus[2]}==============');
             setState(() {});
           },
-          child: Text('Sewn & Delivered'),
           value: selectableOrderStatus[2],
+          child: const Text('Sewn & Delivered'),
         ),
         PopupMenuItem<String>(
           onTap: () {
             changeOrderStatusValues(
                 value: selectableOrderStatus[0], selectedOrder: order);
-            print('============ ${selectableOrderStatus[0]}==============');
             setState(() {});
           },
-          child: Text('In Progress'),
           value: selectableOrderStatus[0],
+          child: const Text('In Progress'),
         ),
       ];
 
   // SHOW FILTER VALUES FOR DROPDOWN BUTTON
   void filterValues(String? value) async {
-    List<Order> tempOrder = [for(var order in allCustomers)...order.customerOrder];
+    final todayStr = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    final today = DateFormat('yyyy-MM-dd').parse(todayStr);
+    List<Order> tempOrder = [
+      for (var order in allCustomers) ...order.customerOrder
+    ];
     switch (value) {
       case 'All':
         allOrders = tempOrder;
         break;
       case 'Swen NOT Delivered':
-        allOrders = tempOrder.where(
-              (foundOrder) => foundOrder.isDone == true && foundOrder.isDelivered == false,
-        ).toList();
+        allOrders = tempOrder
+            .where(
+              (foundOrder) =>
+                  foundOrder.isDone == true && foundOrder.isDelivered == false,
+            )
+            .toList();
         break;
       case 'Sewn & Delivered':
         allOrders = tempOrder
             .where(
               (foundOrder) =>
-          foundOrder.isDelivered == true && foundOrder.isDone == true,
-        )
+                  foundOrder.isDelivered == true && foundOrder.isDone == true,
+            )
             .toList();
         break;
       case 'In Progress':
         allOrders = tempOrder
             .where((foundOrder) =>
-        foundOrder.isDone == false && foundOrder.isDelivered == false)
+                foundOrder.isDone == false && foundOrder.isDelivered == false)
             .toList();
         break;
+      case 'expired':
+        allOrders = tempOrder.where((foundOrder) {
+          return foundOrder.registeredDate.isAfter(foundOrder.deadLineDate);
+        },).toList();
+        break;
+        case 'just today':
+        allOrders = tempOrder.where((foundOrder) => foundOrder.deadLineDate.isAtSameMomentAs(today)).toList();
+        break;
+        case '2 days left':
+        allOrders = tempOrder.where((foundOrder) => foundOrder.deadLineDate.subtract(const Duration(days: 2)).isAtSameMomentAs(today)).toList();
+        break;
+
+
     }
     setState(() {});
   }
@@ -146,7 +168,7 @@ class _AllOrderScreensState extends State<AllOrderScreens> {
         selectedFilter = newValue;
       });
       await swingBox.put('filterValueKey', newValue);
-        filterValues(newValue);
+      filterValues(newValue);
     }
   }
 
@@ -162,56 +184,56 @@ class _AllOrderScreensState extends State<AllOrderScreens> {
         title: const Text('All Orders'),
       ),
       body: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        'Orders: ${allOrders.length}',
-                        style: const TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Padding(
-                        padding: const EdgeInsets.only(right: 12.0),
-                        child: DropdownButton<String>(
-                          padding: const EdgeInsets.symmetric(horizontal: 10),
-                          icon: const Icon(Icons.filter_alt),
-                          alignment: Alignment.center,
-                          iconSize: 30,
-                          value: selectedFilter,
-                          onChanged: onChangeDropdownFilterValue,
-                          items: filterOptions
-                              .map<DropdownMenuItem<String>>((String value) {
-                            return DropdownMenuItem<String>(
-                              value: value,
-                              child: Text(value),
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    ),
-                  ],
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  'Orders: ${allOrders.length}',
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold),
                 ),
-                allOrders.isEmpty
-                    ? const Expanded(
-                      child: Center(
-                        child: Text(
-                          'No Order is Available',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 25,
-                              color: Colors.indigo),
-                        ),
-                      ),
-                    )
-                    : Expanded(
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 12.0),
+                  child: DropdownButton<String>(
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    icon: const Icon(Icons.filter_alt),
+                    alignment: Alignment.center,
+                    iconSize: 30,
+                    value: selectedFilter,
+                    onChanged: onChangeDropdownFilterValue,
+                    items: filterOptions
+                        .map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          allOrders.isEmpty
+              ? const Expanded(
+                  child: Center(
+                    child: Text(
+                      'No Order is Available',
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 25,
+                          color: Colors.indigo),
+                    ),
+                  ),
+                )
+              : Expanded(
                   child: ListView.builder(
                     itemCount: allOrders.length,
                     itemBuilder: (context, index) {
@@ -229,17 +251,18 @@ class _AllOrderScreensState extends State<AllOrderScreens> {
                     },
                   ),
                 ),
-              ],
-            ),
+        ],
+      ),
     );
   }
+
   Widget buildCard(BuildContext context,
       {required String customerName,
-        required String customerLastName,
-        required String orderId,
-        required DateTime registeredDate,
-        required DateTime deadLine,
-        required String customerId}) {
+      required String customerLastName,
+      required String orderId,
+      required DateTime registeredDate,
+      required DateTime deadLine,
+      required String customerId}) {
     return Card(
       color: Colors.white10,
       child: ListTile(
@@ -261,7 +284,7 @@ class _AllOrderScreensState extends State<AllOrderScreens> {
               borderRadius: BorderRadiusDirectional.all(Radius.circular(20))),
           // margin: const EdgeInsets.all(16),
           width: MediaQuery.of(context).size.width * 50 / 100,
-          height: MediaQuery.of(context).size.width * 35 / 100,
+          height: MediaQuery.of(context).size.width * 50 / 100,
           child: Column(
             children: [
               GestureDetector(
@@ -289,12 +312,12 @@ class _AllOrderScreensState extends State<AllOrderScreens> {
                 ),
               ),
               Text(
-                  'Registered: ${registeredDate.year}/${registeredDate.month}/${registeredDate.day}'),
+                  'Registered: ${registeredDate.year}/${registeredDate.month}/${registeredDate.day}',style: const TextStyle(fontSize: 17,fontWeight: FontWeight.bold)),
               Text(
-                  'DeadLine : ${deadLine.year}/${deadLine.month}/${deadLine.day}'),
+                  'DeadLine : ${deadLine.year}/${deadLine.month}/${deadLine.day}',style: const TextStyle(fontSize: 17,fontWeight: FontWeight.bold)),
               Flexible(
                 child: Text(
-                    'Days Left: ${deadLine.difference(registeredDate).inDays}'),
+                    'Days Left: ${deadLine.difference(registeredDate).inDays}',style: const TextStyle(fontSize: 17,fontWeight: FontWeight.bold),),
               ),
             ],
           ),
@@ -302,6 +325,4 @@ class _AllOrderScreensState extends State<AllOrderScreens> {
       ),
     );
   }
-
-
 }
