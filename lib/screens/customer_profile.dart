@@ -4,6 +4,7 @@ import 'package:afg_sewing/page_routing/rout_manager.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:intl/intl.dart';
 
 const String swingDb = 'SwingDb';
 
@@ -35,7 +36,6 @@ class _CustomerProfileState extends State<CustomerProfile> {
     'Sewn & Delivered',
   ];
   late String? selectedFilter;
-
 
   @override
   void initState() {
@@ -193,32 +193,8 @@ class _CustomerProfileState extends State<CustomerProfile> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Expanded(
-                  child: Card(
-                    color: Colors.lightBlueAccent,
-                    child: ListTile(
-                      leading: const Icon(
-                        Icons.phone_android,
-                        color: Colors.blue,
-                      ),
-                      title: Text(customer.phoneNumber1),
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Card(
-                    color: Colors.lightBlueAccent,
-                    child: ListTile(
-                      leading: const Icon(
-                        Icons.phone_android,
-                        color: Colors.blue,
-                      ),
-                      title: Text(customer.phoneNumber2.isNotEmpty
-                          ? customer.phoneNumber2
-                          : 'Not Available'),
-                    ),
-                  ),
-                ),
+                buildPhoneCard(phoneNumber: customer.phoneNumber1),
+                buildPhoneCard(phoneNumber: customer.phoneNumber2),
               ],
             ),
             const SizedBox(height: 16),
@@ -230,8 +206,9 @@ class _CustomerProfileState extends State<CustomerProfile> {
                   child: Padding(
                     padding: const EdgeInsets.only(right: 20),
                     child: Text(
-                      'Total Orders: ${customerOrders.length}',
+                      'Orders: ${customerOrders.length}',
                       textAlign: TextAlign.center,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ),
                 ),
@@ -260,14 +237,21 @@ class _CustomerProfileState extends State<CustomerProfile> {
                     : ListView.builder(
                         itemCount: customerOrders.length,
                         itemBuilder: (context, index) {
+                          final todayStr =
+                              DateFormat('yyyy-MM-dd').format(DateTime.now());
+                          final today =
+                              DateFormat('yyyy-MM-dd').parse(todayStr);
                           Order order = customerOrders[index];
-
                           return Dismissible(
                             key: Key(order.id),
                             onDismissed: (direction) {
                               setState(() {
-                                customerOrders.removeWhere((element) => element.id == order.id,);
-                                Customer.removeOrder(customerId: widget.customerId, removableOrder: order);
+                                customerOrders.removeWhere(
+                                  (element) => element.id == order.id,
+                                );
+                                Customer.removeOrder(
+                                    customerId: widget.customerId,
+                                    removableOrder: order);
                               });
                               ScaffoldMessenger.of(context)
                                   .hideCurrentSnackBar();
@@ -334,32 +318,59 @@ class _CustomerProfileState extends State<CustomerProfile> {
                             ),
                             direction: DismissDirection.endToStart,
                             child: Card(
+                              color: deadlineColor(order, Colors.white70,
+                                  Colors.red.shade200, Colors.orange.shade200),
                               child: ListTile(
-                                onTap: () => Navigator.of(context).pushNamed(
-                                    RouteManager.orderPage,
-                                    arguments: {
-                                      'customerId': widget.customerId,
-                                      'orderId': customerOrders[index].id
-                                    }),
-                                trailing: PopupMenuButton(
-                                  itemBuilder: (context) =>
-                                      orderStatusSelection(context, order),
-                                ),
-                                title: Text(
-                                  'ID: ${customerOrders[index].id.substring(customerOrders[index].id.length - 5)}',
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 18,
-                                      color: Colors.green),
-                                ),
-                                subtitle: Text(
-                                  '${customerOrders[index].deadLineDate.day}-${customerOrders[index].deadLineDate.month}-${customerOrders[index].deadLineDate.year}',
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 18,
-                                      color: Colors.indigo),
-                                ),
-                              ),
+                                  onTap: () => Navigator.of(context).pushNamed(
+                                          RouteManager.orderPage,
+                                          arguments: {
+                                            'customerId': widget.customerId,
+                                            'orderId': customerOrders[index].id
+                                          }),
+                                  trailing: PopupMenuButton(
+                                    itemBuilder: (context) =>
+                                        orderStatusSelection(context, order),
+                                  ),
+                                  title: Text(
+                                    'ID: ${customerOrders[index].id.substring(customerOrders[index].id.length - 5)}',
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 18,
+                                        color: Colors.indigo.shade900),
+                                  ),
+                                  subtitle: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      ListTile(
+                                        leading:
+                                            const Icon(Icons.note_alt_outlined),
+                                        title: Text(
+                                          'Reg: ${customerOrders[index].registeredDate.day}-${customerOrders[index].registeredDate.month}-${customerOrders[index].registeredDate.year}',
+                                          style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16),
+                                        ),
+                                      ),
+                                      ListTile(
+                                        leading:
+                                            const Icon(CupertinoIcons.flag),
+                                        title: Text(
+                                          'DL: ${customerOrders[index].deadLineDate.day}-${customerOrders[index].deadLineDate.month}-${customerOrders[index].deadLineDate.year}',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: deadlineFont(order),
+                                            color: deadlineColor(
+                                                order,
+                                                Colors.indigo,
+                                                Colors.red.shade900,
+                                                Colors.orange.shade900),
+                                          ),
+                                        ),
+                                      )
+                                    ],
+                                  )),
                             ),
                           );
                         },
@@ -379,4 +390,42 @@ class _CustomerProfileState extends State<CustomerProfile> {
       ),
     );
   }
+
+  Widget buildPhoneCard({required String phoneNumber}) {
+    return Expanded(
+      child: Card(
+        color: Colors.white54,
+        child: ListTile(
+          contentPadding: const EdgeInsets.only(left: 3),
+          leading: const Icon(
+            Icons.phone_android,
+            color: Colors.black45,
+          ),
+          title: Text(phoneNumber.isNotEmpty
+              ? phoneNumber
+              : 'Not Available',style: const TextStyle(fontWeight: FontWeight.bold,color: Colors.black,fontSize: 17),),
+        ),
+      ),
+    );
+  }
+}
+
+Color deadlineColor(Order order, Color normal, Color past, Color justToday) {
+  final todayStr = DateFormat('yyyy-MM-dd').format(DateTime.now());
+  final today = DateFormat('yyyy-MM-dd').parse(todayStr);
+  return order.deadLineDate.isAtSameMomentAs(today)
+      ? justToday
+      : order.deadLineDate.isBefore(today)
+          ? past
+          : normal;
+}
+
+double deadlineFont(Order order) {
+  final todayStr = DateFormat('yyyy-MM-dd').format(DateTime.now());
+  final today = DateFormat('yyyy-MM-dd').parse(todayStr);
+  return order.deadLineDate.isAtSameMomentAs(today)
+      ? 17.5
+      : order.deadLineDate.isBefore(today)
+          ? 17.5
+          : 16;
 }

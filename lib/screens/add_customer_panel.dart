@@ -4,6 +4,7 @@ import 'package:afg_sewing/models/customer.dart';
 import 'package:afg_sewing/page_routing/rout_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
 const String appDb = 'SwingDb';
@@ -90,8 +91,11 @@ class _CustomShowModelSheetState extends State<CustomShowModelSheet> {
     setState(() {});
     if (!nameIsEmpty && !lastNameIsEmpty && !phoneIsEmpty) {
       var uuid = const Uuid();
+      final String todayStr = DateFormat('yyyy-MM-ddd').format(DateTime.now());
+      final DateTime today = DateFormat('yyyy-MM-ddd').parse(todayStr);
       Customer newCustomer = Customer(
           id: widget.customer != null ? widget.customer!.id : uuid.v4(),
+          registerDate: today,
           firstName: name,
           lastName: lastName,
           phoneNumber1: phoneOne,

@@ -568,8 +568,16 @@ class _OrderPageState extends State<OrderPage> {
               SizedBox(
                 width: 350,
                 child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white54,
+                    foregroundColor:
+                        deadline != null ? Colors.indigo.shade900 : Colors.red,
+                    textStyle: const TextStyle(fontSize: 17)
+                  ),
                   onPressed: () => _pickDate(context),
-                  label: const Text('Pick a Delivery Date'),
+                  label: Text(deadline != null
+                      ? 'Deadline: ${deadline!.day}-${deadline!.month}-${deadline!.year}'
+                      : 'Deadline: Not set'),
                   icon: const Icon(Icons.date_range),
                 ),
               ),

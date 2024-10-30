@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:flutter/material.dart';
 import 'order.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:uuid/uuid.dart';
@@ -32,6 +31,9 @@ class Customer extends HiveObject with EquatableMixin {
   @HiveField(6)
   final bool status;
 
+  @HiveField(7)
+  final DateTime registerDate;
+
   Customer({
     required this.id,
     required this.firstName,
@@ -40,6 +42,7 @@ class Customer extends HiveObject with EquatableMixin {
     required this.phoneNumber2,
     required this.customerOrder,
     required this.status,
+    required this.registerDate
   });
 
   static Future <void> addNewOrder(
@@ -66,6 +69,7 @@ class Customer extends HiveObject with EquatableMixin {
     if (Hive.isBoxOpen(swingDb)) {
       final swingBox = Hive.box(swingDb);
       final updatedCustomer= Customer(id: customer.id,
+          registerDate: customer.registerDate,
           firstName: customer.firstName,
           lastName: customer.lastName,
           phoneNumber1: customer.phoneNumber1,

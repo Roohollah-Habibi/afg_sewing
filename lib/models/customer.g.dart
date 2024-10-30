@@ -24,13 +24,14 @@ class CustomerAdapter extends TypeAdapter<Customer> {
       phoneNumber2: fields[4] as String,
       customerOrder: (fields[5] as List).cast<Order>(),
       status: fields[6] as bool,
+      registerDate: fields[7] as DateTime,
     );
   }
 
   @override
   void write(BinaryWriter writer, Customer obj) {
     writer
-      ..writeByte(7)
+      ..writeByte(8)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -44,7 +45,9 @@ class CustomerAdapter extends TypeAdapter<Customer> {
       ..writeByte(5)
       ..write(obj.customerOrder)
       ..writeByte(6)
-      ..write(obj.status);
+      ..write(obj.status)
+      ..writeByte(7)
+      ..write(obj.registerDate);
   }
 
   @override

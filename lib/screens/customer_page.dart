@@ -1,7 +1,9 @@
+import 'package:afg_sewing/providers/theam/app_colors_themes.dart';
 import 'package:afg_sewing/screens/add_customer_panel.dart';
 import 'package:afg_sewing/models/customer.dart';
 
 import 'package:afg_sewing/page_routing/rout_manager.dart';
+
 import 'package:flutter/material.dart';
 
 import 'package:hive_flutter/hive_flutter.dart';
@@ -49,6 +51,7 @@ class _CustomersState extends State<Customers> {
 
   @override
   Widget build(BuildContext context) {
+    List<BoxShadow> boxShadow = const[BoxShadow(color: AppColorsAndThemes.accentColor,spreadRadius: 5)];
     return Scaffold(
       appBar: AppBar(
         title: const Text('Customers'),
