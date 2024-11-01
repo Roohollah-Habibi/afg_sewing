@@ -1,6 +1,6 @@
 import 'package:afg_sewing/custom_widgets/screen_items.dart';
 import 'package:afg_sewing/page_routing/rout_manager.dart';
-import 'package:afg_sewing/providers/theam/theme_manager.dart';
+import 'package:afg_sewing/providers/theme_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

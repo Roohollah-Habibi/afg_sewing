@@ -283,6 +283,7 @@ class _OrderPageState extends State<OrderPage> {
               SizedBox(
                 width: 130,
                 child: CustomTextField(
+                  fieldKey: 'ghad',
                   txtEditingController: ghad,
                   label: 'ghad',
                   keyboardType: TextInputType.number,
@@ -291,280 +292,298 @@ class _OrderPageState extends State<OrderPage> {
                   ),
                 ),
               ),
-              // SHANE
-              SizedBox(
-                width: 130,
-                child: CustomTextField(
-                  txtEditingController: shane,
-                  label: 'shane',
-                  keyboardType: TextInputType.number,
-                  customInputDecoration: const InputDecoration(
-                    suffixText: 'Cm',
-                  ),
-                ),
-              ),
               // ASTIN SADE
-              SizedBox(
-                width: 130,
-                child: CustomTextField(
-                  txtEditingController: astinSade,
-                  label: 'Astin Sade',
-                  keyboardType: TextInputType.number,
-                  customInputDecoration: const InputDecoration(
-                    suffixText: 'Cm',
-                  ),
-                ),
+          // shane
+          SizedBox(
+            width: 130,
+            child: CustomTextField(
+              fieldKey: 'shane',
+              txtEditingController: shane,
+              label: 'shane',
+              keyboardType: TextInputType.number,
+              customInputDecoration: const InputDecoration(
+                suffixText: 'Cm',
               ),
-              // ASTIN KAF
-              SizedBox(
-                width: 130,
-                child: CustomTextField(
-                  txtEditingController: astinKaf,
-                  label: 'Astin Kaf',
-                  keyboardType: TextInputType.number,
-                  customInputDecoration: const InputDecoration(
-                    suffixText: 'Cm',
-                  ),
-                ),
+            ),
+          ),
+// astinSade
+          SizedBox(
+            width: 130,
+            child: CustomTextField(
+              fieldKey: 'Astin Sade',
+              txtEditingController: astinSade,
+              label: 'Astin Sade',
+              keyboardType: TextInputType.number,
+              customInputDecoration: const InputDecoration(
+                suffixText: 'Cm',
               ),
-              // yegha
-              SizedBox(
-                width: 130,
-                child: CustomTextField(
-                  txtEditingController: yegha,
-                  label: 'yeghe',
-                  keyboardType: TextInputType.number,
-                  customInputDecoration: const InputDecoration(
-                    suffixText: 'Cm',
-                  ),
-                ),
+            ),
+          ),
+// astinKaf
+          SizedBox(
+            width: 130,
+            child: CustomTextField(
+              fieldKey: 'Astin Kaf',
+              txtEditingController: astinKaf,
+              label: 'Astin Kaf',
+              keyboardType: TextInputType.number,
+              customInputDecoration: const InputDecoration(
+                suffixText: 'Cm',
               ),
-              //baghal
-              SizedBox(
-                width: 130,
-                child: CustomTextField(
-                  txtEditingController: baghal,
-                  label: 'baghal',
-                  keyboardType: TextInputType.number,
-                  customInputDecoration: const InputDecoration(
-                    suffixText: 'Cm',
-                  ),
-                ),
+            ),
+          ),
+// yegha
+          SizedBox(
+            width: 130,
+            child: CustomTextField(
+              fieldKey: 'yeghe',
+              txtEditingController: yegha,
+              label: 'yeghe',
+              keyboardType: TextInputType.number,
+              customInputDecoration: const InputDecoration(
+                suffixText: 'Cm',
               ),
-              // shalwar
-              SizedBox(
-                width: 130,
-                child: CustomTextField(
-                  txtEditingController: shalwar,
-                  label: 'shalwar',
-                  keyboardType: TextInputType.number,
-                  customInputDecoration: const InputDecoration(
-                    suffixText: 'Cm',
-                  ),
-                ),
+            ),
+          ),
+// baghal
+          SizedBox(
+            width: 130,
+            child: CustomTextField(
+              fieldKey: 'baghal',
+              txtEditingController: baghal,
+              label: 'baghal',
+              keyboardType: TextInputType.number,
+              customInputDecoration: const InputDecoration(
+                suffixText: 'Cm',
               ),
-              // parche
-              SizedBox(
-                width: 130,
-                child: CustomTextField(
-                  txtEditingController: parche,
-                  label: 'parche',
-                  keyboardType: TextInputType.number,
-                  customInputDecoration: const InputDecoration(
-                    suffixText: 'Cm',
-                  ),
-                ),
+            ),
+          ),
+// shalwar
+          SizedBox(
+            width: 130,
+            child: CustomTextField(
+              fieldKey: 'shalwar',
+              txtEditingController: shalwar,
+              label: 'shalwar',
+              keyboardType: TextInputType.number,
+              customInputDecoration: const InputDecoration(
+                suffixText: 'Cm',
               ),
-              // ghot
-              SizedBox(
-                width: 130,
-                child: CustomTextField(
-                  txtEditingController: ghot,
-                  label: 'ghot',
-                  keyboardType: TextInputType.number,
-                  customInputDecoration: const InputDecoration(
-                    suffixText: 'Cm',
-                  ),
-                ),
+            ),
+          ),
+// parche
+          SizedBox(
+            width: 130,
+            child: CustomTextField(
+              fieldKey: 'parche',
+              txtEditingController: parche,
+              label: 'parche',
+              keyboardType: TextInputType.number,
+              customInputDecoration: const InputDecoration(
+                suffixText: 'Cm',
               ),
-              //dam astin
-              SizedBox(
-                width: 130,
-                child: CustomTextField(
-                  txtEditingController: damAstin,
-                  label: 'damAstin',
-                  keyboardType: TextInputType.number,
-                  customInputDecoration: const InputDecoration(
-                    suffixText: 'Cm',
-                  ),
-                ),
+            ),
+          ),
+// ghot
+          SizedBox(
+            width: 130,
+            child: CustomTextField(
+              fieldKey: 'ghot',
+              txtEditingController: ghot,
+              label: 'ghot',
+              keyboardType: TextInputType.number,
+              customInputDecoration: const InputDecoration(
+                suffixText: 'Cm',
               ),
-              // bar astin
-              SizedBox(
-                width: 130,
-                child: CustomTextField(
-                  txtEditingController: barAstin,
-                  label: 'barAstin',
-                  keyboardType: TextInputType.number,
-                  customInputDecoration: const InputDecoration(
-                    suffixText: 'Cm',
-                  ),
-                ),
+            ),
+          ),
+// damAstin
+          SizedBox(
+            width: 130,
+            child: CustomTextField(
+              fieldKey: 'damAstin',
+              txtEditingController: damAstin,
+              label: 'damAstin',
+              keyboardType: TextInputType.number,
+              customInputDecoration: const InputDecoration(
+                suffixText: 'Cm',
               ),
-              // jibShalwar
-              SizedBox(
-                width: 130,
-                child: CustomTextField(
-                  txtEditingController: jibShalwar,
-                  label: 'jibShalwar',
-                  keyboardType: TextInputType.number,
-                  customInputDecoration: const InputDecoration(
-                    suffixText: 'Cm',
-                  ),
-                ),
+            ),
+          ),
+// barAstin
+          SizedBox(
+            width: 130,
+            child: CustomTextField(
+              fieldKey: 'barAstin',
+              txtEditingController: barAstin,
+              label: 'barAstin',
+              keyboardType: TextInputType.number,
+              customInputDecoration: const InputDecoration(
+                suffixText: 'Cm',
               ),
-              // qadPuti
-              SizedBox(
-                width: 130,
-                child: CustomTextField(
-                  txtEditingController: ghadPuti,
-                  label: 'qadPuti',
-                  keyboardType: TextInputType.number,
-                  customInputDecoration: const InputDecoration(
-                    suffixText: 'Cm',
-                  ),
-                ),
+            ),
+          ),
+// jibShalwar
+          SizedBox(
+            width: 130,
+            child: CustomTextField(
+              fieldKey: 'jibShalwar',
+              txtEditingController: jibShalwar,
+              label: 'jibShalwar',
+              keyboardType: TextInputType.number,
+              customInputDecoration: const InputDecoration(
+                suffixText: 'Cm',
               ),
-              // barShalwar
-              SizedBox(
-                width: 130,
-                child: CustomTextField(
-                  txtEditingController: barShalwar,
-                  label: 'barShalwar',
-                  keyboardType: TextInputType.number,
-                  customInputDecoration: const InputDecoration(
-                    suffixText: 'Cm',
-                  ),
-                ),
+            ),
+          ),
+// qadPuti
+          SizedBox(
+            width: 130,
+            child: CustomTextField(
+              fieldKey: 'qadPuti',
+              txtEditingController: ghadPuti,
+              label: 'qadPuti',
+              keyboardType: TextInputType.number,
+              customInputDecoration: const InputDecoration(
+                suffixText: 'Cm',
               ),
-              // faq
-              SizedBox(
-                width: 130,
-                child: CustomTextField(
-                  txtEditingController: fagh,
-                  label: 'fagh',
-                  keyboardType: TextInputType.number,
-                  customInputDecoration: const InputDecoration(
-                    suffixText: 'Cm',
-                  ),
-                ),
+            ),
+          ),
+// barShalwar
+          SizedBox(
+            width: 130,
+            child: CustomTextField(
+              fieldKey: 'barShalwar',
+              txtEditingController: barShalwar,
+              label: 'barShalwar',
+              keyboardType: TextInputType.number,
+              customInputDecoration: const InputDecoration(
+                suffixText: 'Cm',
               ),
-              // doorezano
-              SizedBox(
-                width: 130,
-                child: CustomTextField(
-                  txtEditingController: doorezano,
-                  label: 'doorezano',
-                  keyboardType: TextInputType.number,
-                  customInputDecoration: const InputDecoration(
-                    suffixText: 'Cm',
-                  ),
-                ),
+            ),
+          ),
+// fagh
+          SizedBox(
+            width: 130,
+            child: CustomTextField(
+              fieldKey: 'fagh',
+              txtEditingController: fagh,
+              label: 'fagh',
+              keyboardType: TextInputType.number,
+              customInputDecoration: const InputDecoration(
+                suffixText: 'Cm',
               ),
-              // kaf
-              SizedBox(
-                width: 130,
-                child: CustomTextField(
-                  txtEditingController: kaf,
-                  label: 'kaf',
-                  keyboardType: TextInputType.number,
-                  customInputDecoration: const InputDecoration(
-                    suffixText: 'Cm',
-                  ),
-                ),
+            ),
+          ),
+// doorezano
+          SizedBox(
+            width: 130,
+            child: CustomTextField(
+              fieldKey: 'doorezano',
+              txtEditingController: doorezano,
+              label: 'doorezano',
+              keyboardType: TextInputType.number,
+              customInputDecoration: const InputDecoration(
+                suffixText: 'Cm',
               ),
-              // jibRoo
-              SizedBox(
-                width: 130,
-                child: CustomTextField(
-                  txtEditingController: jibroo,
-                  label: 'jibRoo',
-                  keyboardType: TextInputType.number,
-                  customInputDecoration: const InputDecoration(
-                    suffixText: 'Cm',
-                  ),
-                ),
+            ),
+          ),
+// kaf
+          SizedBox(
+            width: 130,
+            child: CustomTextField(
+              fieldKey: 'kaf',
+              txtEditingController: kaf,
+              label: 'kaf',
+              keyboardType: TextInputType.number,
+              customInputDecoration: const InputDecoration(
+                suffixText: 'Cm',
               ),
-              // damanRast
-              SizedBox(
-                width: 130,
-                child: CustomTextField(
-                  txtEditingController: damanRast,
-                  label: 'damanRast',
-                  keyboardType: TextInputType.number,
-                  customInputDecoration: const InputDecoration(
-                    suffixText: 'Cm',
-                  ),
-                ),
+            ),
+          ),
+// jibRoo
+          SizedBox(
+            width: 130,
+            child: CustomTextField(
+              fieldKey: 'jibRoo',
+              txtEditingController: jibroo,
+              label: 'jibRoo',
+              keyboardType: TextInputType.number,
+              customInputDecoration: const InputDecoration(
+                suffixText: 'Cm',
               ),
-              // damanGerd
-              SizedBox(
-                width: 130,
-                child: CustomTextField(
-                  txtEditingController: damanGerd,
-                  label: 'damanGerd',
-                  keyboardType: TextInputType.number,
-                  customInputDecoration: const InputDecoration(
-                    suffixText: 'Cm',
-                  ),
-                ),
+            ),
+          ),
+// damanRast
+          SizedBox(
+            width: 130,
+            child: CustomTextField(
+              fieldKey: 'damanRast',
+              txtEditingController: damanRast,
+              label: 'damanRast',
+              keyboardType: TextInputType.number,
+              customInputDecoration: const InputDecoration(
+                suffixText: 'Cm',
               ),
-              // model
-              SizedBox(
-                width: 130,
-                child: CustomTextField(
-                  txtEditingController: model,
-                  label: 'model',
-                  keyboardType: TextInputType.number,
-                  customInputDecoration: const InputDecoration(
-                    suffixText: 'Cm',
-                  ),
-                ),
+            ),
+          ),
+// damanGerd
+          SizedBox(
+            width: 130,
+            child: CustomTextField(
+              fieldKey: 'damanGerd',
+              txtEditingController: damanGerd,
+              label: 'damanGerd',
+              keyboardType: TextInputType.number,
+              customInputDecoration: const InputDecoration(
+                suffixText: 'Cm',
               ),
-              // totalCost
-              SizedBox(
-                width: 130,
-                child: CustomTextField(
-                  txtEditingController: total,
-                  label: 'Total',
-                  keyboardType: TextInputType.number,
-                  customInputDecoration:
-                      const InputDecoration(suffixText: 'AF'),
-                ),
+            ),
+          ),
+// model
+          SizedBox(
+            width: 130,
+            child: CustomTextField(
+              fieldKey: 'model',
+              txtEditingController: model,
+              label: 'model',
+              keyboardType: TextInputType.number,
+            ),
+          ),
+// totalCost
+          SizedBox(
+            width: 130,
+            child: CustomTextField(
+              fieldKey: 'Total',
+              txtEditingController: total,
+              label: 'Total',
+              keyboardType: TextInputType.number,
+              customInputDecoration: const InputDecoration(
+                suffixText: 'AF',
               ),
-              // received
-              SizedBox(
-                width: 130,
-                child: CustomTextField(
-                  txtEditingController: received,
-                  label: 'received',
-                  keyboardType: TextInputType.number,
-                  customInputDecoration:
-                      const InputDecoration(suffixText: 'AF'),
-                ),
+            ),
+          ),
+// received
+          SizedBox(
+            width: 130,
+            child: CustomTextField(
+              fieldKey: 'received',
+              txtEditingController: received,
+              label: 'received',
+              keyboardType: TextInputType.number,
+              customInputDecoration: const InputDecoration(
+                suffixText: 'AF',
               ),
-              // // remaining
-              SizedBox(
-                width: 130,
-                child: CustomTextField(
-                  readOnly: true,
-                  txtEditingController: remaining,
-                  label: 'remaining',
-                  keyboardType: TextInputType.number,
-                  customInputDecoration:
-                      const InputDecoration(suffixText: 'AF'),
-                ),
-              ),
+            ),
+          ),
+          SizedBox(
+            width: 130,
+            child: CustomTextField(
+              txtEditingController: remaining,
+              fieldKey: 'remaining',
+              label: 'remaining',
+            ),
+          ),
               SizedBox(
                 width: 350,
                 child: ElevatedButton.icon(
@@ -581,6 +600,7 @@ class _OrderPageState extends State<OrderPage> {
                   icon: const Icon(Icons.date_range),
                 ),
               ),
+
               const SizedBox(height: 70),
               //Save Button
               ElevatedButton.icon(

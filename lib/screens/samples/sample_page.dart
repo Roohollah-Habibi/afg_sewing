@@ -1,9 +1,12 @@
 import 'package:afg_sewing/custom_widgets/custom_container.dart';
 import 'package:afg_sewing/page_routing/rout_manager.dart';
-import 'package:afg_sewing/providers/theam/app_colors_themes.dart';
+import 'package:afg_sewing/providers/sample_provider.dart';
+import 'package:afg_sewing/screens/samples/sample_src.dart';
+import 'package:afg_sewing/themes/app_colors_themes.dart';
 
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class SamplePage extends StatelessWidget {
   const SamplePage({super.key});
@@ -85,7 +88,12 @@ class SamplePage extends StatelessWidget {
 void _navigateTo(BuildContext context, int pageIndex) {
   switch (pageIndex) {
     case 0:
+      Provider.of<SampleProvider>(context,listen: false).replaceNewImageList(SampleSrc.yekhanSrs);
       Navigator.of(context).pushNamed(RouteManager.yekhan);
+      break;
+      case 1:
+      Provider.of<SampleProvider>(context,listen: false).replaceNewImageList(SampleSrc.astinSrs);
+      Navigator.of(context).pushNamed(RouteManager.astin);
       break;
   }
 }

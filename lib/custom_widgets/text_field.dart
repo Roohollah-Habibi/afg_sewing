@@ -1,48 +1,52 @@
+import 'package:afg_sewing/providers/customer_provider.dart';
+import 'package:afg_sewing/themes/app_colors_themes.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class CustomTextField extends StatelessWidget {
   final TextEditingController txtEditingController;
   final String label;
-  final Color? enabledBorderColor;
-  final Color? focusedBorderColor;
   final Icon? prefixIcon;
-  final TextInputType? keyboardType;
-  final bool? showError;
+  final TextInputType keyboardType;
   final InputDecoration? customInputDecoration;
-  final bool readOnly;
+  final EdgeInsets? padding;
+  final String fieldKey;
+  final int? maxLength;
+  final String? prefixText;
 
   const CustomTextField({
     super.key,
-    this.readOnly = false,
-    this.showError,
-    this.keyboardType,
+    this.prefixText,
+    this.padding,
+    this.maxLength,
+    this.keyboardType = TextInputType.name,
     this.customInputDecoration,
     this.prefixIcon,
+    required this.fieldKey,
     required this.txtEditingController,
     required this.label,
-    this.enabledBorderColor,
-    this.focusedBorderColor,
-
   });
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all( 8.0),
-      child: TextField(
-        readOnly: readOnly,
-        controller: txtEditingController,
-        keyboardType: keyboardType ?? TextInputType.text,
-        decoration: customInputDecoration?.copyWith(
-          labelText: label,
-          enabledBorder: enableInputBorder(Colors.blue),
-          focusedBorder: focusInputBorder(Colors.lightBlueAccent),
-        )??
-          inputDecoration(
+    return Consumer<CustomerProvider>(
+      builder: (context, customerProvider, _) =>  Padding(
+        padding: padding ?? const EdgeInsets.all(8),
+        child: TextField(
+          maxLength: maxLength,
+          controller: txtEditingController,
+          onChanged: (value) {
+            customerProvider.validate(fieldKey,value);
+          },
+          keyboardType: keyboardType,
+          decoration: customInputDecoration?.copyWith(
             labelText: label,
-            prefixIcon: prefixIcon,
-            enableBorderColor: enabledBorderColor,
-            focusBorderColor: focusedBorderColor,
-        errorText: showError),
+          )??
+            inputDecoration(
+              labelText: label,
+              prefixIcon: prefixIcon,
+          prefixText: prefixText,
+          fieldError: customerProvider.getError(fieldKey)),
+        ),
       ),
     );
   }
@@ -51,11 +55,14 @@ class CustomTextField extends StatelessWidget {
 InputDecoration inputDecoration({
   Icon? prefixIcon,
   required String labelText,
-  bool? errorText,
+  required bool fieldError,
   Color? enableBorderColor,
   Color? focusBorderColor,
+  String? prefixText,
 }) {
   return InputDecoration(
+    prefixText: prefixText,
+    prefixStyle: const TextStyle(color: Colors.black,fontSize: 16),
     labelStyle: const TextStyle(
       fontSize: 18,
       fontWeight: FontWeight.bold,
@@ -63,28 +70,10 @@ InputDecoration inputDecoration({
     contentPadding: const EdgeInsets.only(left: 40,top: 50),
     prefixIcon: prefixIcon,
     labelText: labelText,
-    errorText: errorText != null ? 'Empty or invalid input' : null,
-    enabledBorder: enableInputBorder(enableBorderColor ?? Colors.blue),
-    focusedBorder: focusInputBorder(focusBorderColor ?? Colors.blueAccent),
-  );
-}
-
-OutlineInputBorder focusInputBorder(Color myColor) {
-  return OutlineInputBorder(
-    borderRadius: BorderRadius.circular(10.0),
-    borderSide: BorderSide(
-      color: myColor,
-      width: 3.0,
-    ),
-  );
-}
-
-OutlineInputBorder enableInputBorder(Color myColor) {
-  return OutlineInputBorder(
-    borderRadius: BorderRadius.circular(10.0),
-    borderSide: BorderSide(
-      color: myColor,
-      width: 2.0,
-    ),
+    errorText: fieldError ?'Empty or invalid input' : null,
+    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0),borderSide: const BorderSide(color: AppColorsAndThemes.accentColor, width: 2.0)),
+    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0),borderSide: const BorderSide(color: AppColorsAndThemes.darkSecondaryColor,width: 3.0)),
+    errorBorder:OutlineInputBorder(borderRadius: BorderRadius.circular(10),borderSide: const BorderSide(color: Colors.red,width: 3.0)),
+    focusedErrorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10),borderSide: const BorderSide(color: Colors.red,width: 3.0)),
   );
 }

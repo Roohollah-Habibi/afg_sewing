@@ -1,9 +1,10 @@
 import 'package:afg_sewing/models/customer.dart';
 import 'package:afg_sewing/models/order.dart';
 import 'package:afg_sewing/page_routing/rout_manager.dart';
+import 'package:afg_sewing/providers/customer_provider.dart';
 import 'package:afg_sewing/providers/sample_provider.dart';
-import 'package:afg_sewing/providers/theam/app_colors_themes.dart';
-import 'package:afg_sewing/providers/theam/theme_manager.dart';
+import 'package:afg_sewing/themes/app_colors_themes.dart';
+import 'package:afg_sewing/providers/theme_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hive_flutter/adapters.dart';
@@ -27,7 +28,8 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => ThemeManagerProvider()),
-        ChangeNotifierProvider(create: (context) => SampleProvider(),),
+        ChangeNotifierProvider(create: (context) => SampleProvider()),
+        ChangeNotifierProvider(create: (context) => CustomerProvider()),
       ],
       child: Consumer<ThemeManagerProvider>(
         builder: (context, themeManger, child) => MaterialApp(

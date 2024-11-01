@@ -401,7 +401,7 @@ class _CustomerProfileState extends State<CustomerProfile> {
             Icons.phone_android,
             color: Colors.black45,
           ),
-          title: Text(phoneNumber.isNotEmpty
+          title: Text(phoneNumber.length >2
               ? phoneNumber
               : 'Not Available',style: const TextStyle(fontWeight: FontWeight.bold,color: Colors.black,fontSize: 17),),
         ),

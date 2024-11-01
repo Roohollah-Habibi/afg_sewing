@@ -1,13 +1,16 @@
+import 'package:afg_sewing/providers/sample_provider.dart';
 import 'package:afg_sewing/screens/all_order_screens.dart';
-import 'package:afg_sewing/screens/customer_profile.dart';
-import 'package:afg_sewing/screens/customer_page.dart';
+import 'package:afg_sewing/screens/customers/customer_page.dart';
+import 'package:afg_sewing/screens/customers/customer_profile.dart';
 import 'package:afg_sewing/screens/home_page.dart';
 import 'package:afg_sewing/screens/order_page.dart';
 import 'package:afg_sewing/screens/reports.dart';
-import 'package:afg_sewing/screens/samples/order_full_screen.dart';
+import 'package:afg_sewing/screens/samples/Astin.dart';
+import 'package:afg_sewing/screens/samples/sample_full_screen.dart';
 import 'package:afg_sewing/screens/samples/sample_page.dart';
 import 'package:afg_sewing/screens/samples/yekhan.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class RouteManager {
   static const root = '/';
@@ -15,6 +18,7 @@ class RouteManager {
   static const customers = '/customers';
   static const samples = '/samplePage';
   static const yekhan = '/yekhan';
+  static const astin = '/astin';
   static const fullOrderScreen = '/fullOrderScreen';
   static const customerProfile = '/customerProfile';
   static const orderPage = '/orderPage';
@@ -29,29 +33,24 @@ class RouteManager {
     }
     switch (setting.name) {
       case root:
-        return MaterialPageRoute(
-          builder: (context) => const HomePage(),
-        );
+        return MaterialPageRoute(builder: (context) => const HomePage());
         break;
       case yekhan:
-        return MaterialPageRoute(
-          builder: (context) => const Yekhan(),
-        );
-            break;
-      case allOrdersScreen:
-        return MaterialPageRoute(
-          builder: (context) => const AllOrderScreens(),
-        );
+        return MaterialPageRoute(builder: (context) => const Yekhan());
         break;
-        case fullOrderScreen:
+        case astin:
+        return MaterialPageRoute(builder: (context) => const Astin());
+        break;
+      case allOrdersScreen:
+        return MaterialPageRoute(builder: (context) => const AllOrderScreens());
+        break;
+      case fullOrderScreen:
         return MaterialPageRoute(
-          builder: (context) => OrderFullScreen(pageIndex: arguments['pageIndex']),
-        );
+            builder: (context) =>
+                SamplesFullScreen(pageIndex: arguments['pageIndex'],imgSrc: arguments[''],));
         break;
       case samples:
-        return MaterialPageRoute(
-          builder: (context) => const SamplePage(),
-        );
+        return MaterialPageRoute(builder: (context) => const SamplePage());
         break;
       case customers:
         return MaterialPageRoute(builder: (context) => const Customers());
@@ -69,7 +68,9 @@ class RouteManager {
         );
         break;
       case reports:
-        return MaterialPageRoute(builder: (context) => const Reports(),);
+        return MaterialPageRoute(
+          builder: (context) => const Reports(),
+        );
         break;
       default:
         throw const FormatException(

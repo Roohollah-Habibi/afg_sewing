@@ -7,19 +7,19 @@ import 'package:afg_sewing/screens/samples/sample_full_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class Yekhan extends StatelessWidget {
-  const Yekhan({super.key});
+class Astin extends StatelessWidget {
+  const Astin({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading:
-            !context.watch<SampleProvider>().getFullScreen,
-        title: Text('یخن ها',
+        !context.watch<SampleProvider>().getFullScreen,
+        title: Text('آستین ها',
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: AppColorsAndThemes.primaryColor,
-                )),
+              color: AppColorsAndThemes.primaryColor,
+            )),
       ),
       body: Center(
         child: Stack(
@@ -30,7 +30,7 @@ class Yekhan extends StatelessWidget {
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 3),
               itemBuilder: (context, index) {
-                String imgSrc = 'assets/images/yekhan/yekhan$index.jpg';
+                String imgSrc = 'assets/images/astin/tj$index.jpg';
                 return GestureDetector(
                   child: CustomContainer(
                     margin: const EdgeInsets.all(2),
@@ -50,15 +50,13 @@ class Yekhan extends StatelessWidget {
             ),
             if (context.watch<SampleProvider>().getFullScreen)
               Center(
-                child: CustomContainer(
-                  width: double.infinity,
-                  height: MediaQuery.of(context).size.height * 80 / 100,
-                  child: Consumer<SampleProvider>(
-                    builder: (context, customerProvider, _) =>
-                        SamplesFullScreen(
-                      pageIndex: customerProvider.getSelectedOrderIndex,
-                          imgSrc: customerProvider.imgList,
-                    ),
+                child: Consumer<SampleProvider>(
+                  builder:(context,customerProvider,_) => CustomContainer(
+                    width: double.infinity,
+                    height: MediaQuery.of(context).size.height * 80 / 100,
+                    child: SamplesFullScreen(
+                        pageIndex: customerProvider.getSelectedOrderIndex,
+                      imgSrc: customerProvider.imgList,),
                   ),
                 ),
               ),
