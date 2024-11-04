@@ -332,7 +332,7 @@ class _CustomerProfileState extends State<CustomerProfile> {
                                         orderStatusSelection(context, order),
                                   ),
                                   title: Text(
-                                    'ID: ${customerOrders[index].id.substring(customerOrders[index].id.length - 5)}',
+                                    'ID: ${customerOrders[index].id}',
                                     style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 18,
@@ -382,7 +382,8 @@ class _CustomerProfileState extends State<CustomerProfile> {
       ),
       floatingActionButton: ElevatedButton.icon(
         onPressed: () {
-          Navigator.of(context).pushReplacementNamed(RouteManager.orderPage,
+          print('cccccccccccccccUSOMTER iD = ${customer.id}');
+          Navigator.of(context).pushNamed(RouteManager.orderPage,
               arguments: {'customerId': customer.id, 'orderId': ''});
         },
         label: const Text('New Order'),

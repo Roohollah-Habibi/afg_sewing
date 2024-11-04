@@ -40,6 +40,10 @@ class CustomTextField extends StatelessWidget {
           keyboardType: keyboardType,
           decoration: customInputDecoration?.copyWith(
             labelText: label,
+            enabledBorder: enableBorder,
+            focusedBorder: focusBorder,
+            errorBorder:errorBorder,
+            focusedErrorBorder: errorBorder,
           )??
             inputDecoration(
               labelText: label,
@@ -64,16 +68,22 @@ InputDecoration inputDecoration({
     prefixText: prefixText,
     prefixStyle: const TextStyle(color: Colors.black,fontSize: 16),
     labelStyle: const TextStyle(
-      fontSize: 18,
+      fontSize: 16,
       fontWeight: FontWeight.bold,
     ),
     contentPadding: const EdgeInsets.only(left: 40,top: 50),
     prefixIcon: prefixIcon,
     labelText: labelText,
     errorText: fieldError ?'Empty or invalid input' : null,
-    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0),borderSide: const BorderSide(color: AppColorsAndThemes.accentColor, width: 2.0)),
-    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0),borderSide: const BorderSide(color: AppColorsAndThemes.darkSecondaryColor,width: 3.0)),
-    errorBorder:OutlineInputBorder(borderRadius: BorderRadius.circular(10),borderSide: const BorderSide(color: Colors.red,width: 3.0)),
-    focusedErrorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10),borderSide: const BorderSide(color: Colors.red,width: 3.0)),
+    enabledBorder: enableBorder,
+    focusedBorder: focusBorder,
+    errorBorder:errorBorder,
+    focusedErrorBorder: errorBorder,
   );
 }
+
+OutlineInputBorder get errorBorder => OutlineInputBorder(borderRadius: BorderRadius.circular(10),borderSide: const BorderSide(color: Colors.red,width: 3.0));
+
+OutlineInputBorder get focusBorder => OutlineInputBorder(borderRadius: BorderRadius.circular(10.0),borderSide: const BorderSide(color: AppColorsAndThemes.darkSecondaryColor,width: 3.0));
+
+OutlineInputBorder get enableBorder => OutlineInputBorder(borderRadius: BorderRadius.circular(10.0),borderSide: const BorderSide(color: AppColorsAndThemes.accentColor, width: 2.0));

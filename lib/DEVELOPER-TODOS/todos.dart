@@ -9,7 +9,7 @@
 //todo: check if the customer has order it is active if it dose not he is inactive
 //todo: add customer register date inside the customer profile
 //todo: check the customer deadline is WITHIN 2 days not Exactly 2 days
-//todo:
+//todo: 1- remember customer profile modification
 //todo:
 //todo:
 //todo:

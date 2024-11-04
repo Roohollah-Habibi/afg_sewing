@@ -2,6 +2,7 @@ import 'package:afg_sewing/models/customer.dart';
 import 'package:afg_sewing/models/order.dart';
 import 'package:afg_sewing/page_routing/rout_manager.dart';
 import 'package:afg_sewing/providers/customer_provider.dart';
+import 'package:afg_sewing/providers/order_provider.dart';
 import 'package:afg_sewing/providers/sample_provider.dart';
 import 'package:afg_sewing/themes/app_colors_themes.dart';
 import 'package:afg_sewing/providers/theme_provider.dart';
@@ -30,6 +31,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => ThemeManagerProvider()),
         ChangeNotifierProvider(create: (context) => SampleProvider()),
         ChangeNotifierProvider(create: (context) => CustomerProvider()),
+        ChangeNotifierProvider(create: (context) => OrderProvider()),
       ],
       child: Consumer<ThemeManagerProvider>(
         builder: (context, themeManger, child) => MaterialApp(

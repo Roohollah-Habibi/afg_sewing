@@ -78,6 +78,9 @@ ThemeData myLightTheme = ThemeData(
   ],
   elevatedButtonTheme: const ElevatedButtonThemeData(
     style: ButtonStyle(
+
+      textStyle: WidgetStatePropertyAll(TextStyle
+            (fontSize: 20)),
       backgroundColor:
           WidgetStatePropertyAll<Color?>(AppColorsAndThemes.secondaryColor),
       foregroundColor:

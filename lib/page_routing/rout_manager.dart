@@ -3,7 +3,7 @@ import 'package:afg_sewing/screens/all_order_screens.dart';
 import 'package:afg_sewing/screens/customers/customer_page.dart';
 import 'package:afg_sewing/screens/customers/customer_profile.dart';
 import 'package:afg_sewing/screens/home_page.dart';
-import 'package:afg_sewing/screens/order_page.dart';
+import 'package:afg_sewing/screens/orders/order_page.dart';
 import 'package:afg_sewing/screens/reports.dart';
 import 'package:afg_sewing/screens/samples/Astin.dart';
 import 'package:afg_sewing/screens/samples/sample_full_screen.dart';
