@@ -382,7 +382,6 @@ class _CustomerProfileState extends State<CustomerProfile> {
       ),
       floatingActionButton: ElevatedButton.icon(
         onPressed: () {
-          print('cccccccccccccccUSOMTER iD = ${customer.id}');
           Navigator.of(context).pushNamed(RouteManager.orderPage,
               arguments: {'customerId': customer.id, 'orderId': ''});
         },

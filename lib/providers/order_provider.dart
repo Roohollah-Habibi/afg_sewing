@@ -10,7 +10,7 @@ final _registerDateStr = DateFormat('yyyy-MM-dd').format(DateTime.now());
 final Box _swingBox = Hive.box('SwingDb');
 
 class OrderProvider extends ChangeNotifier {
-  int _orderIdNew = 0;
+  static int _orderIdNew = (_swingBox.get('oi') as int?) ?? 0;
   int _remainingPrice = 0;
   DateTime? _deadline;
   DateTime _registerDate = DateFormat('yyyy-MM-dd').parse(_registerDateStr);
@@ -74,10 +74,9 @@ class OrderProvider extends ChangeNotifier {
     double received = double.tryParse(orderInfo['received'] as String) ?? 0;
     final String deadLineStr = DateFormat('yyyy-MM-dd').format(_deadline!);
     _deadline = DateFormat('yyyy-MM-dd').parse(deadLineStr);
-    _orderIdNew++;
     final Order newOrder = Order(
       customerId: customer.id,
-      id: orderId.isEmpty ? _orderIdNew.toString() : orderId,
+      id: orderId.isEmpty ? '${_orderIdNew++}'.toString() : orderId,
       isDone: false,
       isDelivered: false,
       registeredDate: _registerDate,
@@ -108,10 +107,10 @@ class OrderProvider extends ChangeNotifier {
       remainingMoney: setRemainingPrice(total, received),
     );
     await Customer.addNewOrder(
-        newOrder: newOrder, customerId: customer.id, replaceOrderId:
-    orderId);
+        newOrder: newOrder, customerId: customer.id, replaceOrderId:orderId);
     _registerDate = DateFormat('yyyy-MM-dd').parse(_registerDateStr);
     _deadline = null;
+    _swingBox.put('oi', _orderIdNew);
     notifyListeners();
     if (context.mounted) {
       Navigator.of(context).pop(RouteManager.orderPage);
