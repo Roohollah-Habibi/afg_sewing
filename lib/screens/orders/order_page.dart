@@ -24,11 +24,30 @@ class OrderPage extends StatefulWidget {
 }
 
 class _OrderPageState extends State<OrderPage> {
-  late TextEditingController ghad, shane, astinSade, astinKaf, yegha, baghal,
-      shalwar, parche, ghot, damAstin, barAstin, jibShalwar, ghadPuti,
+  late TextEditingController ghad,
+      shane,
+      astinSade,
+      astinKaf,
+      yegha,
+      baghal,
+      shalwar,
+      parche,
+      ghot,
+      damAstin,
+      barAstin,
+      jibShalwar,
+      ghadPuti,
       barShalwar,
-      fagh, doorezano, kaf, jibroo, damanRast, damanGerd, model, total,
-      received, remaining;
+      fagh,
+      doorezano,
+      kaf,
+      jibroo,
+      damanRast,
+      damanGerd,
+      model,
+      total,
+      received,
+      remaining;
   late final List<Map<String, dynamic>> textFields;
   late final Map<String, String> userMeasurements;
   bool disableButton = false;
@@ -43,7 +62,7 @@ class _OrderPageState extends State<OrderPage> {
     Order? foundOrder = widget.orderId.isEmpty
         ? null
         : customer.customerOrder
-        .firstWhere((element) => element.id == widget.orderId);
+            .firstWhere((element) => element.id == widget.orderId);
     ghad = TextEditingController(text: foundOrder?.qad ?? '');
     shane = TextEditingController(text: foundOrder?.shana ?? '');
     astinSade = TextEditingController(text: foundOrder?.astinSada ?? '');
@@ -73,8 +92,12 @@ class _OrderPageState extends State<OrderPage> {
     textFields = [
       {'fieldKey': 'ghad', 'controller': ghad, 'label': 'قد'},
       {'fieldKey': 'shane', 'controller': shane, 'label': 'شانه'},
-      {'fieldKey': 'Astin Sade', 'controller': astinSade, 'label': 'آستین '
-          'ساده'},
+      {
+        'fieldKey': 'Astin Sade',
+        'controller': astinSade,
+        'label': 'آستین '
+            'ساده'
+      },
       {'fieldKey': 'Astin Kaf', 'controller': astinKaf, 'label': 'آستین کف'},
       {'fieldKey': 'yeghe', 'controller': yegha, 'label': 'یقه'},
       {'fieldKey': 'baghal', 'controller': baghal, 'label': 'بغل'},
@@ -83,8 +106,12 @@ class _OrderPageState extends State<OrderPage> {
       {'fieldKey': 'ghot', 'controller': ghot, 'label': 'قوت'},
       {'fieldKey': 'damAstin', 'controller': damAstin, 'label': 'دم آستین'},
       {'fieldKey': 'barAstin', 'controller': barAstin, 'label': 'بر آستین'},
-      {'fieldKey': 'jibShalwar', 'controller': jibShalwar, 'label': 'جیب '
-          'شلوار'},
+      {
+        'fieldKey': 'jibShalwar',
+        'controller': jibShalwar,
+        'label': 'جیب '
+            'شلوار'
+      },
       {'fieldKey': 'qadPuti', 'controller': ghadPuti, 'label': 'قد پوتی'},
       {'fieldKey': 'barShalwar', 'controller': barShalwar, 'label': 'بر شلوار'},
       {'fieldKey': 'fagh', 'controller': fagh, 'label': 'فاق'},
@@ -125,7 +152,6 @@ class _OrderPageState extends State<OrderPage> {
     };
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -134,114 +160,94 @@ class _OrderPageState extends State<OrderPage> {
       ),
       body: Center(
           child: Form(
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 15.0),
-                child: Wrap(
-                  alignment: WrapAlignment.center,
-                  children: [
-                    SizedBox(
-                        width: 300,
-                        child: Text(
-                          '${customer.firstName} ${customer.lastName}',
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                              fontSize: 30, fontWeight: FontWeight.bold),
-                        )),
-                    ...textFields.map((e) =>
-                        SizedBox(
-                          width: MediaQuery
-                              .of(context)
-                              .size
-                              .width * 33 / 100,
-                          child: CustomTextField(
-                              padding: const EdgeInsets.symmetric(vertical: 4,
-                                  horizontal:
-                                  1),
-                              fieldKey: e['fieldKey'] as String,
-                              txtEditingController: e['controller'] as
-                              TextEditingController,
-                              label: e['label'] as String,
-                              keyboardType: TextInputType.number),
-                        ),),
-                    Container(
-                      alignment: Alignment.center,
-                      height:  MediaQuery
-                          .of(context)
-                          .size
-                          .height * 10 / 100,
-                      color: AppColorsAndThemes.subPrimaryColor,
-                      margin: const EdgeInsets.symmetric(horizontal: 1),
-                      width: MediaQuery
-                        .of(context)
-                        .size
-                        .width * 33 / 100,
-                      child: const Text('test 200'),),
-
-                    SizedBox(
-                      width: MediaQuery
-                          .of(context)
-                          .size
-                          .width * 43 / 100,
-                      child: Consumer<OrderProvider>(
-                        builder: (context, orderProvider, _) =>
-                            TextButton
-                                .icon(
-                              onPressed: () =>
-                                  orderProvider
-                                      .pickRegisterDate(context),
-                              label: Text(orderProvider.getRegisterDate),
-                              icon: const Icon(Icons.date_range),
-                            ),
-                      ),
-                    ),
-                    Container(
-                      alignment: Alignment.center,
-                      margin: const EdgeInsets.only(right: 2),
-                      width: MediaQuery
-                          .of(context)
-                          .size
-                          .width * 54 / 100,
-                      child: Consumer<OrderProvider>(
-                        builder: (context, orderProvider, _) =>
-                            ElevatedButton.icon(
-                              onPressed: () =>
-                                  orderProvider.pickDeadline(context),
-                              label: const Text('pick a deadline'),
-                              icon: const Icon(Icons.date_range),
-                            ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 60),
-                    //Save Button
-                    Consumer<OrderProvider>(
-                      builder: (context, orderProvider, _) =>
-                          ElevatedButton
-                              .icon(
-                            onPressed: () {
-                              orderProvider.addNewOrder(
-                                context: context,
-                                customer: customer,
-                                orderId: widget.orderId,
-                                orderInfo: userMeasurements);
-                            },
-                            label: const Text('Save'),
-                            icon: const Icon(Icons.save),
-                          ),
-                    ),
-                    const SizedBox(width: 30,),
-                    ElevatedButton.icon(
-                      onPressed: () => Navigator.of(context).pop(
-                            RouteManager.orderPage),
-                      label: const Text('Cancel'),
-                      icon: const Icon(Icons.cancel_outlined),
-                    ),
-                  ],
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 15.0),
+            child: Wrap(
+              alignment: WrapAlignment.center,
+              children: [
+                SizedBox(
+                    width: 300,
+                    child: Text(
+                      '${customer.firstName} ${customer.lastName}',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                          fontSize: 30, fontWeight: FontWeight.bold),
+                    )),
+                ...textFields.map(
+                  (e) => SizedBox(
+                    width: MediaQuery.of(context).size.width * 33 / 100,
+                    child: CustomTextField(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 4, horizontal: 1),
+                        fieldKey: e['fieldKey'] as String,
+                        txtEditingController:
+                            e['controller'] as TextEditingController,
+                        label: e['label'] as String,
+                        keyboardType: TextInputType.number),
+                  ),
                 ),
-              ),
+                Container(
+                  alignment: Alignment.center,
+                  height: MediaQuery.of(context).size.height * 10 / 100,
+                  color: AppColorsAndThemes.subPrimaryColor,
+                  margin: const EdgeInsets.symmetric(horizontal: 1),
+                  width: MediaQuery.of(context).size.width * 33 / 100,
+                  child: const Text('test 200'),
+                ),
+
+                SizedBox(
+                  width: MediaQuery.of(context).size.width * 43 / 100,
+                  child: Consumer<OrderProvider>(
+                    builder: (context, orderProvider, _) => TextButton.icon(
+                      onPressed: () => orderProvider.pickRegisterDate(context),
+                      label: Text(orderProvider.getRegisterDate),
+                      icon: const Icon(Icons.date_range),
+                    ),
+                  ),
+                ),
+                Container(
+                  alignment: Alignment.center,
+                  margin: const EdgeInsets.only(right: 2),
+                  width: MediaQuery.of(context).size.width * 54 / 100,
+                  child: Consumer<OrderProvider>(
+                    builder: (context, orderProvider, _) => ElevatedButton.icon(
+                      onPressed: () => orderProvider.pickDeadline(context),
+                      label: const Text('pick a deadline'),
+                      icon: const Icon(Icons.date_range),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 60),
+                //Save Button
+                Consumer<OrderProvider>(
+                  builder: (context, orderProvider, _) => ElevatedButton.icon(
+                    onPressed: () {
+                      orderProvider.addNewOrder(
+                          context: context,
+                          customer: customer,
+                          orderId: widget.orderId,
+                          orderInfo: userMeasurements);
+                    },
+                    label: const Text('Save'),
+                    icon: const Icon(Icons.save),
+                  ),
+                ),
+                const SizedBox(
+                  width: 30,
+                ),
+                ElevatedButton.icon(
+                  onPressed: () =>
+                      Navigator.of(context).pop(RouteManager.orderPage),
+                  label: const Text('Cancel'),
+                  icon: const Icon(Icons.cancel_outlined),
+                ),
+              ],
             ),
-          )),
+          ),
+        ),
+      )),
     );
   }
 }

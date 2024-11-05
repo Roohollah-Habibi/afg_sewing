@@ -1,7 +1,6 @@
 import 'package:afg_sewing/models/customer.dart';
 import 'package:afg_sewing/models/order.dart';
 import 'package:afg_sewing/page_routing/rout_manager.dart';
-import 'package:afg_sewing/screens/reports.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
@@ -107,7 +106,7 @@ class OrderProvider extends ChangeNotifier {
       remainingMoney: setRemainingPrice(total, received),
     );
     await Customer.addNewOrder(
-        newOrder: newOrder, customerId: customer.id, replaceOrderId:orderId);
+        newOrder: newOrder, customerId: customer.id, replaceOrderId: orderId);
     _registerDate = DateFormat('yyyy-MM-dd').parse(_registerDateStr);
     _deadline = null;
     _swingBox.put('oi', _orderIdNew);
