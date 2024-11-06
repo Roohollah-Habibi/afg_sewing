@@ -304,7 +304,7 @@ class _AllOrderScreensState extends State<AllOrderScreens> {
                     RouteManager.orderPage,
                     arguments: {'customerId': customerId, 'orderId': orderId}),
                 child: Text(
-                  orderId.substring(orderId.length - 5),
+                  orderId,
                   style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 18,

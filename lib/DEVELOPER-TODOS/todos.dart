@@ -10,9 +10,11 @@
 //todo: add customer register date inside the customer profile
 //todo: check the customer deadline is WITHIN 2 days not Exactly 2 days
 //todo: 1- remember customer profile modification
-//todo:
-//todo:
-//todo:
+//
+//
+// todo: یادت باشه که تاریخ ثبت سفارش تاریخ روز است پس اگر یوزر دوروز بعد هم بخواهد تغییری در سفارش بیارد و ثبت کند تاریخ روز میگیرد در صورتی که باید تاریخ ثبت شده قبلی نمایش داده شود
+//todo: محاسبه الباقی پول در هنگام ثبت سفارش
+//todo:  نمایش رنگ سرخ برای دیدلاین در هنگام ثبت سفارش و نیز نمایش تاریخ ثبت شده
 //todo:
 //todo:
 //todo:

@@ -2,26 +2,31 @@ import 'package:afg_sewing/models/customer.dart';
 import 'package:afg_sewing/models/order.dart';
 import 'package:afg_sewing/page_routing/rout_manager.dart';
 import 'package:afg_sewing/screens/customers/add_customer_panel.dart';
+import 'package:afg_sewing/themes/app_colors_themes.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
+
+final Box swingBox = Hive.box('SwingDb');
 
 class CustomerProvider extends ChangeNotifier {
   //constructor initialize all orders
   CustomerProvider() {
     _initializeAllOrders();
   }
-  static const swingDbName = 'SwingDb';
+
   static const fieldKeyForName = 'name';
   static const fieldKeyForLast = 'last';
   static const fieldKeyForPhone = 'phone';
-  String? _selectedFilter = swingBox.get('filterValueKey');
-  static final Box swingBox = Hive.box(swingDbName);
-  bool _customerStatus = false;
   DateTime? _registerDate;
   final Map<String, bool> _errors = {};
-  List<Customer> _customerList = swingBox.values.whereType<Customer>().toList().cast<Customer>();
+  List<Customer> _customerList =
+      swingBox.values.whereType<Customer>().toList().cast<Customer>();
   List<Order> _customerOrders = [];
+  String _selectedFilter =
+      (swingBox.get('filterValueKey') as String?) ?? 'In Progress';
+
+  bool _customerStatus = false;
   final List<String> filterOptions = [
     'In Progress',
     'Swen NOT Delivered',
@@ -34,21 +39,31 @@ class CustomerProvider extends ChangeNotifier {
     'Sewn & Delivered',
   ];
 
-
-  void _initializeAllOrders(){
-    _customerOrders = _customerList.expand((element) => element.customerOrder).toList();
+  void _initializeAllOrders() {
+    _customerOrders =
+        _customerList.expand((element) => element.customerOrder).toList();
     notifyListeners();
   }
 
   // Getters
   List<Customer> get getCustomers => _customerList;
+
   List<Order> get getOrders => _customerOrders;
+
   bool getError(String field) => _errors[field] ?? false;
+
   String? get getSelectedFilter => _selectedFilter;
+
   DateTime? get showRegisterDate => _registerDate;
+
   bool get customerStatus => _customerStatus;
+
   // END OF GETTERS
   // ///////////////////////////////////////////////////////////////////////////////////////
+
+  // METHODS
+  // format date to show as String
+  String betterFormatedDate(DateTime dateTime) => '${dateTime.day}-${dateTime.month}-${dateTime.year}';
 
   void changeCustomerStatus(bool status) {
     _customerStatus = status;
@@ -184,7 +199,7 @@ class CustomerProvider extends ChangeNotifier {
 
 // DELETE AN EXISTING CUSTOMER
   Future<void> deleteCustomer(
-      {required BuildContext context, required Customer customer}) async{
+      {required BuildContext context, required Customer customer}) async {
     await swingBox.delete(customer.id);
     _customerList.removeWhere((element) => element == customer);
     notifyListeners();
@@ -202,8 +217,8 @@ class CustomerProvider extends ChangeNotifier {
     return order.deadLineDate.isAtSameMomentAs(today)
         ? justToday
         : order.deadLineDate.isBefore(today)
-        ? past
-        : normal;
+            ? past
+            : normal;
     notifyListeners();
   }
 
@@ -214,39 +229,49 @@ class CustomerProvider extends ChangeNotifier {
     return order.deadLineDate.isAtSameMomentAs(today)
         ? 17.5
         : order.deadLineDate.isBefore(today)
-        ? 17.5
-        : 16;
+            ? 17.5
+            : 16;
     notifyListeners();
   }
 
   // getting target customer out of list
-  Customer customer(String customerId){
-    return _customerList.firstWhere((foundCustomer) => foundCustomer.id == customerId);
-    notifyListeners();
+  Customer customer(String customerId) {
+    return _customerList
+        .firstWhere((foundCustomer) => foundCustomer.id == customerId);
   }
 
   // SHOW FILTER VALUES FOR DROPDOWN BUTTON
-  void filterValues({required String? value,required String customerId}) async {
+  void filterValues(
+      {required String? value, required String customerId}) async {
     switch (value) {
       case 'All':
         _customerOrders = customer(customerId).customerOrder;
         notifyListeners();
         break;
       case 'Swen NOT Delivered':
-        _customerOrders = customer(customerId).customerOrder.where(
-              (foundOrder) => foundOrder.isDone == true && foundOrder.isDelivered == false).toList();
+        _customerOrders = customer(customerId)
+            .customerOrder
+            .where((foundOrder) =>
+                foundOrder.isDone == true && foundOrder.isDelivered == false)
+            .toList();
         print('########S N D######## ${_customerOrders}');
         notifyListeners();
         break;
       case 'Sewn & Delivered':
-        _customerOrders = customer(customerId).customerOrder
-            .where((foundOrder) => foundOrder.isDelivered == true && foundOrder.isDone == true).toList();
+        _customerOrders = customer(customerId)
+            .customerOrder
+            .where((foundOrder) =>
+                foundOrder.isDelivered == true && foundOrder.isDone == true)
+            .toList();
         print('######## S  D ######## ${_customerOrders}');
         notifyListeners();
         break;
       case 'In Progress':
-        _customerOrders = customer(customerId).customerOrder.where((foundOrder) =>
-        foundOrder.isDone == false && foundOrder.isDelivered == false).toList();
+        _customerOrders = customer(customerId)
+            .customerOrder
+            .where((foundOrder) =>
+                foundOrder.isDone == false && foundOrder.isDelivered == false)
+            .toList();
         print('######## In Progress ######## ${_customerOrders}');
         notifyListeners();
         break;
@@ -254,49 +279,50 @@ class CustomerProvider extends ChangeNotifier {
   }
 
   // CHANGE THE ORDER STATUS [Swen NOT Delivered , Sewn & Delivered , In Progress]
-  void onChangeDropdownFilterValue({required String? newValue, required
-  String customerId}) async {
+  void onChangeFilterValue(
+      {required String? newValue, required String customerId}) async {
     if (newValue != null) {
-        _selectedFilter = newValue;
-        filterValues(value: newValue,customerId: customerId);
+      _selectedFilter = newValue;
+      filterValues(value: newValue, customerId: customerId);
       await swingBox.put('filterValueKey', newValue);
-    notifyListeners();
+      notifyListeners();
     }
   }
 
-  // filter in customer profile
-  List<PopupMenuEntry<String>> orderStatusSelection(
-      {required BuildContext context, required Order order,required String
-      customerId}) {
-    return [
-        PopupMenuItem<String>(
-            value: selectableOrderStatus[1],
-            onTap: () {
-              onChangeDropdownFilterValue(newValue: selectableOrderStatus[1],
-                customerId: customerId);
-             notifyListeners();
-            },
-            child: Text(selectableOrderStatus[1])),
-        PopupMenuItem<String>(
-          onTap: () {
-            onChangeDropdownFilterValue(newValue: selectableOrderStatus[2],
-                customerId: customerId);
-            notifyListeners();
-          },
-          value: selectableOrderStatus[2],
-          child: Text(selectableOrderStatus[2]),
-        ),
-        PopupMenuItem<String>(
-          onTap: () {
-            onChangeDropdownFilterValue(newValue: selectableOrderStatus[0],
-                customerId: customerId);
-            notifyListeners();
-          },
-          value: selectableOrderStatus[0],
-          child: Text(selectableOrderStatus[0]),
-        )
-      ];
-  }
+  // This METHOD MATCHED THE COLOR OF POPUPMENU CIRCLES WITH THE LEADING
+  // CIRCLE OF EACH CARD
+Color circleMatchWithPopupValueColor({required Order order}){
+  return (order.isDone && order.isDelivered) ? Colors.green.shade800 : (order
+       .isDone && !order.isDelivered) ? AppColorsAndThemes.secondaryColor : Colors.orange.shade700;
+  notifyListeners();
+}
 
+// ON ORDER POPUP
+  void onPopupMenu({required Order order,required String value,required
+  Customer customer}) async{
+      const String sewnNotDelivered = 'Sewn NOT delivered';
+      const String sewnAndDelivered = 'Sewn & delivered';
+      const String inProgress = 'In progress';
+    switch(value){
+      case sewnNotDelivered:
+        order.isDone = true;
+        order.isDelivered = false;
+        notifyListeners();
+        break;
+        case sewnAndDelivered:
+        order.isDone = true;
+        order.isDelivered = true;
+        notifyListeners();
+        break;
+        case inProgress:
+        order.isDone = false;
+        order.isDelivered = false;
+        notifyListeners();
+        break;
+    }
+      await Customer.addNewOrder(newOrder: order, customerId: customer.id,
+          replaceOrderId: order.id);
+    notifyListeners();
+  }
 
 }

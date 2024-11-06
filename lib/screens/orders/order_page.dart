@@ -2,6 +2,7 @@ import 'package:afg_sewing/custom_widgets/text_field.dart';
 import 'package:afg_sewing/models/customer.dart';
 import 'package:afg_sewing/models/order.dart';
 import 'package:afg_sewing/page_routing/rout_manager.dart';
+import 'package:afg_sewing/providers/customer_provider.dart';
 import 'package:afg_sewing/providers/order_provider.dart';
 import 'package:afg_sewing/themes/app_colors_themes.dart';
 import 'package:flutter/material.dart';
@@ -49,20 +50,18 @@ class _OrderPageState extends State<OrderPage> {
       received,
       remaining;
   late final List<Map<String, dynamic>> textFields;
-  late final Map<String, String> userMeasurements;
-  bool disableButton = false;
-  final Box swingBox = Hive.box(swingDb);
+   Map<String, String> _userData = {};
   late final Customer customer;
 
   @override
   void initState() {
     super.initState();
-    widget.orderId.isEmpty ? disableButton = false : disableButton = true;
-    customer = swingBox.get(widget.customerId);
+    customer = Provider.of<CustomerProvider>(context,listen: false).customer(widget.customerId);
     Order? foundOrder = widget.orderId.isEmpty
         ? null
-        : customer.customerOrder
-            .firstWhere((element) => element.id == widget.orderId);
+        : Provider.of<OrderProvider>(context,listen: false).order(customerId: widget.customerId, orderId: widget.orderId);
+    print('--------Order---- ${foundOrder?.id} - قد-- ${foundOrder?.qad}');
+    print('-------- CUSTOMER ---- ${customer.id} - =>-- ${customer.customerOrder}');
     ghad = TextEditingController(text: foundOrder?.qad ?? '');
     shane = TextEditingController(text: foundOrder?.shana ?? '');
     astinSade = TextEditingController(text: foundOrder?.astinSada ?? '');
@@ -87,18 +86,17 @@ class _OrderPageState extends State<OrderPage> {
     total = TextEditingController(text: foundOrder?.totalCost.toString() ?? '');
     received =
         TextEditingController(text: foundOrder?.receivedMoney.toString() ?? '');
-    remaining = TextEditingController(
-        text: foundOrder?.remainingMoney.toString() ?? '');
+    remaining = TextEditingController(text: foundOrder?.remainingMoney.toString() ?? '');
     textFields = [
       {'fieldKey': 'ghad', 'controller': ghad, 'label': 'قد'},
       {'fieldKey': 'shane', 'controller': shane, 'label': 'شانه'},
       {
-        'fieldKey': 'Astin Sade',
+        'fieldKey': 'astinSade',
         'controller': astinSade,
         'label': 'آستین '
             'ساده'
       },
-      {'fieldKey': 'Astin Kaf', 'controller': astinKaf, 'label': 'آستین کف'},
+      {'fieldKey': 'astinKaf', 'controller': astinKaf, 'label': 'آستین کف'},
       {'fieldKey': 'yeghe', 'controller': yegha, 'label': 'یقه'},
       {'fieldKey': 'baghal', 'controller': baghal, 'label': 'بغل'},
       {'fieldKey': 'shalwar', 'controller': shalwar, 'label': 'شلوار'},
@@ -112,142 +110,124 @@ class _OrderPageState extends State<OrderPage> {
         'label': 'جیب '
             'شلوار'
       },
-      {'fieldKey': 'qadPuti', 'controller': ghadPuti, 'label': 'قد پوتی'},
+      {'fieldKey': 'qhadPuti', 'controller': ghadPuti, 'label': 'قد پوتی'},
       {'fieldKey': 'barShalwar', 'controller': barShalwar, 'label': 'بر شلوار'},
       {'fieldKey': 'fagh', 'controller': fagh, 'label': 'فاق'},
       {'fieldKey': 'doorezano', 'controller': doorezano, 'label': 'دور زانو'},
       {'fieldKey': 'kaf', 'controller': kaf, 'label': 'کف'},
-      {'fieldKey': 'jibRoo', 'controller': jibroo, 'label': 'جیب رو'},
+      {'fieldKey': 'jibroo', 'controller': jibroo, 'label': 'جیب رو'},
       {'fieldKey': 'damanRast', 'controller': damanRast, 'label': 'دامن راست'},
       {'fieldKey': 'damanGerd', 'controller': damanGerd, 'label': 'دامن گرد'},
       {'fieldKey': 'model', 'controller': model, 'label': 'مدل'},
-      {'fieldKey': 'Total', 'controller': total, 'label': 'قیمت'},
+      {'fieldKey': 'total', 'controller': total, 'label': 'قیمت'},
       {'fieldKey': 'received', 'controller': received, 'label': 'رسیده'},
       // {'fieldKey': 'remaining', 'controller': remaining, 'label': 'باقی مانده'},
     ];
-    userMeasurements = {
-      'ghad': ghad.text,
-      'shane': shane.text,
-      'astinSade': astinSade.text,
-      'astinKaf': astinKaf.text,
-      'yegha': yegha.text,
-      'baghal': baghal.text,
-      'shalwar': shalwar.text,
-      'parche': parche.text,
-      'ghot': ghot.text,
-      'damAstin': damAstin.text,
-      'barAstin': barAstin.text,
-      'jibShalwar': jibShalwar.text,
-      'ghadPuti': ghadPuti.text,
-      'barShalwar': barShalwar.text,
-      'fagh': fagh.text,
-      'doorezano': doorezano.text,
-      'kaf': kaf.text,
-      'jibroo': jibroo.text,
-      'damanRast': damanRast.text,
-      'damanGerd': damanGerd.text,
-      'model': model.text,
-      'total': total.text,
-      'received': received.text,
-    };
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(disableButton ? 'Edit Order' : 'Order'),
+        title: const Text('Order'),
       ),
-      body: Center(
-          child: Form(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.only(bottom: 15.0),
-            child: Wrap(
-              alignment: WrapAlignment.center,
-              children: [
-                SizedBox(
-                    width: 300,
-                    child: Text(
-                      '${customer.firstName} ${customer.lastName}',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                          fontSize: 30, fontWeight: FontWeight.bold),
-                    )),
-                ...textFields.map(
-                  (e) => SizedBox(
-                    width: MediaQuery.of(context).size.width * 33 / 100,
-                    child: CustomTextField(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 4, horizontal: 1),
-                        fieldKey: e['fieldKey'] as String,
-                        txtEditingController:
-                            e['controller'] as TextEditingController,
-                        label: e['label'] as String,
-                        keyboardType: TextInputType.number),
-                  ),
-                ),
-                Container(
-                  alignment: Alignment.center,
-                  height: MediaQuery.of(context).size.height * 10 / 100,
-                  color: AppColorsAndThemes.subPrimaryColor,
-                  margin: const EdgeInsets.symmetric(horizontal: 1),
-                  width: MediaQuery.of(context).size.width * 33 / 100,
-                  child: const Text('test 200'),
-                ),
+      body: Builder(
+        builder: (context) {
+          final OrderProvider orderProvider = Provider.of<OrderProvider>(context);
+          final CustomerProvider customerProvider = Provider.of<CustomerProvider>(context);
+          return Center(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 15.0,top: 10),
+                  child: Wrap(
+                    alignment: WrapAlignment.center,
+                    children: [
+                      SizedBox(
+                          width: 300,
+                          child: Text(
+                            '${customer.firstName} ${customer.lastName}',
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                                fontSize: 30, fontWeight: FontWeight.bold),
+                          )),
+                      ...textFields.map(
+                        (textFieldsMap) => SizedBox(
+                          width: MediaQuery.of(context).size.width * 33 / 100,
+                          child: CustomTextField(
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 4, horizontal: 1),
+                              fieldKey: textFieldsMap['fieldKey'] as String,
+                              txtEditingController:
+                                  textFieldsMap['controller'] as TextEditingController,
+                              label: textFieldsMap['label'] as String,
+                              keyboardType: textFieldsMap['fieldKey'] as String == 'model' ? TextInputType.text: TextInputType.number),
+                        ),
+                      ),
+                      Container(
+                        alignment: Alignment.center,
+                        height: MediaQuery.of(context).size.height * 10 / 100,
+                        color: AppColorsAndThemes.subPrimaryColor,
+                        margin: const EdgeInsets.symmetric(horizontal: 1),
+                        width: MediaQuery.of(context).size.width * 33 / 100,
+                        child: const Text('test 200'),
+                      ),
 
-                SizedBox(
-                  width: MediaQuery.of(context).size.width * 43 / 100,
-                  child: Consumer<OrderProvider>(
-                    builder: (context, orderProvider, _) => TextButton.icon(
-                      onPressed: () => orderProvider.pickRegisterDate(context),
-                      label: Text(orderProvider.getRegisterDate),
-                      icon: const Icon(Icons.date_range),
-                    ),
-                  ),
-                ),
-                Container(
-                  alignment: Alignment.center,
-                  margin: const EdgeInsets.only(right: 2),
-                  width: MediaQuery.of(context).size.width * 54 / 100,
-                  child: Consumer<OrderProvider>(
-                    builder: (context, orderProvider, _) => ElevatedButton.icon(
-                      onPressed: () => orderProvider.pickDeadline(context),
-                      label: const Text('pick a deadline'),
-                      icon: const Icon(Icons.date_range),
-                    ),
-                  ),
-                ),
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width * 43 / 100,
+                        child: Consumer<OrderProvider>(
+                          builder: (context, orderProvider, _) => TextButton.icon(
+                            onPressed: () => orderProvider.pickRegisterDate(context),
+                            label: Text(orderProvider.getRegisterDate),
+                            icon: const Icon(Icons.date_range),
+                          ),
+                        ),
+                      ),
+                      Container(
+                        alignment: Alignment.center,
+                        margin: const EdgeInsets.only(right: 2),
+                        width: MediaQuery.of(context).size.width * 54 / 100,
+                        child: Consumer<OrderProvider>(
+                          builder: (context, orderProvider, _) => ElevatedButton.icon(
+                            onPressed: () => orderProvider.pickDeadline(context),
+                            label: const Text('pick a deadline'),
+                            icon: const Icon(Icons.date_range),
+                          ),
+                        ),
+                      ),
 
-                const SizedBox(height: 60),
-                //Save Button
-                Consumer<OrderProvider>(
-                  builder: (context, orderProvider, _) => ElevatedButton.icon(
-                    onPressed: () {
-                      orderProvider.addNewOrder(
-                          context: context,
-                          customer: customer,
-                          orderId: widget.orderId,
-                          orderInfo: userMeasurements);
-                    },
-                    label: const Text('Save'),
-                    icon: const Icon(Icons.save),
+                      const SizedBox(height: 60),
+                      //Save Button
+
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            for(var map  in textFields){
+                              _userData[map['fieldKey']] = (map['controller'] as TextEditingController).text;
+                            }
+                            print('******* $_userData');
+                            orderProvider.addNewOrder(
+                                context: context,
+                                customer: customerProvider.customer(widget.customerId),
+                                orderId: widget.orderId,
+                                orderInfo: _userData);
+                          },
+                          label: const Text('Save'),
+                          icon: const Icon(Icons.save),
+                        ),
+                      const SizedBox(
+                        width: 30,
+                      ),
+                      ElevatedButton.icon(
+                        onPressed: () =>
+                            Navigator.of(context).pop(RouteManager.orderPage),
+                        label: const Text('Cancel'),
+                        icon: const Icon(Icons.cancel_outlined),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(
-                  width: 30,
-                ),
-                ElevatedButton.icon(
-                  onPressed: () =>
-                      Navigator.of(context).pop(RouteManager.orderPage),
-                  label: const Text('Cancel'),
-                  icon: const Icon(Icons.cancel_outlined),
-                ),
-              ],
-            ),
-          ),
-        ),
-      )),
+              ));
+        }
+      ),
     );
   }
 }

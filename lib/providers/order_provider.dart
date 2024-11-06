@@ -10,11 +10,13 @@ final Box _swingBox = Hive.box('SwingDb');
 
 class OrderProvider extends ChangeNotifier {
   static int _orderIdNew = (_swingBox.get('oi') as int?) ?? 0;
+  List<Customer> customers =
+      _swingBox.values.whereType<Customer>().cast<Customer>().toList();
   int _remainingPrice = 0;
   DateTime? _deadline;
   DateTime _registerDate = DateFormat('yyyy-MM-dd').parse(_registerDateStr);
 
-// getters
+// GETTERS ===================================================
   int get getRemainingPrice => _remainingPrice;
 
   String get getRegisterDate =>
@@ -22,6 +24,18 @@ class OrderProvider extends ChangeNotifier {
 
   String get getDeadline =>
       '${_deadline?.day}-${_deadline?.month}-${_deadline?.year}';
+
+  // METHODS ======================================================
+  /*
+final foundOrder = customer.customerOrder.firstWhere( (foundOrder) => foundOrder.id == orderId, orElse: () => null, );
+   */
+  Order? order({required String customerId, required String orderId}) {
+    final targetCustomer =
+        customers.firstWhere((foundCustomer) => foundCustomer.id == customerId);
+    return targetCustomer.customerOrder.firstWhere(
+        (foundOrder) => foundOrder.id == orderId);
+    notifyListeners();
+  }
 
 // setting remaining money
   int setRemainingPrice(double total, double received) {
@@ -69,6 +83,7 @@ class OrderProvider extends ChangeNotifier {
       ));
       return;
     }
+    print('++++++++++++++++++ ${orderInfo}');
     double total = double.tryParse(orderInfo['total'] as String) ?? 0;
     double received = double.tryParse(orderInfo['received'] as String) ?? 0;
     final String deadLineStr = DateFormat('yyyy-MM-dd').format(_deadline!);
@@ -81,26 +96,26 @@ class OrderProvider extends ChangeNotifier {
       registeredDate: _registerDate,
       deadLineDate: _deadline!,
       qad: orderInfo['ghad'] as String,
-      shana: orderInfo['shane']!,
-      astinSada: orderInfo['astinSade']!,
-      astinKaf: orderInfo['astinKaf']!,
-      yeqa: orderInfo['yegha']!,
-      beghal: orderInfo['baghal']!,
-      shalwar: orderInfo['shalwar']!,
-      parcha: orderInfo['parche']!,
-      qout: orderInfo['ghot']!,
-      damAstin: orderInfo['damAstin']!,
-      barAstin: orderInfo['barAstin']!,
-      jibShalwar: orderInfo['jibShalwar']!,
-      qadPuti: orderInfo['ghadPuti']!,
-      barShalwar: orderInfo['barShalwar']!,
-      faq: orderInfo['fagh']!,
-      doorezano: orderInfo['doorezano']!,
-      kaf: orderInfo['kaf']!,
-      jibRoo: orderInfo['jibroo']!,
-      damanRast: orderInfo['damanRast']!,
-      damanGerd: orderInfo['damanGerd']!,
-      model: orderInfo['model']!,
+      shana: orderInfo['shane'] as String,
+      astinSada: orderInfo['astinSade'] as String,
+      astinKaf: orderInfo['astinKaf'] as String,
+      yeqa: orderInfo['yeghe'] as String,
+      beghal: orderInfo['baghal'] as String,
+      shalwar: orderInfo['shalwar'] as String,
+      parcha: orderInfo['parche'] as String,
+      qout: orderInfo['ghot'] as String,
+      damAstin: orderInfo['damAstin'] as String,
+      barAstin: orderInfo['barAstin'] as String,
+      jibShalwar: orderInfo['jibShalwar'] as String,
+      qadPuti: orderInfo['qhadPuti'] as String,
+      barShalwar: orderInfo['barShalwar'] as String,
+      faq: orderInfo['fagh'] as String,
+      doorezano: orderInfo['doorezano'] as String,
+      kaf: orderInfo['kaf'] as String,
+      jibRoo: orderInfo['jibroo'] as String,
+      damanRast: orderInfo['damanRast'] as String,
+      damanGerd: orderInfo['damanGerd'] as String,
+      model: orderInfo['model'] as String,
       totalCost: total.toInt(),
       receivedMoney: received.toInt(),
       remainingMoney: setRemainingPrice(total, received),
@@ -114,5 +129,6 @@ class OrderProvider extends ChangeNotifier {
     if (context.mounted) {
       Navigator.of(context).pop(RouteManager.orderPage);
     }
+    notifyListeners();
   }
 }
