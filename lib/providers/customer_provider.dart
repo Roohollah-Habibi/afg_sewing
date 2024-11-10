@@ -7,24 +7,33 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 
-final Box swingBox = Hive.box('SwingDb');
+final Box _swingBox = Hive.box('SwingDb');
 
 class CustomerProvider extends ChangeNotifier {
   //constructor initialize all orders
   CustomerProvider() {
-    _initializeAllOrders();
+    _orderRegister = formatMyDate(myDate: DateTime.now()) as DateTime;
   }
 
   static const fieldKeyForName = 'name';
   static const fieldKeyForLast = 'last';
   static const fieldKeyForPhone = 'phone';
+  static int _orderIdNew = (_swingBox.get('oi') as int?) ?? 0;
+  Color _deadlineOrderColor = AppColorsAndThemes.secondaryColor;
+  int _orderRemainingPrice = 0;
+  Map<String, String> _orderTimeMap = {};
+
+  late DateTime _orderRegister; //=> this is valued in constructor
+  DateTime? _orderDeadline;
+
   DateTime? _registerDate;
   final Map<String, bool> _errors = {};
+
   List<Customer> _customerList =
-      swingBox.values.whereType<Customer>().toList().cast<Customer>();
+      _swingBox.values.whereType<Customer>().toList().cast<Customer>();
   List<Order> _customerOrders = [];
   String _selectedFilter =
-      (swingBox.get('filterValueKey') as String?) ?? 'In Progress';
+      (_swingBox.get('filterValueKey') as String?) ?? 'In Progress';
 
   bool _customerStatus = false;
   final List<String> filterOptions = [
@@ -39,16 +48,26 @@ class CustomerProvider extends ChangeNotifier {
     'Sewn & Delivered',
   ];
 
-  void _initializeAllOrders() {
-    _customerOrders =
-        _customerList.expand((element) => element.customerOrder).toList();
+  void initializeCustomerOrders({required String customerId}) {
+    final Customer targetCustomer = customer(customerId);
+    _customerOrders = targetCustomer.customerOrder;
     notifyListeners();
   }
 
-  // Getters
+  // Getters ====================================================================
   List<Customer> get getCustomers => _customerList;
 
+  Color get getDeadlineOrderColor => _deadlineOrderColor;
+
+  DateTime? get getOrderRegister => _orderRegister;
+
+  DateTime? get getOrderDeadline => _orderDeadline;
+
   List<Order> get getOrders => _customerOrders;
+
+  Map<String, String> get getOrderTimeMap => _orderTimeMap;
+
+  int get getOrderRemainingPrice => _orderRemainingPrice;
 
   bool getError(String field) => _errors[field] ?? false;
 
@@ -58,12 +77,189 @@ class CustomerProvider extends ChangeNotifier {
 
   bool get customerStatus => _customerStatus;
 
-  // END OF GETTERS
-  // ///////////////////////////////////////////////////////////////////////////////////////
+  // METHODS ========================================================================
+  // This method is to get an order id and show the deadline as a formatted String to the user
 
-  // METHODS
+  void setOrderDeadline({
+    required String orderId,
+  }) {
+    if (orderId.isNotEmpty) {
+      final order = Order.fromId(orderId: orderId);
+      _orderTimeMap['register'] =
+          formatMyDate(myDate: order.registeredDate, returnAsDate: false)
+              as String;
+      _orderTimeMap['deadline'] =
+          formatMyDate(myDate: order.deadLineDate, returnAsDate: false)
+              as String;
+      changeDeadlineColor(changeRed: false);
+    } else {
+      _orderTimeMap['register'] =
+          formatMyDate(myDate: _orderRegister, returnAsDate: false) as String;
+      _orderTimeMap['deadline'] = 'Pick a deadline';
+    }
+    notifyListeners();
+  }
+
+  Order foundOrder({required String orderId}) {
+    return Order.fromId(orderId: orderId);
+  }
+
+  // setting remaining money
+  int setRemainingPrice(double total, double received) {
+    _orderRemainingPrice = total.toInt() - received.toInt();
+    notifyListeners();
+    return _orderRemainingPrice;
+  }
+
+  // TO CHANGE THE COLOR OF THE DEADLINE WHEN SELECTED OR NOT
+  void changeDeadlineColor({required bool changeRed}) {
+    if (changeRed) {
+      _deadlineOrderColor = Colors.red.shade900;
+      notifyListeners();
+    } else {
+      print('CHage color');
+      _deadlineOrderColor = AppColorsAndThemes.secondaryColor;
+      notifyListeners();
+    }
+  }
+
+  // pick register date
+  Future<void> pickRegisterDate(BuildContext context) async {
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: formatMyDate(myDate: DateTime.now()) as DateTime,
+      firstDate: DateTime(2000), // Set the earliest date
+      lastDate: DateTime(2100), // Set the latest date
+    );
+    if (pickedDate != null) {
+      _orderRegister =
+          formatMyDate(myDate: pickedDate, returnAsDate: true) as DateTime;
+      _orderTimeMap['register'] =
+          formatMyDate(myDate: pickedDate, returnAsDate: false) as String;
+      notifyListeners();
+    }
+  }
+
+  // pick deadline
+  Future<void> pickDeadline(BuildContext context) async {
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: formatMyDate(myDate: DateTime.now()) as DateTime,
+      firstDate: DateTime(2000), // Set the earliest date
+      lastDate: DateTime(2100), // Set the latest date
+    );
+    if (pickedDate != null) {
+      _orderDeadline =
+          formatMyDate(myDate: pickedDate, returnAsDate: true) as DateTime;
+      _orderTimeMap['deadline'] =
+          formatMyDate(myDate: pickedDate, returnAsDate: false) as String;
+      changeDeadlineColor(changeRed: false);
+      notifyListeners();
+    }
+  }
+
+  void setOrderTimes({required String orderId}) {
+    if (orderId.isEmpty) {
+      return;
+    }
+    final Order order = Order.fromId(orderId: orderId);
+    _orderRegister = order.registeredDate;
+    _orderDeadline = order.deadLineDate;
+    _orderTimeMap['register'] =
+        formatMyDate(myDate: _orderRegister, returnAsDate: false) as String;
+    _orderTimeMap['deadline'] = formatMyDate(
+            myDate: _orderDeadline!, returnAsDate: false)
+        as String; // if this runs error try order.deadline instead of _orderDeadline!
+
+  }
+
+  // This method is to get a date and return a formatted date just to make the future codes more cleaner LIKE 2024-01-21 - 00:00:00
+  dynamic formatMyDate({required DateTime? myDate, bool returnAsDate = true}) {
+    if (myDate == null) {
+      _orderTimeMap['deadline'] = 'Pick a deadline';
+      notifyListeners();
+      return;
+    }
+    final String dateStr = DateFormat('yyyy-MM-dd').format(myDate!);
+    DateTime myTime = DateFormat('yyyy-MM-dd').parse(dateStr);
+    return returnAsDate
+        ? myTime
+        : '${myTime.day}-${myTime.month}-${myTime.year}';
+  }
+
+  // ADD NEW ORDER TO THE TARGET CUSTOMER
+  Future<void> saveNewOrder(
+      {required BuildContext context,
+      required Map<String, String> orderInfo,
+      required Customer customer,
+      required String orderId}) async {
+    print('===== SAVE NEW ORDER= CUSTOMER PROVIDER === $_orderTimeMap');
+    print('SAVE NEW ORDER= CUSTOMER PROVIDER === $_orderDeadline');
+    if (_orderDeadline == null) {
+      changeDeadlineColor(changeRed: true);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          duration: Duration(milliseconds: 1000),
+          content: Text('Pick a deadline date'),
+        ),
+      );
+      return;
+    }
+
+    double total = double.tryParse(orderInfo['total'] as String) ?? 0;
+    double received = double.tryParse(orderInfo['received'] as String) ?? 0;
+
+    print('CustomerProvider ==> Reg: ${_registerDate}');
+    print('CustomerProvider ==> Reg: ${_orderDeadline}');
+    final Order newOrder = Order(
+      customerId: customer.id,
+      id: orderId.isEmpty ? '${_orderIdNew++}'.toString() : orderId,
+      isDone: false,
+      isDelivered: false,
+      registeredDate: formatMyDate(myDate: _orderRegister) as DateTime,
+      deadLineDate: formatMyDate(myDate: _orderDeadline!) as DateTime,
+      qad: orderInfo['ghad'] as String,
+      shana: orderInfo['shane'] as String,
+      astinSada: orderInfo['astinSade'] as String,
+      astinKaf: orderInfo['astinKaf'] as String,
+      yeqa: orderInfo['yeghe'] as String,
+      beghal: orderInfo['baghal'] as String,
+      shalwar: orderInfo['shalwar'] as String,
+      parcha: orderInfo['parche'] as String,
+      qout: orderInfo['ghot'] as String,
+      damAstin: orderInfo['damAstin'] as String,
+      barAstin: orderInfo['barAstin'] as String,
+      jibShalwar: orderInfo['jibShalwar'] as String,
+      qadPuti: orderInfo['qhadPuti'] as String,
+      barShalwar: orderInfo['barShalwar'] as String,
+      faq: orderInfo['fagh'] as String,
+      doorezano: orderInfo['doorezano'] as String,
+      kaf: orderInfo['kaf'] as String,
+      jibRoo: orderInfo['jibroo'] as String,
+      damanRast: orderInfo['damanRast'] as String,
+      damanGerd: orderInfo['damanGerd'] as String,
+      model: orderInfo['model'] as String,
+      totalCost: total.toInt(),
+      receivedMoney: received.toInt(),
+      remainingMoney: setRemainingPrice(total, received),
+    );
+    await Customer.addNewOrder(
+        newOrder: newOrder, customerId: customer.id, replaceOrderId: orderId);
+    _swingBox.put('oi', _orderIdNew);
+    _orderTimeMap = {};
+    _orderRegister = DateTime.now();
+    _orderDeadline = null;
+    notifyListeners();
+    if (context.mounted) {
+      Navigator.of(context).pop(RouteManager.orderPage);
+    }
+    notifyListeners();
+  }
+
   // format date to show as String
-  String betterFormatedDate(DateTime dateTime) => '${dateTime.day}-${dateTime.month}-${dateTime.year}';
+  String betterFormatedDate(DateTime dateTime) {
+    return '${dateTime.day}-${dateTime.month}-${dateTime.year}';
+  }
 
   void changeCustomerStatus(bool status) {
     _customerStatus = status;
@@ -163,9 +359,9 @@ class CustomerProvider extends ChangeNotifier {
         phoneNumber2: '07$phoneTwo',
         customerOrder: customer != null ? customer.customerOrder : [],
         status: customerStatus);
-    await swingBox.put(newCustomer.id, newCustomer);
+    await _swingBox.put(newCustomer.id, newCustomer);
     _customerList =
-        swingBox.values.whereType<Customer>().cast<Customer>().toList();
+        _swingBox.values.whereType<Customer>().cast<Customer>().toList();
     notifyListeners();
     for (Customer cc in _customerList) {
       print('Name: ${cc.firstName} \t ${cc.status}');
@@ -200,7 +396,7 @@ class CustomerProvider extends ChangeNotifier {
 // DELETE AN EXISTING CUSTOMER
   Future<void> deleteCustomer(
       {required BuildContext context, required Customer customer}) async {
-    await swingBox.delete(customer.id);
+    await _swingBox.delete(customer.id);
     _customerList.removeWhere((element) => element == customer);
     notifyListeners();
     if (context.mounted) {
@@ -284,45 +480,49 @@ class CustomerProvider extends ChangeNotifier {
     if (newValue != null) {
       _selectedFilter = newValue;
       filterValues(value: newValue, customerId: customerId);
-      await swingBox.put('filterValueKey', newValue);
+      await _swingBox.put('filterValueKey', newValue);
       notifyListeners();
     }
   }
 
   // This METHOD MATCHED THE COLOR OF POPUPMENU CIRCLES WITH THE LEADING
   // CIRCLE OF EACH CARD
-Color circleMatchWithPopupValueColor({required Order order}){
-  return (order.isDone && order.isDelivered) ? Colors.green.shade800 : (order
-       .isDone && !order.isDelivered) ? AppColorsAndThemes.secondaryColor : Colors.orange.shade700;
-  notifyListeners();
-}
+  Color circleMatchWithPopupValueColor({required Order order}) {
+    return (order.isDone && order.isDelivered)
+        ? Colors.green.shade800
+        : (order.isDone && !order.isDelivered)
+            ? AppColorsAndThemes.secondaryColor
+            : Colors.orange.shade700;
+    notifyListeners();
+  }
 
 // ON ORDER POPUP
-  void onPopupMenu({required Order order,required String value,required
-  Customer customer}) async{
-      const String sewnNotDelivered = 'Sewn NOT delivered';
-      const String sewnAndDelivered = 'Sewn & delivered';
-      const String inProgress = 'In progress';
-    switch(value){
+  void onPopupMenu(
+      {required Order order,
+      required String value,
+      required Customer customer}) async {
+    const String sewnNotDelivered = 'Sewn NOT delivered';
+    const String sewnAndDelivered = 'Sewn & delivered';
+    const String inProgress = 'In progress';
+    switch (value) {
       case sewnNotDelivered:
         order.isDone = true;
         order.isDelivered = false;
         notifyListeners();
         break;
-        case sewnAndDelivered:
+      case sewnAndDelivered:
         order.isDone = true;
         order.isDelivered = true;
         notifyListeners();
         break;
-        case inProgress:
+      case inProgress:
         order.isDone = false;
         order.isDelivered = false;
         notifyListeners();
         break;
     }
-      await Customer.addNewOrder(newOrder: order, customerId: customer.id,
-          replaceOrderId: order.id);
+    await Customer.addNewOrder(
+        newOrder: order, customerId: customer.id, replaceOrderId: order.id);
     notifyListeners();
   }
-
 }

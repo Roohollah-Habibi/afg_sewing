@@ -33,6 +33,7 @@ class _CustomerProfileState extends State<CustomerProfile> {
         onPressed: () {
           Navigator.of(context).pushNamed(RouteManager.orderPage,
               arguments: {'customerId': widget.customerId, 'orderId': ''});
+          Provider.of<CustomerProvider>(context,listen: false).setOrderTimes(orderId: '');
         },
         label: const Text('New Order'),
         icon: const Icon(Icons.add),
@@ -101,26 +102,21 @@ class _CustomerProfileState extends State<CustomerProfile> {
                 const Divider(),
                 Expanded(
                   child: Center(
-                    child: customerProvider.getOrders.isEmpty
+                    child: customerProvider.customer(widget.customerId).customerOrder.isEmpty
                         ? Text(
                             textAlign: TextAlign.center,
                             'No available Order for ${customerProvider.customer(widget.customerId).firstName} to '
                             'this filter option')
                         : ListView.builder(
-                            itemCount: customerProvider
-                                .customer(widget.customerId)
-                                .customerOrder
-                                .length,
+                            itemCount: customerProvider.customer(widget.customerId).customerOrder.length,
                             itemBuilder: (context, index) {
-                              Order order = customerProvider
-                                  .customer(widget.customerId)
-                                  .customerOrder[index];
-                              String betterFormatedRegisteredDate =
-                                  customerProvider
-                                      .betterFormatedDate(order.registeredDate);
-                              String betterFormatedDeadlineDate =
-                                  customerProvider
-                                      .betterFormatedDate(order.deadLineDate);
+                              Order targetOrder = customerProvider.customer(widget.customerId).customerOrder[index];
+                              print('######## CUSTOMER PROFILE Reg ===> ${targetOrder.registeredDate}');
+                              print('######## CUSTOMER PROFILE Dead ===> ${targetOrder.deadLineDate}');
+                              String registerStr = customerProvider.betterFormatedDate(targetOrder.registeredDate);
+                              String deadlineStr = customerProvider.betterFormatedDate(targetOrder.deadLineDate);
+                              print('-------- $registerStr');
+                              print('-------- $deadlineStr');
                               //             return Dismissible(
                               //               key: Key(order.id),
                               //               onDismissed: (direction) {
@@ -193,10 +189,10 @@ class _CustomerProfileState extends State<CustomerProfile> {
                               //               direction: DismissDirection.endToStart,
                               //               child:
                               return buildCardListView(
-                                order: order,
+                                order: targetOrder,
                                 provider: customerProvider,
-                                registerDate: betterFormatedRegisteredDate,
-                                deadline: betterFormatedDeadlineDate,
+                                registerDate: registerStr,
+                                deadline: deadlineStr,
                                 // popUp: Icon(Icons.phone_android)
                               );
                               //                     Card(
@@ -299,8 +295,12 @@ class _CustomerProfileState extends State<CustomerProfile> {
       elevation: 5,
       shadowColor: AppColorsAndThemes.secondaryColor,
       child: ListTile(
-        onTap: () => Navigator.of(context).pushNamed(RouteManager.orderPage,
-            arguments: {'customerId': widget.customerId, 'orderId': order.id}),
+        onTap: () {
+          Navigator.of(context).pushNamed(RouteManager.orderPage,
+            arguments: {'customerId': widget.customerId, 'orderId': order.id});
+          provider.setOrderDeadline(orderId: order.id);
+        },
+
         leading: Icon(
           Icons.circle,
           color: provider.circleMatchWithPopupValueColor(order: order),

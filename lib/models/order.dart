@@ -1,6 +1,7 @@
 import 'package:afg_sewing/models/customer.dart';
 import 'package:equatable/equatable.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
 part 'order.g.dart';
@@ -130,19 +131,60 @@ class Order extends HiveObject with EquatableMixin {
     required this.remainingMoney,
   });
 
-  factory Order.fromId({required String orderId}){
+  // This method is to get a date and return a formatted date just to make the future codes more cleaner LIKE 2024-01-21 - 00:00:00
+  // static dynamic formatMyDate({required DateTime myDate,bool returnAsDate = true}) {
+  //   final String dateStr = DateFormat('yyyy-MM-dd').format(myDate);
+  //   DateTime myTime = DateFormat('yyyy-MM-dd').parse(dateStr);
+  //   return returnAsDate ? myTime : '${myTime.day}-${myTime.month}-${myTime.year}';
+  //
+  // }
+
+  // factory Order.emptyOrder(
+  //     {required String customerId}) {
+  //   return Order(
+  //       id: '',
+  //       customerId: customerId,
+  //       registeredDate: formatMyDate(myDate: DateTime.now(),returnAsDate: true) as DateTime,
+  //       deadLineDate: formatMyDate(myDate: DateTime.now(),returnAsDate: true) as DateTime,
+  //       qad: '',
+  //       shana: '',
+  //       astinSada: '',
+  //       astinKaf: '',
+  //       yeqa: '',
+  //       beghal: '',
+  //       shalwar: '',
+  //       parcha: '',
+  //       qout: '',
+  //       damAstin: '',
+  //       barAstin: '',
+  //       jibShalwar: '',
+  //       qadPuti: '',
+  //       barShalwar: '',
+  //       faq: '',
+  //       doorezano: '',
+  //       kaf: '',
+  //       jibRoo: '',
+  //       damanRast: '',
+  //       damanGerd: '',
+  //       model: '',
+  //       totalCost: 0,
+  //       receivedMoney: 0,
+  //       remainingMoney: 0);
+  // }
+
+  factory Order.fromId({required String orderId}) {
     late Order foundOrder;
     if (Hive.isBoxOpen(swingDb)) {
       final Box swingBox = Hive.box(swingDb);
-      List<Customer> customers = swingBox.values.whereType<Customer>()
-          .toList()
-          .cast<Customer>();
+      List<Customer> customers =
+      swingBox.values.whereType<Customer>().toList().cast<Customer>();
       List<Order> orderList = [
-        for(var order in customers)...order.customerOrder
+        for (var order in customers) ...order.customerOrder
       ];
       foundOrder = orderList.firstWhere((element) => element.id == orderId,);
     }
-    return Order(id: orderId,
+    return Order(
+        id: orderId,
         customerId: foundOrder.customerId,
         registeredDate: foundOrder.registeredDate,
         deadLineDate: foundOrder.deadLineDate,
@@ -177,5 +219,4 @@ class Order extends HiveObject with EquatableMixin {
 
   @override
   bool? get stringify => true;
-
 }
