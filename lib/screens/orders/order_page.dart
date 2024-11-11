@@ -12,8 +12,6 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
-const swingDb = 'SwingDb';
-
 class OrderPage extends StatefulWidget {
   final String customerId;
   final String orderId;
@@ -53,42 +51,40 @@ class _OrderPageState extends State<OrderPage> {
   final Map<String, String> _userData = {};
   List<Map<String, dynamic>> _textFields = [];
   late final Customer customer;
-  late Order? foundOrder;
+  late Order foundOrder;
 
   @override
   void initState() {
     super.initState();
-        Provider.of<CustomerProvider>(context, listen: false)
-            .setOrderTimes(orderId: widget.orderId);
-    customer = Provider.of<CustomerProvider>(context, listen: false)
-        .customer(widget.customerId);
-    foundOrder = Provider.of<OrderProvider>(context, listen: false)
-        .order(orderId: widget.orderId);
-    ghad = TextEditingController(text: foundOrder?.qad ?? '');
-    shane = TextEditingController(text: foundOrder?.shana ?? '');
-    astinSade = TextEditingController(text: foundOrder?.astinSada ?? '');
-    astinKaf = TextEditingController(text: foundOrder?.astinKaf ?? '');
-    yegha = TextEditingController(text: foundOrder?.yeqa ?? '');
-    baghal = TextEditingController(text: foundOrder?.beghal ?? '');
-    shalwar = TextEditingController(text: foundOrder?.shalwar ?? '');
-    parche = TextEditingController(text: foundOrder?.parcha ?? '');
-    ghot = TextEditingController(text: foundOrder?.qout ?? '');
-    damAstin = TextEditingController(text: foundOrder?.damAstin ?? '');
-    barAstin = TextEditingController(text: foundOrder?.barAstin ?? '');
-    jibShalwar = TextEditingController(text: foundOrder?.jibShalwar ?? '');
-    ghadPuti = TextEditingController(text: foundOrder?.qadPuti ?? '');
-    barShalwar = TextEditingController(text: foundOrder?.barShalwar ?? '');
-    fagh = TextEditingController(text: foundOrder?.faq ?? '');
-    doorezano = TextEditingController(text: foundOrder?.doorezano ?? '');
-    kaf = TextEditingController(text: foundOrder?.kaf ?? '');
-    jibroo = TextEditingController(text: foundOrder?.jibRoo ?? '');
-    damanRast = TextEditingController(text: foundOrder?.damanRast ?? '');
-    damanGerd = TextEditingController(text: foundOrder?.damanGerd ?? '');
-    model = TextEditingController(text: foundOrder?.model ?? '');
+    foundOrder =
+        Order.fromId(orderId: widget.orderId, customerId: widget.customerId);
+    customer = Provider.of<CustomerProvider>(context, listen: false).customer(
+        widget.customerId);
+    ghad = TextEditingController(text: foundOrder.qad);
+    shane = TextEditingController(text: foundOrder.shana);
+    astinSade = TextEditingController(text: foundOrder.astinSada);
+    astinKaf = TextEditingController(text: foundOrder.astinKaf);
+    yegha = TextEditingController(text: foundOrder.yeqa);
+    baghal = TextEditingController(text: foundOrder.beghal);
+    shalwar = TextEditingController(text: foundOrder.shalwar);
+    parche = TextEditingController(text: foundOrder.parcha);
+    ghot = TextEditingController(text: foundOrder.qout);
+    damAstin = TextEditingController(text: foundOrder.damAstin);
+    barAstin = TextEditingController(text: foundOrder.barAstin);
+    jibShalwar = TextEditingController(text: foundOrder.jibShalwar);
+    ghadPuti = TextEditingController(text: foundOrder.qadPuti);
+    barShalwar = TextEditingController(text: foundOrder.barShalwar);
+    fagh = TextEditingController(text: foundOrder.faq);
+    doorezano = TextEditingController(text: foundOrder.doorezano);
+    kaf = TextEditingController(text: foundOrder.kaf);
+    jibroo = TextEditingController(text: foundOrder.jibRoo);
+    damanRast = TextEditingController(text: foundOrder.damanRast);
+    damanGerd = TextEditingController(text: foundOrder.damanGerd);
+    model = TextEditingController(text: foundOrder.model);
     total =
-        TextEditingController(text: foundOrder?.totalCost.toString() ?? '0');
+        TextEditingController(text: foundOrder.totalCost.toString() ?? '0');
     received = TextEditingController(
-        text: foundOrder?.receivedMoney.toString() ?? '0');
+        text: foundOrder.receivedMoney.toString() ?? '0');
     // remaining = TextEditingController(text: foundOrder?.remainingMoney.toString() ?? '');
     _textFields = [
       {'fieldKey': 'ghad', 'controller': ghad, 'label': 'قد'},
@@ -124,122 +120,149 @@ class _OrderPageState extends State<OrderPage> {
       {'fieldKey': 'model', 'controller': model, 'label': 'مدل'},
       {'fieldKey': 'total', 'controller': total, 'label': 'قیمت'},
       {'fieldKey': 'received', 'controller': received, 'label': 'رسیده'},
-      // {'fieldKey': 'remaining', 'controller': remaining, 'label': 'باقی مانده'},
     ];
   }
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Order'),
       ),
       body: Builder(builder: (context) {
         final CustomerProvider customerProvider =
-            Provider.of<CustomerProvider>(context);
+        Provider.of<CustomerProvider>(context);
         print('OOOOOODEr BUILDER: ${customerProvider.getOrderTimeMap}');
         return Center(
             child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.only(bottom: 15.0, top: 10),
-            child: Wrap(
-              alignment: WrapAlignment.center,
-              children: [
-                SizedBox(
-                  width: 300,
-                  child: Text(
-                    '${customerProvider.customer(widget.customerId).firstName} ${customerProvider.customer(widget.customerId).lastName}',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                        fontSize: 30, fontWeight: FontWeight.bold),
-                  ),
-                ),
-                ..._textFields.map(
-                  (textFieldsMap) => SizedBox(
-                    width: MediaQuery.of(context).size.width * 33 / 100,
-                    child: CustomTextField(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 4, horizontal: 1),
-                        fieldKey: textFieldsMap['fieldKey'] as String,
-                        txtEditingController: textFieldsMap['controller']
-                            as TextEditingController,
-                        label: textFieldsMap['label'] as String,
-                        keyboardType:
-                            textFieldsMap['fieldKey'] as String == 'model'
-                                ? TextInputType.text
-                                : TextInputType.number),
-                  ),
-                ),
-                Container(
-                  alignment: Alignment.center,
-                  height: MediaQuery.of(context).size.height * 10 / 100,
-                  color: AppColorsAndThemes.subPrimaryColor,
-                  margin: const EdgeInsets.symmetric(horizontal: 1),
-                  width: MediaQuery.of(context).size.width * 33 / 100,
-                  child: Text(widget.orderId.isNotEmpty
-                      ? '${customerProvider.foundOrder(orderId: widget.orderId).remainingMoney}'
-                      : '0'),
-                ),
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 15.0, top: 10),
+                child: Wrap(
+                  alignment: WrapAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: 300,
+                      child: Text(
+                        '${customerProvider
+                            .customer(widget.customerId)
+                            .firstName} ${customerProvider
+                            .customer(widget.customerId)
+                            .lastName}',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                            fontSize: 30, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    ..._textFields.map(
+                          (textFieldsMap) =>
+                          SizedBox(
+                            width: MediaQuery
+                                .of(context)
+                                .size
+                                .width * 33 / 100,
+                            child: CustomTextField(
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 4, horizontal: 1),
+                                fieldKey: textFieldsMap['fieldKey'] as String,
+                                txtEditingController: textFieldsMap['controller']
+                                as TextEditingController,
+                                label: textFieldsMap['label'] as String,
+                                keyboardType:
+                                textFieldsMap['fieldKey'] as String == 'model'
+                                    ? TextInputType.text
+                                    : TextInputType.number),
+                          ),
+                    ),
+                    Container(
+                      alignment: Alignment.center,
+                      height: MediaQuery
+                          .of(context)
+                          .size
+                          .height * 10 / 100,
+                      color: AppColorsAndThemes.subPrimaryColor,
+                      margin: const EdgeInsets.symmetric(horizontal: 1),
+                      width: MediaQuery
+                          .of(context)
+                          .size
+                          .width * 33 / 100,
+                      child: Text(widget.orderId.isNotEmpty
+                          ? '${foundOrder.remainingMoney}'
+                          : '0'),
+                    ),
 
-                SizedBox(
-                  width: MediaQuery.of(context).size.width * 45 / 100,
-                  child: TextButton.icon(
-                    onPressed: () async =>
+                    SizedBox(
+                      width: MediaQuery
+                          .of(context)
+                          .size
+                          .width * 45 / 100,
+                      child: TextButton.icon(
+                        onPressed: () async =>
                         await customerProvider.pickRegisterDate(context),
-                    label: Text(customerProvider.formatMyDate(
-                        myDate: customerProvider.getOrderRegister!,
-                        returnAsDate: false) as String),
-                    icon: const Icon(Icons.date_range),
-                  ),
-                ),
-                Container(
-                  alignment: Alignment.center,
-                  margin: const EdgeInsets.only(right: 2),
-                  width: MediaQuery.of(context).size.width * 50 / 100,
-                  child: ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor: customerProvider.getDeadlineOrderColor,
-                        padding: const EdgeInsets.symmetric(horizontal: 10)),
-                    onPressed: () async => await customerProvider.pickDeadline(context),
-                    label: Text(customerProvider.getOrderTimeMap['deadline'] ?? 'pick a deadline'),
-                    icon: const Icon(Icons.date_range),
-                  ),
-                ),
+                        label: Text(customerProvider.formatMyDate(
+                            myDate: customerProvider.getOrderRegister!,
+                            returnAsDate: false) as String),
+                        icon: const Icon(Icons.date_range),
+                      ),
+                    ),
+                    Container(
+                      alignment: Alignment.center,
+                      margin: const EdgeInsets.only(right: 2),
+                      width: MediaQuery
+                          .of(context)
+                          .size
+                          .width * 50 / 100,
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: customerProvider
+                                .getDeadlineOrderColor,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10)),
+                        onPressed: () async =>
+                        await customerProvider.pickDeadline(context),
+                        label: Text(customerProvider
+                            .getOrderTimeMap['deadline'] ?? 'pick a deadline'),
+                        icon: const Icon(Icons.date_range),
+                      ),
+                    ),
 
-                const SizedBox(height: 60),
-                //Save Button
+                    const SizedBox(height: 60),
+                    //Save Button
 
-                ElevatedButton.icon(
-                  onPressed: () {
-                    for (var map in _textFields) {
-                      _userData[map['fieldKey']] =
-                          (map['controller'] as TextEditingController).text;
-                    }
-                    customerProvider.saveNewOrder(
-                        context: context,
-                        customer: customerProvider.customer(widget.customerId),
-                        orderId: widget.orderId,
-                        orderInfo: _userData);
-                  },
-                  label: const Text('Save'),
-                  icon: const Icon(Icons.save),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        for (var map in _textFields) {
+                          _userData[map['fieldKey']] =
+                              (map['controller'] as TextEditingController).text;
+                        }
+                        if(customerProvider.handleErrorWhileSaving(context))return;
+                        foundOrder = Order.fromMaps(customerId: widget
+                            .customerId,
+                            orderId: widget.orderId,
+                            mapInfo: _userData,
+                            register: customerProvider.getOrderRegister!,
+                            deadline: customerProvider.getOrderDeadline!);
+                        customerProvider.saveNewOrder(
+                            context: context,
+                            customerId: widget.customerId,
+                            targetOrder: foundOrder);
+                      },
+                      label: const Text('Save'),
+                      icon: const Icon(Icons.save),
+                    ),
+                    const SizedBox(
+                      width: 30,
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.of(context).pop(RouteManager.orderPage);
+                      },
+                      label: const Text('Cancel'),
+                      icon: const Icon(Icons.cancel_outlined),
+                    ),
+                  ],
                 ),
-                const SizedBox(
-                  width: 30,
-                ),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    customerProvider.setOrderTimes(orderId: '');
-                    Navigator.of(context).pop(RouteManager.orderPage);
-                  },
-                  label: const Text('Cancel'),
-                  icon: const Icon(Icons.cancel_outlined),
-                ),
-              ],
-            ),
-          ),
-        ));
+              ),
+            ));
       }),
     );
   }

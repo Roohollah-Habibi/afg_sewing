@@ -31,13 +31,4 @@ DateTime? get getDeadline => _deadline;
   // METHODS ========================================================================
 
 
-
-
-  Order? order({required String orderId}) {
-    return orderId.isNotEmpty ? Order.fromId(orderId: orderId) : null;
-  }
-
-
-
-
 }

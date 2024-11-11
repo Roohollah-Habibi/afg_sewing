@@ -2,7 +2,6 @@ import 'package:afg_sewing/models/customer.dart';
 import 'package:equatable/equatable.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
-import 'package:uuid/uuid.dart';
 
 part 'order.g.dart';
 
@@ -132,59 +131,118 @@ class Order extends HiveObject with EquatableMixin {
   });
 
   // This method is to get a date and return a formatted date just to make the future codes more cleaner LIKE 2024-01-21 - 00:00:00
-  // static dynamic formatMyDate({required DateTime myDate,bool returnAsDate = true}) {
-  //   final String dateStr = DateFormat('yyyy-MM-dd').format(myDate);
-  //   DateTime myTime = DateFormat('yyyy-MM-dd').parse(dateStr);
-  //   return returnAsDate ? myTime : '${myTime.day}-${myTime.month}-${myTime.year}';
-  //
-  // }
+  static dynamic formatMyDate(
+      {required DateTime myDate, bool returnAsDate = true}) {
+    final String dateStr = DateFormat('yyyy-MM-dd').format(myDate);
+    DateTime myTime = DateFormat('yyyy-MM-dd').parse(dateStr);
+    return returnAsDate ? myTime : '${myTime.day}-${myTime.month}-${myTime
+        .year}';
+  }
 
-  // factory Order.emptyOrder(
-  //     {required String customerId}) {
-  //   return Order(
-  //       id: '',
-  //       customerId: customerId,
-  //       registeredDate: formatMyDate(myDate: DateTime.now(),returnAsDate: true) as DateTime,
-  //       deadLineDate: formatMyDate(myDate: DateTime.now(),returnAsDate: true) as DateTime,
-  //       qad: '',
-  //       shana: '',
-  //       astinSada: '',
-  //       astinKaf: '',
-  //       yeqa: '',
-  //       beghal: '',
-  //       shalwar: '',
-  //       parcha: '',
-  //       qout: '',
-  //       damAstin: '',
-  //       barAstin: '',
-  //       jibShalwar: '',
-  //       qadPuti: '',
-  //       barShalwar: '',
-  //       faq: '',
-  //       doorezano: '',
-  //       kaf: '',
-  //       jibRoo: '',
-  //       damanRast: '',
-  //       damanGerd: '',
-  //       model: '',
-  //       totalCost: 0,
-  //       receivedMoney: 0,
-  //       remainingMoney: 0);
-  // }
+  factory Order.fromMaps({required String customerId,
+    required String orderId,
+    required Map<String, String> mapInfo,
+    required DateTime register,
+    required DateTime deadline,
+  }){
+    return Order(id: orderId,
+        customerId: customerId,
+        registeredDate: register,
+        deadLineDate: deadline,
+        qad: mapInfo['ghad']!,
+        shana: mapInfo['shane']!,
+        astinSada: mapInfo['astinSade']!,
+        astinKaf: mapInfo['astinKaf']!,
+      yeqa: mapInfo['yeghe']!,
+      beghal: mapInfo['baghal']!,
+      shalwar: mapInfo['shalwar']!,
+      parcha: mapInfo['parche']!,
+      qout: mapInfo['ghot']!,
+      damAstin: mapInfo['damAstin']!,
+      barAstin: mapInfo['barAstin']!,
+      jibShalwar: mapInfo['jibShalwar']!,
+      qadPuti: mapInfo['qhadPuti']!,
+      barShalwar: mapInfo['barShalwar']!,
+      faq: mapInfo['fagh']!,
+      doorezano: mapInfo['doorezano']!,
+      kaf: mapInfo['kaf']!,
+      jibRoo: mapInfo['jibroo']!,
+      damanRast: mapInfo['damanRast']!,
+      damanGerd: mapInfo['damanGerd']!,
+      model: mapInfo['model']!,
+      totalCost: int.parse(mapInfo['total']!),
+      receivedMoney: int.parse(mapInfo['received']!),
+      remainingMoney: int.parse('000'),
+    );
+  }
 
-  factory Order.fromId({required String orderId}) {
-    late Order foundOrder;
+  factory Order._emptyOrder({required String customerId}) {
+    late Customer targetCustomer;
     if (Hive.isBoxOpen(swingDb)) {
       final Box swingBox = Hive.box(swingDb);
       List<Customer> customers =
       swingBox.values.whereType<Customer>().toList().cast<Customer>();
-      List<Order> orderList = [
-        for (var order in customers) ...order.customerOrder
-      ];
-      foundOrder = orderList.firstWhere((element) => element.id == orderId,);
+      targetCustomer =
+          customers.firstWhere((element) => element.id == customerId,);
+    }
+    return Order(
+        id: '',
+        customerId: customerId,
+        registeredDate: formatMyDate(
+            myDate: DateTime.now(), returnAsDate: true) as DateTime,
+        deadLineDate: formatMyDate(
+            myDate: DateTime.now(), returnAsDate: true) as DateTime,
+        qad: '',
+        shana: '',
+        astinSada: '',
+        astinKaf: '',
+        yeqa: '',
+        beghal: '',
+        shalwar: '',
+        parcha: '',
+        qout: '',
+        damAstin: '',
+        barAstin: '',
+        jibShalwar: '',
+        qadPuti: '',
+        barShalwar: '',
+        faq: '',
+        doorezano: '',
+        kaf: '',
+        jibRoo: '',
+        damanRast: '',
+        damanGerd: '',
+        model: '',
+        isDelivered: false,
+        isDone: false,
+        totalCost: 0,
+        receivedMoney: 0,
+        remainingMoney: 0);
+  }
+
+  factory Order.fromId({required String orderId, required String customerId}) {
+    late Order foundOrder;
+    late Customer foundCustomer;
+    if (Hive.isBoxOpen(swingDb)) {
+      final Box swingBox = Hive.box(swingDb);
+      List<Customer> customers = swingBox.values.whereType<Customer>()
+          .toList()
+          .cast<Customer>();
+      foundCustomer =
+          customers.firstWhere((element) => element.id == customerId);
+      // List<Order> orderList = [
+      //   for (var order in customers) ...order.customerOrder
+      // ];
+      foundOrder =
+          foundCustomer.customerOrder.firstWhere((element) =>
+          element.id ==
+              orderId,
+            orElse: () => Order._emptyOrder(customerId: foundCustomer.id),);
     }
     return Order(
         id: orderId,
+        isDelivered: foundOrder.isDelivered,
+        isDone: foundOrder.isDone,
         customerId: foundOrder.customerId,
         registeredDate: foundOrder.registeredDate,
         deadLineDate: foundOrder.deadLineDate,

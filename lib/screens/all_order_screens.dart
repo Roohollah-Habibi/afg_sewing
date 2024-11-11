@@ -268,7 +268,7 @@ class _AllOrderScreensState extends State<AllOrderScreens> {
       child: ListTile(
         trailing: PopupMenuButton(
           itemBuilder: (context) =>
-              orderStatusSelection(context, Order.fromId(orderId: orderId)),
+              orderStatusSelection(context, Order.fromId(orderId: orderId,customerId: customerId)),
         ),
         title: Container(
           padding: const EdgeInsets.all(10),

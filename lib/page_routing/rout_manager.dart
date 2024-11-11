@@ -34,31 +34,27 @@ class RouteManager {
     switch (setting.name) {
       case root:
         return MaterialPageRoute(builder: (context) => const HomePage());
-        break;
       case yekhan:
         return MaterialPageRoute(builder: (context) => const Yekhan());
-        break;
         case astin:
         return MaterialPageRoute(builder: (context) => const Astin());
-        break;
       case allOrdersScreen:
         return MaterialPageRoute(builder: (context) => const AllOrderScreens());
-        break;
       case fullOrderScreen:
         return MaterialPageRoute(
             builder: (context) =>
                 SamplesFullScreen(pageIndex: arguments['pageIndex'],imgSrc: arguments[''],));
-        break;
+
       case samples:
         return MaterialPageRoute(builder: (context) => const SamplePage());
-        break;
+
       case customers:
         return MaterialPageRoute(builder: (context) => const Customers());
-        break;
+
       case customerProfile:
         return MaterialPageRoute(
             builder: (context) => CustomerProfile(customerId: arguments['id']));
-        break;
+
       case orderPage:
         return MaterialPageRoute(
           builder: (context) => OrderPage(
@@ -66,12 +62,11 @@ class RouteManager {
             orderId: arguments['orderId'],
           ),
         );
-        break;
+
       case reports:
         return MaterialPageRoute(
           builder: (context) => const Reports(),
         );
-        break;
       default:
         throw const FormatException(
             'RoutManager ============ Page not found ===========');

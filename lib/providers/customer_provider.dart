@@ -20,6 +20,7 @@ class CustomerProvider extends ChangeNotifier {
   static const fieldKeyForPhone = 'phone';
   static int _orderIdNew = (_swingBox.get('oi') as int?) ?? 0;
   Color _deadlineOrderColor = AppColorsAndThemes.secondaryColor;
+  late final Customer _targetCustomer;
   int _orderRemainingPrice = 0;
   Map<String, String> _orderTimeMap = {};
 
@@ -78,52 +79,42 @@ class CustomerProvider extends ChangeNotifier {
   bool get customerStatus => _customerStatus;
 
   // METHODS ========================================================================
-  // This method is to get an order id and show the deadline as a formatted String to the user
 
-  void setOrderDeadline({
-    required String orderId,
-  }) {
-    if (orderId.isNotEmpty) {
-      final order = Order.fromId(orderId: orderId);
-      _orderTimeMap['register'] =
-          formatMyDate(myDate: order.registeredDate, returnAsDate: false)
-              as String;
-      _orderTimeMap['deadline'] =
-          formatMyDate(myDate: order.deadLineDate, returnAsDate: false)
-              as String;
-      changeDeadlineColor(changeRed: false);
-    } else {
-      _orderTimeMap['register'] =
-          formatMyDate(myDate: _orderRegister, returnAsDate: false) as String;
-      _orderTimeMap['deadline'] = 'Pick a deadline';
-    }
-    notifyListeners();
+  // getting target customer out of list
+  Customer customer(String customerId) {
+    _targetCustomer = _customerList.firstWhere((foundCustomer) => foundCustomer.id == customerId);
+    return _targetCustomer;
   }
 
-  Order foundOrder({required String orderId}) {
-    return Order.fromId(orderId: orderId);
-  }
-
-  // setting remaining money
-  int setRemainingPrice(double total, double received) {
-    _orderRemainingPrice = total.toInt() - received.toInt();
-    notifyListeners();
-    return _orderRemainingPrice;
-  }
-
-  // TO CHANGE THE COLOR OF THE DEADLINE WHEN SELECTED OR NOT
-  void changeDeadlineColor({required bool changeRed}) {
-    if (changeRed) {
+  /// TO change deadline color when it is selected or not [blue] while selected [red] while not selected
+  void changeDeadlineColor({required bool changeToRed}) {
+    if (changeToRed) {
       _deadlineOrderColor = Colors.red.shade900;
       notifyListeners();
     } else {
-      print('CHage color');
       _deadlineOrderColor = AppColorsAndThemes.secondaryColor;
       notifyListeners();
     }
   }
 
-  // pick register date
+/// This method is used while tapping on an order to edit [Sets the register date as well as deadline]
+  void setOrderDeadline({required String orderId, required String customerId}) {
+    // if (orderId.isNotEmpty) {
+      print('p1- SET ORDER METHOD IN CProvider: $orderId');
+      final order = Order.fromId(orderId: orderId, customerId: customerId);
+      print('p3- Order: $order');
+      _orderRegister = order.registeredDate;
+      _orderDeadline = order.deadLineDate;
+      changeDeadlineColor(changeToRed: false);
+    // } else {
+      print('p2- SET ORDER METHOD IN CProvider: $orderId');
+      // _orderTimeMap['register'] =
+      //     formatMyDate(myDate: _orderRegister, returnAsDate: false) as String;
+      // _orderTimeMap['deadline'] = 'Pick a deadline;-)';
+    // }
+    notifyListeners();
+  }
+  /// Pick register date while saving or editing an order
   Future<void> pickRegisterDate(BuildContext context) async {
     final DateTime? pickedDate = await showDatePicker(
       context: context,
@@ -133,14 +124,14 @@ class CustomerProvider extends ChangeNotifier {
     );
     if (pickedDate != null) {
       _orderRegister =
-          formatMyDate(myDate: pickedDate, returnAsDate: true) as DateTime;
+      formatMyDate(myDate: pickedDate, returnAsDate: true) as DateTime;
       _orderTimeMap['register'] =
-          formatMyDate(myDate: pickedDate, returnAsDate: false) as String;
+      formatMyDate(myDate: pickedDate, returnAsDate: false) as String;
       notifyListeners();
     }
   }
 
-  // pick deadline
+  /// pick deadline date while saving or editing an order
   Future<void> pickDeadline(BuildContext context) async {
     final DateTime? pickedDate = await showDatePicker(
       context: context,
@@ -150,19 +141,27 @@ class CustomerProvider extends ChangeNotifier {
     );
     if (pickedDate != null) {
       _orderDeadline =
-          formatMyDate(myDate: pickedDate, returnAsDate: true) as DateTime;
+      formatMyDate(myDate: pickedDate, returnAsDate: true) as DateTime;
       _orderTimeMap['deadline'] =
-          formatMyDate(myDate: pickedDate, returnAsDate: false) as String;
-      changeDeadlineColor(changeRed: false);
+      formatMyDate(myDate: pickedDate, returnAsDate: false) as String;
+      changeDeadlineColor(changeToRed: false);
       notifyListeners();
     }
   }
 
-  void setOrderTimes({required String orderId}) {
+  // setting remaining money
+  int setRemainingPrice(double total, double received) {
+    _orderRemainingPrice = total.toInt() - received.toInt();
+    notifyListeners();
+    return _orderRemainingPrice;
+  }
+
+
+  void setOrderTimes({required String orderId, required String customerId}) {
     if (orderId.isEmpty) {
       return;
     }
-    final Order order = Order.fromId(orderId: orderId);
+    final Order order = Order.fromId(orderId: orderId, customerId: customerId);
     _orderRegister = order.registeredDate;
     _orderDeadline = order.deadLineDate;
     _orderTimeMap['register'] =
@@ -170,7 +169,6 @@ class CustomerProvider extends ChangeNotifier {
     _orderTimeMap['deadline'] = formatMyDate(
             myDate: _orderDeadline!, returnAsDate: false)
         as String; // if this runs error try order.deadline instead of _orderDeadline!
-
   }
 
   // This method is to get a date and return a formatted date just to make the future codes more cleaner LIKE 2024-01-21 - 00:00:00
@@ -187,72 +185,70 @@ class CustomerProvider extends ChangeNotifier {
         : '${myTime.day}-${myTime.month}-${myTime.year}';
   }
 
-  // ADD NEW ORDER TO THE TARGET CUSTOMER
-  Future<void> saveNewOrder(
-      {required BuildContext context,
-      required Map<String, String> orderInfo,
-      required Customer customer,
-      required String orderId}) async {
-    print('===== SAVE NEW ORDER= CUSTOMER PROVIDER === $_orderTimeMap');
-    print('SAVE NEW ORDER= CUSTOMER PROVIDER === $_orderDeadline');
+  // handle error while saving new or edited order
+  bool handleErrorWhileSaving(BuildContext context) {
     if (_orderDeadline == null) {
-      changeDeadlineColor(changeRed: true);
+      changeDeadlineColor(changeToRed: true);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           duration: Duration(milliseconds: 1000),
           content: Text('Pick a deadline date'),
         ),
       );
-      return;
+      return true;
     }
+    return false;
+  }
 
-    double total = double.tryParse(orderInfo['total'] as String) ?? 0;
-    double received = double.tryParse(orderInfo['received'] as String) ?? 0;
-
-    print('CustomerProvider ==> Reg: ${_registerDate}');
-    print('CustomerProvider ==> Reg: ${_orderDeadline}');
+  // ADD NEW ORDER TO THE TARGET CUSTOMER
+  Future<void> saveNewOrder(
+      {required BuildContext context,required Order targetOrder, required String customerId}) async {
+print('p1- inside saveNewOrder M- in Cp ${targetOrder.id} =================');
     final Order newOrder = Order(
-      customerId: customer.id,
-      id: orderId.isEmpty ? '${_orderIdNew++}'.toString() : orderId,
-      isDone: false,
-      isDelivered: false,
-      registeredDate: formatMyDate(myDate: _orderRegister) as DateTime,
-      deadLineDate: formatMyDate(myDate: _orderDeadline!) as DateTime,
-      qad: orderInfo['ghad'] as String,
-      shana: orderInfo['shane'] as String,
-      astinSada: orderInfo['astinSade'] as String,
-      astinKaf: orderInfo['astinKaf'] as String,
-      yeqa: orderInfo['yeghe'] as String,
-      beghal: orderInfo['baghal'] as String,
-      shalwar: orderInfo['shalwar'] as String,
-      parcha: orderInfo['parche'] as String,
-      qout: orderInfo['ghot'] as String,
-      damAstin: orderInfo['damAstin'] as String,
-      barAstin: orderInfo['barAstin'] as String,
-      jibShalwar: orderInfo['jibShalwar'] as String,
-      qadPuti: orderInfo['qhadPuti'] as String,
-      barShalwar: orderInfo['barShalwar'] as String,
-      faq: orderInfo['fagh'] as String,
-      doorezano: orderInfo['doorezano'] as String,
-      kaf: orderInfo['kaf'] as String,
-      jibRoo: orderInfo['jibroo'] as String,
-      damanRast: orderInfo['damanRast'] as String,
-      damanGerd: orderInfo['damanGerd'] as String,
-      model: orderInfo['model'] as String,
-      totalCost: total.toInt(),
-      receivedMoney: received.toInt(),
-      remainingMoney: setRemainingPrice(total, received),
+      customerId: customerId,
+      id: _orderIdNew.toString(),
+      isDone: targetOrder.isDone,
+      isDelivered: targetOrder.isDelivered,
+      registeredDate: targetOrder.registeredDate,
+      deadLineDate: targetOrder.deadLineDate,
+      qad: targetOrder.qad,
+      shana: targetOrder.shana,
+      astinSada: targetOrder.astinSada,
+      astinKaf: targetOrder.astinKaf,
+      yeqa: targetOrder.yeqa,
+      beghal: targetOrder.beghal,
+      shalwar: targetOrder.shalwar,
+      parcha: targetOrder.parcha,
+      qout: targetOrder.qout,
+      damAstin: targetOrder.damAstin,
+      barAstin: targetOrder.barAstin,
+      jibShalwar: targetOrder.jibShalwar,
+      qadPuti: targetOrder.qadPuti,
+      barShalwar: targetOrder.barShalwar,
+      faq: targetOrder.faq,
+      doorezano: targetOrder.doorezano,
+      kaf: targetOrder.kaf,
+      jibRoo: targetOrder.jibRoo,
+      damanRast: targetOrder.damanRast,
+      damanGerd: targetOrder.damanGerd,
+      model: targetOrder.model,
+      totalCost: targetOrder.totalCost,
+      receivedMoney: targetOrder.receivedMoney,
+      remainingMoney: targetOrder.receivedMoney,
     );
+print('p2- inside saveNewOrder M- in Cp ${newOrder.id} =================');
     await Customer.addNewOrder(
-        newOrder: newOrder, customerId: customer.id, replaceOrderId: orderId);
-    _swingBox.put('oi', _orderIdNew);
-    _orderTimeMap = {};
-    _orderRegister = DateTime.now();
-    _orderDeadline = null;
+        newOrder: newOrder,
+        customerId: customerId,
+        replaceOrderId: targetOrder.id);
+    await _swingBox.put('oi', _orderIdNew);
     notifyListeners();
     if (context.mounted) {
       Navigator.of(context).pop(RouteManager.orderPage);
     }
+    _orderTimeMap = {};
+    _orderRegister = DateTime.now();
+    _orderDeadline = null;
     notifyListeners();
   }
 
@@ -428,12 +424,6 @@ class CustomerProvider extends ChangeNotifier {
             ? 17.5
             : 16;
     notifyListeners();
-  }
-
-  // getting target customer out of list
-  Customer customer(String customerId) {
-    return _customerList
-        .firstWhere((foundCustomer) => foundCustomer.id == customerId);
   }
 
   // SHOW FILTER VALUES FOR DROPDOWN BUTTON
