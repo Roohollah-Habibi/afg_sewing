@@ -50,7 +50,6 @@ class _OrderPageState extends State<OrderPage> {
 
   final Map<String, String> _userData = {};
   List<Map<String, dynamic>> _textFields = [];
-  late final Customer customer;
   late Order foundOrder;
 
   @override
@@ -58,8 +57,7 @@ class _OrderPageState extends State<OrderPage> {
     super.initState();
     foundOrder =
         Order.fromId(orderId: widget.orderId, customerId: widget.customerId);
-    customer = Provider.of<CustomerProvider>(context, listen: false).customer(
-        widget.customerId);
+     Provider.of<CustomerProvider>(context, listen: false).setOrdersTimesInfo(orderId: widget.orderId, customerId: widget.customerId);
     ghad = TextEditingController(text: foundOrder.qad);
     shane = TextEditingController(text: foundOrder.shana);
     astinSade = TextEditingController(text: foundOrder.astinSada);
@@ -132,7 +130,7 @@ class _OrderPageState extends State<OrderPage> {
       body: Builder(builder: (context) {
         final CustomerProvider customerProvider =
         Provider.of<CustomerProvider>(context);
-        print('OOOOOODEr BUILDER: ${customerProvider.getOrderTimeMap}');
+        print('OOOOOODEr BUILDER: ${customerProvider.getOrderInfo}');
         return Center(
             child: SingleChildScrollView(
               child: Padding(
@@ -220,7 +218,7 @@ class _OrderPageState extends State<OrderPage> {
                         onPressed: () async =>
                         await customerProvider.pickDeadline(context),
                         label: Text(customerProvider
-                            .getOrderTimeMap['deadline'] ?? 'pick a deadline'),
+                            .getOrderInfo['deadline'] ?? 'pick a deadline'),
                         icon: const Icon(Icons.date_range),
                       ),
                     ),
@@ -254,7 +252,7 @@ class _OrderPageState extends State<OrderPage> {
                     ),
                     ElevatedButton.icon(
                       onPressed: () {
-                        Navigator.of(context).pop(RouteManager.orderPage);
+                        customerProvider.onCancelOrder(context: context, orderId: widget.orderId);
                       },
                       label: const Text('Cancel'),
                       icon: const Icon(Icons.cancel_outlined),

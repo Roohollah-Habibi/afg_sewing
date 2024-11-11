@@ -3,6 +3,7 @@ import 'package:afg_sewing/models/order.dart';
 import 'package:afg_sewing/page_routing/rout_manager.dart';
 import 'package:afg_sewing/screens/customers/add_customer_panel.dart';
 import 'package:afg_sewing/themes/app_colors_themes.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
@@ -20,9 +21,11 @@ class CustomerProvider extends ChangeNotifier {
   static const fieldKeyForPhone = 'phone';
   static int _orderIdNew = (_swingBox.get('oi') as int?) ?? 0;
   Color _deadlineOrderColor = AppColorsAndThemes.secondaryColor;
-  late final Customer _targetCustomer;
+
+  // late final Customer _targetCustomer;
   int _orderRemainingPrice = 0;
-  Map<String, String> _orderTimeMap = {};
+  /// This map is used to save register and deadline date info. as String
+  Map<String, String> _orderTimesInfo = {};
 
   late DateTime _orderRegister; //=> this is valued in constructor
   DateTime? _orderDeadline;
@@ -66,7 +69,7 @@ class CustomerProvider extends ChangeNotifier {
 
   List<Order> get getOrders => _customerOrders;
 
-  Map<String, String> get getOrderTimeMap => _orderTimeMap;
+  Map<String, String> get getOrderInfo => _orderTimesInfo;
 
   int get getOrderRemainingPrice => _orderRemainingPrice;
 
@@ -82,8 +85,8 @@ class CustomerProvider extends ChangeNotifier {
 
   // getting target customer out of list
   Customer customer(String customerId) {
-    _targetCustomer = _customerList.firstWhere((foundCustomer) => foundCustomer.id == customerId);
-    return _targetCustomer;
+    return _customerList
+        .firstWhere((foundCustomer) => foundCustomer.id == customerId);
   }
 
   /// TO change deadline color when it is selected or not [blue] while selected [red] while not selected
@@ -97,23 +100,24 @@ class CustomerProvider extends ChangeNotifier {
     }
   }
 
-/// This method is used while tapping on an order to edit [Sets the register date as well as deadline]
+  /// This method is used while tapping on an order to edit [Sets the register date as well as deadline]
   void setOrderDeadline({required String orderId, required String customerId}) {
     // if (orderId.isNotEmpty) {
-      print('p1- SET ORDER METHOD IN CProvider: $orderId');
-      final order = Order.fromId(orderId: orderId, customerId: customerId);
-      print('p3- Order: $order');
-      _orderRegister = order.registeredDate;
-      _orderDeadline = order.deadLineDate;
-      changeDeadlineColor(changeToRed: false);
+    print('p1- SET ORDER METHOD IN CProvider: $orderId');
+    final order = Order.fromId(orderId: orderId, customerId: customerId);
+    print('p3- Order: $order');
+    _orderRegister = order.registeredDate;
+    _orderDeadline = order.deadLineDate;
+    changeDeadlineColor(changeToRed: false);
     // } else {
-      print('p2- SET ORDER METHOD IN CProvider: $orderId');
-      // _orderTimeMap['register'] =
-      //     formatMyDate(myDate: _orderRegister, returnAsDate: false) as String;
-      // _orderTimeMap['deadline'] = 'Pick a deadline;-)';
+    print('p2- SET ORDER METHOD IN CProvider: $orderId');
+    // _orderTimeMap['register'] =
+    //     formatMyDate(myDate: _orderRegister, returnAsDate: false) as String;
+    // _orderTimeMap['deadline'] = 'Pick a deadline;-)';
     // }
     notifyListeners();
   }
+
   /// Pick register date while saving or editing an order
   Future<void> pickRegisterDate(BuildContext context) async {
     final DateTime? pickedDate = await showDatePicker(
@@ -124,9 +128,8 @@ class CustomerProvider extends ChangeNotifier {
     );
     if (pickedDate != null) {
       _orderRegister =
-      formatMyDate(myDate: pickedDate, returnAsDate: true) as DateTime;
-      _orderTimeMap['register'] =
-      formatMyDate(myDate: pickedDate, returnAsDate: false) as String;
+          formatMyDate(myDate: pickedDate, returnAsDate: true) as DateTime;
+      _orderTimesInfo['register'] = formatMyDate(myDate: pickedDate, returnAsDate: false) as String;
       notifyListeners();
     }
   }
@@ -140,10 +143,9 @@ class CustomerProvider extends ChangeNotifier {
       lastDate: DateTime(2100), // Set the latest date
     );
     if (pickedDate != null) {
-      _orderDeadline =
-      formatMyDate(myDate: pickedDate, returnAsDate: true) as DateTime;
-      _orderTimeMap['deadline'] =
-      formatMyDate(myDate: pickedDate, returnAsDate: false) as String;
+      _orderDeadline = formatMyDate(myDate: pickedDate, returnAsDate: true) as DateTime;
+      _orderTimesInfo['deadline'] =
+          formatMyDate(myDate: pickedDate, returnAsDate: false) as String;
       changeDeadlineColor(changeToRed: false);
       notifyListeners();
     }
@@ -155,26 +157,25 @@ class CustomerProvider extends ChangeNotifier {
     notifyListeners();
     return _orderRemainingPrice;
   }
-
-
-  void setOrderTimes({required String orderId, required String customerId}) {
+// this method is to set register and deadline info into the map[OrderTimesInfo].
+  void setOrdersTimesInfo({required String orderId, required String customerId}) {
     if (orderId.isEmpty) {
       return;
     }
     final Order order = Order.fromId(orderId: orderId, customerId: customerId);
     _orderRegister = order.registeredDate;
     _orderDeadline = order.deadLineDate;
-    _orderTimeMap['register'] =
+    _orderTimesInfo['register'] =
         formatMyDate(myDate: _orderRegister, returnAsDate: false) as String;
-    _orderTimeMap['deadline'] = formatMyDate(
+    _orderTimesInfo['deadline'] = formatMyDate(
             myDate: _orderDeadline!, returnAsDate: false)
-        as String; // if this runs error try order.deadline instead of _orderDeadline!
+        as String;
   }
 
   // This method is to get a date and return a formatted date just to make the future codes more cleaner LIKE 2024-01-21 - 00:00:00
   dynamic formatMyDate({required DateTime? myDate, bool returnAsDate = true}) {
     if (myDate == null) {
-      _orderTimeMap['deadline'] = 'Pick a deadline';
+      _orderTimesInfo['deadline'] = 'Pick a deadline';
       notifyListeners();
       return;
     }
@@ -199,11 +200,23 @@ class CustomerProvider extends ChangeNotifier {
     }
     return false;
   }
+/// THIS method is used to cancel an order
+  void onCancelOrder({required BuildContext context, required String orderId}) {
+      _orderDeadline = null;
+      changeDeadlineColor(changeToRed: false);
+      getOrderInfo['deadline'] = 'Pick a deadline';
+      Navigator.of(context).pop();
+      notifyListeners();
+
+  }
 
   // ADD NEW ORDER TO THE TARGET CUSTOMER
   Future<void> saveNewOrder(
-      {required BuildContext context,required Order targetOrder, required String customerId}) async {
-print('p1- inside saveNewOrder M- in Cp ${targetOrder.id} =================');
+      {required BuildContext context,
+      required Order targetOrder,
+      required String customerId}) async {
+    print(
+        'p1- inside saveNewOrder M- in Cp ${targetOrder.id} =================');
     final Order newOrder = Order(
       customerId: customerId,
       id: _orderIdNew.toString(),
@@ -236,7 +249,7 @@ print('p1- inside saveNewOrder M- in Cp ${targetOrder.id} =================');
       receivedMoney: targetOrder.receivedMoney,
       remainingMoney: targetOrder.receivedMoney,
     );
-print('p2- inside saveNewOrder M- in Cp ${newOrder.id} =================');
+    print('p2- inside saveNewOrder M- in Cp ${newOrder.id} =================');
     await Customer.addNewOrder(
         newOrder: newOrder,
         customerId: customerId,
@@ -246,7 +259,7 @@ print('p2- inside saveNewOrder M- in Cp ${newOrder.id} =================');
     if (context.mounted) {
       Navigator.of(context).pop(RouteManager.orderPage);
     }
-    _orderTimeMap = {};
+    _orderTimesInfo = {};
     _orderRegister = DateTime.now();
     _orderDeadline = null;
     notifyListeners();
