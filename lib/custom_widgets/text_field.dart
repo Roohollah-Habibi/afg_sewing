@@ -1,3 +1,4 @@
+import 'package:afg_sewing/models/order.dart';
 import 'package:afg_sewing/providers/customer_provider.dart';
 import 'package:afg_sewing/themes/app_colors_themes.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +15,7 @@ class CustomTextField extends StatelessWidget {
   final int? maxLength;
   final String? prefixText;
 
+
   const CustomTextField({
     super.key,
     this.prefixText,
@@ -29,13 +31,20 @@ class CustomTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<CustomerProvider>(
-      builder: (context, customerProvider, _) =>  Padding(
+      builder: (context, customerProvider, _) {
+        return Padding(
         padding: padding ?? const EdgeInsets.all(8),
         child: TextField(
           maxLength: maxLength,
           controller: txtEditingController,
           onChanged: (value) {
             customerProvider.validate(fieldKey,value);
+            switch(fieldKey){
+              case 'total':
+                customerProvider.setPriceValue(price: PriceType.total,value: value);
+              case 'received':
+                customerProvider.setPriceValue(price: PriceType.received, value: value);
+            }
           },
           keyboardType: keyboardType,
           decoration: customInputDecoration?.copyWith(
@@ -51,7 +60,8 @@ class CustomTextField extends StatelessWidget {
           prefixText: prefixText,
           fieldError: customerProvider.getError(fieldKey)),
         ),
-      ),
+      );
+      },
     );
   }
 }

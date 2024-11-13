@@ -55,9 +55,17 @@ class _OrderPageState extends State<OrderPage> {
   @override
   void initState() {
     super.initState();
-    foundOrder =
-        Order.fromId(orderId: widget.orderId, customerId: widget.customerId);
-     Provider.of<CustomerProvider>(context, listen: false).setOrdersTimesInfo(orderId: widget.orderId, customerId: widget.customerId);
+    foundOrder = Order.fromId(orderId: widget.orderId, customerId: widget.customerId);
+    Provider.of<CustomerProvider>(context, listen: false).checkAndSetOrderDeadline(orderId: widget.orderId, customerId: widget.customerId);
+    final customerProvider = Provider.of<CustomerProvider>(context, listen: false);
+
+    customerProvider.setPriceValue(price: PriceType.received, value: foundOrder.receivedMoney.toString());
+    customerProvider.setPriceValue(price: PriceType.total, value: foundOrder.totalCost.toString());
+    customerProvider.setPriceValue(price: PriceType.remaining, value: foundOrder.remainingMoney.toString());
+    print('++++++ ${foundOrder.totalCost}');
+    print('++++++ ${foundOrder.receivedMoney}');
+    print('++++++ ${foundOrder.remainingMoney}');
+    final provider = Provider.of<CustomerProvider>(context, listen: false);
     ghad = TextEditingController(text: foundOrder.qad);
     shane = TextEditingController(text: foundOrder.shana);
     astinSade = TextEditingController(text: foundOrder.astinSada);
@@ -79,11 +87,12 @@ class _OrderPageState extends State<OrderPage> {
     damanRast = TextEditingController(text: foundOrder.damanRast);
     damanGerd = TextEditingController(text: foundOrder.damanGerd);
     model = TextEditingController(text: foundOrder.model);
-    total =
-        TextEditingController(text: foundOrder.totalCost.toString() ?? '0');
-    received = TextEditingController(
-        text: foundOrder.receivedMoney.toString() ?? '0');
-    // remaining = TextEditingController(text: foundOrder?.remainingMoney.toString() ?? '');
+    total = TextEditingController(text: foundOrder.totalCost.toString() ?? '0');
+    received =
+        TextEditingController(text: foundOrder.receivedMoney.toString() ?? '0');
+
+    remaining = TextEditingController(
+        text: customerProvider.getOrderRemainingPrice.toString());
     _textFields = [
       {'fieldKey': 'ghad', 'controller': ghad, 'label': 'قد'},
       {'fieldKey': 'shane', 'controller': shane, 'label': 'شانه'},
@@ -118,6 +127,7 @@ class _OrderPageState extends State<OrderPage> {
       {'fieldKey': 'model', 'controller': model, 'label': 'مدل'},
       {'fieldKey': 'total', 'controller': total, 'label': 'قیمت'},
       {'fieldKey': 'received', 'controller': received, 'label': 'رسیده'},
+      {'fieldKey': 'remaining', 'controller': remaining, 'label': 'باقی مانده'},
     ];
   }
 
@@ -125,53 +135,55 @@ class _OrderPageState extends State<OrderPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: const Text('Order'),
       ),
       body: Builder(builder: (context) {
         final CustomerProvider customerProvider =
-        Provider.of<CustomerProvider>(context);
-        print('OOOOOODEr BUILDER: ${customerProvider.getOrderInfo}');
+            Provider.of<CustomerProvider>(context);
         return Center(
             child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 15.0, top: 10),
-                child: Wrap(
-                  alignment: WrapAlignment.center,
-                  children: [
-                    SizedBox(
-                      width: 300,
-                      child: Text(
-                        '${customerProvider
-                            .customer(widget.customerId)
-                            .firstName} ${customerProvider
-                            .customer(widget.customerId)
-                            .lastName}',
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                            fontSize: 30, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                    ..._textFields.map(
-                          (textFieldsMap) =>
-                          SizedBox(
-                            width: MediaQuery
-                                .of(context)
-                                .size
-                                .width * 33 / 100,
-                            child: CustomTextField(
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 4, horizontal: 1),
-                                fieldKey: textFieldsMap['fieldKey'] as String,
-                                txtEditingController: textFieldsMap['controller']
-                                as TextEditingController,
-                                label: textFieldsMap['label'] as String,
-                                keyboardType:
-                                textFieldsMap['fieldKey'] as String == 'model'
-                                    ? TextInputType.text
-                                    : TextInputType.number),
-                          ),
-                    ),
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 15.0, top: 10),
+            child: Wrap(
+              alignment: WrapAlignment.center,
+              children: [
+                SizedBox(
+                  width: 300,
+                  child: Text(
+                    '${customerProvider.customer(widget.customerId).firstName} ${customerProvider.customer(widget.customerId).lastName}',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                        fontSize: 30, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                ..._textFields.map(
+                  (textFieldsMap) {
+                    // customerProvider.setPriceValue(price: PriceType.total, value: foundOrder.totalCost.toString());
+                    // customerProvider.setPriceValue(price: PriceType.received, value: foundOrder.receivedMoney.toString());
+                    return SizedBox(
+                    width: MediaQuery.of(context).size.width * 33 / 100,
+                    child: CustomTextField(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 4, horizontal: 1),
+                        fieldKey: textFieldsMap['fieldKey'] as String,
+                        txtEditingController:
+                            (textFieldsMap['fieldKey'] as String) == 'remaining'
+                                ? remaining = TextEditingController(
+                                    text: customerProvider.getOrderRemainingPrice.toString()):
+                                 textFieldsMap['controller']
+                                    as TextEditingController,
+                        label: textFieldsMap['label'] as String,
+                        keyboardType:
+                            textFieldsMap['fieldKey'] as String == 'model'
+                                ? TextInputType.text
+                                : TextInputType.number),
+                  );
+                  },
+                ),
+                /*
                     Container(
+                      // This shows the remaining price
                       alignment: Alignment.center,
                       height: MediaQuery
                           .of(context)
@@ -183,84 +195,85 @@ class _OrderPageState extends State<OrderPage> {
                           .of(context)
                           .size
                           .width * 33 / 100,
-                      child: Text(widget.orderId.isNotEmpty
-                          ? '${foundOrder.remainingMoney}'
-                          : '0'),
+                      child: Consumer<CustomerProvider>(
+                        builder: (context, value, child) {
+                          value.setRemainingPrice(totalPrice: total.text, receivedPrice: received.text);
+                          return Text(widget.orderId.isNotEmpty
+                            ? '${foundOrder.remainingMoney}'
+                            : '${value.getOrderRemainingPrice}');
+                        },
+                      ),
                     ),
-
-                    SizedBox(
-                      width: MediaQuery
-                          .of(context)
-                          .size
-                          .width * 45 / 100,
-                      child: TextButton.icon(
-                        onPressed: () async =>
+                     */
+                SizedBox(
+                  //Pick a register date
+                  width: MediaQuery.of(context).size.width * 45 / 100,
+                  child: TextButton.icon(
+                    onPressed: () async =>
                         await customerProvider.pickRegisterDate(context),
-                        label: Text(customerProvider.formatMyDate(
-                            myDate: customerProvider.getOrderRegister!,
-                            returnAsDate: false) as String),
-                        icon: const Icon(Icons.date_range),
-                      ),
-                    ),
-                    Container(
-                      alignment: Alignment.center,
-                      margin: const EdgeInsets.only(right: 2),
-                      width: MediaQuery
-                          .of(context)
-                          .size
-                          .width * 50 / 100,
-                      child: ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(
-                            backgroundColor: customerProvider
-                                .getDeadlineOrderColor,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 10)),
-                        onPressed: () async =>
-                        await customerProvider.pickDeadline(context),
-                        label: Text(customerProvider
-                            .getOrderInfo['deadline'] ?? 'pick a deadline'),
-                        icon: const Icon(Icons.date_range),
-                      ),
-                    ),
-
-                    const SizedBox(height: 60),
-                    //Save Button
-
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        for (var map in _textFields) {
-                          _userData[map['fieldKey']] =
-                              (map['controller'] as TextEditingController).text;
-                        }
-                        if(customerProvider.handleErrorWhileSaving(context))return;
-                        foundOrder = Order.fromMaps(customerId: widget
-                            .customerId,
-                            orderId: widget.orderId,
-                            mapInfo: _userData,
-                            register: customerProvider.getOrderRegister!,
-                            deadline: customerProvider.getOrderDeadline!);
-                        customerProvider.saveNewOrder(
-                            context: context,
-                            customerId: widget.customerId,
-                            targetOrder: foundOrder);
-                      },
-                      label: const Text('Save'),
-                      icon: const Icon(Icons.save),
-                    ),
-                    const SizedBox(
-                      width: 30,
-                    ),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        customerProvider.onCancelOrder(context: context, orderId: widget.orderId);
-                      },
-                      label: const Text('Cancel'),
-                      icon: const Icon(Icons.cancel_outlined),
-                    ),
-                  ],
+                    label: Text(customerProvider.formatMyDate(
+                        myDate: customerProvider.getOrderRegister!,
+                        returnAsDate: false) as String),
+                    icon: const Icon(Icons.date_range),
+                  ),
                 ),
-              ),
-            ));
+                Container(
+                  alignment: Alignment.center,
+                  margin: const EdgeInsets.only(right: 2),
+                  width: MediaQuery.of(context).size.width * 50 / 100,
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: customerProvider.getDeadlineOrderColor,
+                        padding: const EdgeInsets.symmetric(horizontal: 10)),
+                    onPressed: () async =>
+                        await customerProvider.pickDeadline(context),
+                    label: Text(customerProvider.getOrderInfo['deadline'] ?? 'pick a deadline'),
+                    icon: const Icon(Icons.date_range),
+                  ),
+                ),
+
+                const SizedBox(height: 60),
+                //Save Button
+
+                ElevatedButton.icon(
+                  onPressed: () {
+                    for (var map in _textFields) {
+                      _userData[map['fieldKey']] =
+                          (map['controller'] as TextEditingController).text;
+                    }
+                    _userData['remaining'] = remaining.text;
+                    print('===========> ${_userData['remaining']}');
+                    if (customerProvider.handleErrorWhileSaving(context))
+                      return;
+                    foundOrder = Order.fromMaps(
+                        customerId: widget.customerId,
+                        orderId: widget.orderId,
+                        orderInfo: _userData,
+                        register: customerProvider.getOrderRegister!,
+                        deadline: customerProvider.getOrderDeadline!);
+                    customerProvider.saveNewOrder(
+                        context: context,
+                        customerId: widget.customerId,
+                        targetOrder: foundOrder);
+                  },
+                  label: const Text('Save'),
+                  icon: const Icon(Icons.save),
+                ),
+                const SizedBox(
+                  width: 30,
+                ),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    customerProvider.onCancelOrder(
+                        context: context, orderId: widget.orderId);
+                  },
+                  label: const Text('Cancel'),
+                  icon: const Icon(Icons.cancel_outlined),
+                ),
+              ],
+            ),
+          ),
+        ));
       }),
     );
   }

@@ -111,8 +111,7 @@ class _CustomerProfileState extends State<CustomerProfile> {
                             itemCount: customerProvider.customer(widget.customerId).customerOrder.length,
                             itemBuilder: (context, index) {
                               Order targetOrder = customerProvider.customer(widget.customerId).customerOrder[index];
-                              print('p1- inside listViewBuilder ${customerProvider.customer(widget.customerId).customerOrder.length}');
-                              print('p2- inside listViewBuilder ${customerProvider.customer(widget.customerId).customerOrder}');
+                              print('p1- inside listViewBuilder ghad ${targetOrder.qad}');
                               String registerStr = customerProvider.betterFormatedDate(targetOrder.registeredDate);
                               String deadlineStr = customerProvider.betterFormatedDate(targetOrder.deadLineDate);
                               print('-------- $registerStr');
@@ -298,8 +297,8 @@ class _CustomerProfileState extends State<CustomerProfile> {
         onTap: () {
           Navigator.of(context).pushNamed(RouteManager.orderPage,
             arguments: {'customerId': widget.customerId, 'orderId': order.id});
-          print('p1- INSIDE buildCardListView in CP.DART ${order.id}');
-          provider.setOrderDeadline(orderId: order.id,customerId: widget.customerId);
+          print('p1- INSIDE buildCard in CP.DART ${order.remainingMoney}');
+          provider.checkAndSetOrderDeadline(orderId: order.id,customerId: widget.customerId);
         },
 
         leading: Icon(

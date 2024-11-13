@@ -118,6 +118,7 @@ class _CustomShowModelSheetState extends State<CustomShowModelSheet> {
                   style: Theme.of(context).textButtonTheme.style,
                 )),
             CustomTextField(
+
               fieldKey: CustomerProvider.fieldKeyForName,
               txtEditingController: nameController,
               padding: const EdgeInsets.fromLTRB(8, 0, 8, 5),
