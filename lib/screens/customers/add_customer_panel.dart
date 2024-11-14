@@ -1,5 +1,5 @@
 import 'package:afg_sewing/custom_widgets/text_field.dart';
-import 'package:afg_sewing/models/customer.dart';
+import 'package:afg_sewing/models_and_List/customer.dart';
 import 'package:afg_sewing/providers/customer_provider.dart';
 import 'package:afg_sewing/themes/app_colors_themes.dart';
 import 'package:flutter/material.dart';

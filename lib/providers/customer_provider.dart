@@ -1,5 +1,6 @@
-import 'package:afg_sewing/models/customer.dart';
-import 'package:afg_sewing/models/order.dart';
+
+import 'package:afg_sewing/models_and_List/customer.dart';
+import 'package:afg_sewing/models_and_List/order.dart';
 import 'package:afg_sewing/page_routing/rout_manager.dart';
 import 'package:afg_sewing/screens/customers/add_customer_panel.dart';
 import 'package:afg_sewing/themes/app_colors_themes.dart';
@@ -67,7 +68,8 @@ class CustomerProvider extends ChangeNotifier {
   List<Order> get getOrders => _customerOrders;
 
   Map<String, String> get getOrderInfo => _orderTimesInfo;
-
+  double get getTotalPrice => _orderTotalPrice;
+  double get getReceivedPrice => _orderReceivedPrice;
   int get getOrderRemainingPrice => _orderRemainingPrice;
 
   bool getError(String field) => _errors[field] ?? false;
@@ -166,17 +168,18 @@ class CustomerProvider extends ChangeNotifier {
     }
   }
 
-  void setPriceValue({required PriceType price, required String value}){
+  void setPriceValue({required PriceType price, String value = ''}){
     switch(price){
       case PriceType.total:
         _orderTotalPrice = double.tryParse(value) ?? 0;
       case PriceType.received:
         _orderReceivedPrice =  double.tryParse(value) ?? 0;
-      case PriceType.remaining:
+      case PriceType.remaining: // this line of code is used inside [initState]of Order_page
         _orderRemainingPrice = (_orderTotalPrice.toInt() - _orderReceivedPrice.toInt());
     }
+    // this line of code ensures the remaining price is always set either one of Prices or both set. COOL ;->
     _orderRemainingPrice = (_orderTotalPrice.toInt() - _orderReceivedPrice.toInt());
-    // notifyListeners();
+    // notify listener should not be used bease this method is used inside onChange method of textfields and initState of order_page
   }
 
   double setRemainingPrice({required double total, required double received}){

@@ -1,14 +1,13 @@
-import 'package:afg_sewing/models/customer.dart';
-import 'package:afg_sewing/models/order.dart';
+
+import 'package:afg_sewing/models_and_List/customer.dart';
+import 'package:afg_sewing/models_and_List/order.dart';
 import 'package:afg_sewing/page_routing/rout_manager.dart';
 import 'package:afg_sewing/providers/customer_provider.dart';
-import 'package:afg_sewing/providers/order_provider.dart';
-import 'package:afg_sewing/screens/reports.dart';
+
 import 'package:afg_sewing/themes/app_colors_themes.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:intl/intl.dart';
+
 import 'package:provider/provider.dart';
 
 const String swingDb = 'SwingDb';
@@ -111,11 +110,9 @@ class _CustomerProfileState extends State<CustomerProfile> {
                             itemCount: customerProvider.customer(widget.customerId).customerOrder.length,
                             itemBuilder: (context, index) {
                               Order targetOrder = customerProvider.customer(widget.customerId).customerOrder[index];
-                              print('p1- inside listViewBuilder ghad ${targetOrder.qad}');
                               String registerStr = customerProvider.betterFormatedDate(targetOrder.registeredDate);
                               String deadlineStr = customerProvider.betterFormatedDate(targetOrder.deadLineDate);
-                              print('-------- $registerStr');
-                              print('-------- $deadlineStr');
+
                               //             return Dismissible(
                               //               key: Key(order.id),
                               //               onDismissed: (direction) {
@@ -297,7 +294,6 @@ class _CustomerProfileState extends State<CustomerProfile> {
         onTap: () {
           Navigator.of(context).pushNamed(RouteManager.orderPage,
             arguments: {'customerId': widget.customerId, 'orderId': order.id});
-          print('p1- INSIDE buildCard in CP.DART ${order.remainingMoney}');
           provider.checkAndSetOrderDeadline(orderId: order.id,customerId: widget.customerId);
         },
 

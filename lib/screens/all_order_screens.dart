@@ -1,5 +1,6 @@
-import 'package:afg_sewing/models/customer.dart';
-import 'package:afg_sewing/models/order.dart';
+
+import 'package:afg_sewing/models_and_List/customer.dart';
+import 'package:afg_sewing/models_and_List/order.dart';
 import 'package:afg_sewing/page_routing/rout_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';

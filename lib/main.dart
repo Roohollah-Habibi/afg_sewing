@@ -1,5 +1,5 @@
-import 'package:afg_sewing/models/customer.dart';
-import 'package:afg_sewing/models/order.dart';
+import 'package:afg_sewing/models_and_List/customer.dart';
+import 'package:afg_sewing/models_and_List/order.dart';
 import 'package:afg_sewing/page_routing/rout_manager.dart';
 import 'package:afg_sewing/providers/customer_provider.dart';
 import 'package:afg_sewing/providers/order_provider.dart';

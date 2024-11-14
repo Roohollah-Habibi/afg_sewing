@@ -1,4 +1,5 @@
-import 'package:afg_sewing/models/customer.dart';
+
+import 'package:afg_sewing/models_and_List/customer.dart';
 import 'package:equatable/equatable.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
