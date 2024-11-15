@@ -3,6 +3,7 @@ import 'package:afg_sewing/models_and_List/order.dart';
 import 'package:afg_sewing/page_routing/rout_manager.dart';
 import 'package:afg_sewing/providers/customer_provider.dart';
 import 'package:afg_sewing/themes/app_colors_themes.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
@@ -19,6 +20,11 @@ class CustomerProfile extends StatefulWidget {
 }
 
 class _CustomerProfileState extends State<CustomerProfile> {
+  @override
+  void initState() {
+    super.initState();
+    Provider.of<CustomerProvider>(context,listen: false).initializeAllOrders(customerId: widget.customerId);
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -53,9 +59,9 @@ class _CustomerProfileState extends State<CustomerProfile> {
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                  buildPhoneCard(
+                  _buildPhoneCard(
                       phoneNumber: customerProvider.customer(widget.customerId).phoneNumber1),
-                  buildPhoneCard(
+                  _buildPhoneCard(
                       phoneNumber: customerProvider.customer(widget.customerId).phoneNumber2),
                 ]),
                 const SizedBox(height: 16),
@@ -67,7 +73,7 @@ class _CustomerProfileState extends State<CustomerProfile> {
                       child: Padding(
                         padding: const EdgeInsets.only(right: 20),
                         child: Selector<CustomerProvider,int>(
-                          selector: (p0, cP) => cP.customer(widget.customerId).customerOrder.length,
+                          selector: (p0, provider) => provider.getOrders.length,
                           builder: (_, selectorValue, __) => Text(
                             'Orders: $selectorValue',
                             textAlign: TextAlign.center,
@@ -102,100 +108,98 @@ class _CustomerProfileState extends State<CustomerProfile> {
                             textAlign: TextAlign.center,
                             'No available Order for ${customerProvider.customer(widget.customerId).firstName} to '
                             'this filter option')
-                        : ListView.builder(
-                            itemCount:
-                                customerProvider.customer(widget.customerId).customerOrder.length,
-                            itemBuilder: (context, index) {
-                              Order targetOrder =
-                                  customerProvider.customer(widget.customerId).customerOrder[index];
-                              String registerStr =
-                                  customerProvider.betterFormatedDate(targetOrder.registeredDate);
-                              String deadlineStr =
-                                  customerProvider.betterFormatedDate(targetOrder.deadLineDate);
-
-                              return buildDismissible(
-                                  targetOrder, customerProvider, context, registerStr, deadlineStr);
-                              //                     Card(
-                              //                 color: customerProvider.deadlineColor(
-                              //                     targetOrder,
-                              //                     Colors.white70,
-                              //                     Colors.red.shade200,
-                              //                     Colors.orange.shade200),
-                              //                 child: ListTile(
-                              //                   tileColor: customerProvider.deadlineColor(
-                              //                       targetOrder,
-                              //                       AppColorsAndThemes.subPrimaryColor,
-                              //                       Colors.red.shade200,
-                              //                       Colors.orange.shade200),
-                              //                   minVerticalPadding: 0,
-                              //                   onTap: () => Navigator.of(context)
-                              //                       .pushNamed(RouteManager.orderPage,
-                              //                           arguments: {
-                              //                         'customerId': widget.customerId,
-                              //                         'orderId': targetOrder.id
-                              //                       }),
-                              //                   trailing: PopupMenuButton(
-                              //                     itemBuilder: (context) =>
-                              //                         customerProvider.orderStatusSelection(
-                              //                             context: context,
-                              //                             // order: order,
-                              //                             customerId: widget.customerId),
-                              //                   ),
-                              //                   subtitle: Column(
-                              //                     mainAxisSize: MainAxisSize.min,
-                              //                     crossAxisAlignment:
-                              //                         CrossAxisAlignment.start,
-                              //                     children: [
-                              //                       ListTile(
-                              //                         leading: const Icon(
-                              //                             Icons.note_alt_outlined),
-                              //                         title: Text(
-                              //                           'Reg: ${order.registeredDate.day}-${order.registeredDate.month}-${order.registeredDate.year}',
-                              //                           style: const TextStyle(
-                              //                               fontWeight: FontWeight.bold,
-                              //                               fontSize: 16),
-                              //                         ),
-                              //                         tileColor:
-                              //                             customerProvider.deadlineColor(
-                              //                                 order,
-                              //                                 AppColorsAndThemes
-                              //                                     .subPrimaryColor,
-                              //                                 Colors.red.shade200,
-                              //                                 Colors.orange.shade200),
-                              //                       ),
-                              //                       ListTile(
-                              //                         tileColor:
-                              //                             customerProvider.deadlineColor(
-                              //                                 order,
-                              //                                 AppColorsAndThemes
-                              //                                     .subPrimaryColor,
-                              //                                 Colors.red.shade200,
-                              //                                 Colors.orange.shade200),
-                              //                         leading:
-                              //                             const Icon(CupertinoIcons.flag),
-                              //                         title: Text(
-                              //                           'DL: ${order.deadLineDate.day}-${order.deadLineDate.month}-${order.deadLineDate.year}',
-                              //                           style: TextStyle(
-                              //                             fontWeight: FontWeight.bold,
-                              //                             fontSize: customerProvider
-                              //                                 .deadlineFont(order),
-                              //                             color: customerProvider
-                              //                                 .deadlineColor(
-                              //                                     order,
-                              //                                     AppColorsAndThemes
-                              //                                         .secondaryColor,
-                              //                                     Colors.redAccent,
-                              //                                     Colors.red.shade900),
-                              //                           ),
-                              //                         ),
-                              //                       )
-                              //                     ],
-                              //                   ),
-                              // //                 ),
-                              //               ),
-                              //             );
-                            },
-                          ),
+                        : Selector<CustomerProvider,int>(
+                      selector: (ctx, provider) => provider.getOrders.length,
+                          builder:(_,providerValue,__) => ListView.builder(
+                              itemCount: providerValue,
+                              itemBuilder: (context, index) {
+                                Order targetOrder = customerProvider.customer(widget.customerId).customerOrder[index];
+                                String registerStr = customerProvider.betterFormatedDate(targetOrder.registeredDate);
+                                String deadlineStr = customerProvider.betterFormatedDate(targetOrder.deadLineDate);
+                                return buildDismissible(
+                                    targetOrder, context, registerStr, deadlineStr);
+                                //                     Card(
+                                //                 color: customerProvider.deadlineColor(
+                                //                     targetOrder,
+                                //                     Colors.white70,
+                                //                     Colors.red.shade200,
+                                //                     Colors.orange.shade200),
+                                //                 child: ListTile(
+                                //                   tileColor: customerProvider.deadlineColor(
+                                //                       targetOrder,
+                                //                       AppColorsAndThemes.subPrimaryColor,
+                                //                       Colors.red.shade200,
+                                //                       Colors.orange.shade200),
+                                //                   minVerticalPadding: 0,
+                                //                   onTap: () => Navigator.of(context)
+                                //                       .pushNamed(RouteManager.orderPage,
+                                //                           arguments: {
+                                //                         'customerId': widget.customerId,
+                                //                         'orderId': targetOrder.id
+                                //                       }),
+                                //                   trailing: PopupMenuButton(
+                                //                     itemBuilder: (context) =>
+                                //                         customerProvider.orderStatusSelection(
+                                //                             context: context,
+                                //                             // order: order,
+                                //                             customerId: widget.customerId),
+                                //                   ),
+                                //                   subtitle: Column(
+                                //                     mainAxisSize: MainAxisSize.min,
+                                //                     crossAxisAlignment:
+                                //                         CrossAxisAlignment.start,
+                                //                     children: [
+                                //                       ListTile(
+                                //                         leading: const Icon(
+                                //                             Icons.note_alt_outlined),
+                                //                         title: Text(
+                                //                           'Reg: ${order.registeredDate.day}-${order.registeredDate.month}-${order.registeredDate.year}',
+                                //                           style: const TextStyle(
+                                //                               fontWeight: FontWeight.bold,
+                                //                               fontSize: 16),
+                                //                         ),
+                                //                         tileColor:
+                                //                             customerProvider.deadlineColor(
+                                //                                 order,
+                                //                                 AppColorsAndThemes
+                                //                                     .subPrimaryColor,
+                                //                                 Colors.red.shade200,
+                                //                                 Colors.orange.shade200),
+                                //                       ),
+                                //                       ListTile(
+                                //                         tileColor:
+                                //                             customerProvider.deadlineColor(
+                                //                                 order,
+                                //                                 AppColorsAndThemes
+                                //                                     .subPrimaryColor,
+                                //                                 Colors.red.shade200,
+                                //                                 Colors.orange.shade200),
+                                //                         leading:
+                                //                             const Icon(CupertinoIcons.flag),
+                                //                         title: Text(
+                                //                           'DL: ${order.deadLineDate.day}-${order.deadLineDate.month}-${order.deadLineDate.year}',
+                                //                           style: TextStyle(
+                                //                             fontWeight: FontWeight.bold,
+                                //                             fontSize: customerProvider
+                                //                                 .deadlineFont(order),
+                                //                             color: customerProvider
+                                //                                 .deadlineColor(
+                                //                                     order,
+                                //                                     AppColorsAndThemes
+                                //                                         .secondaryColor,
+                                //                                     Colors.redAccent,
+                                //                                     Colors.red.shade900),
+                                //                           ),
+                                //                         ),
+                                //                       )
+                                //                     ],
+                                //                   ),
+                                // //                 ),
+                                //               ),
+                                //             );
+                              },
+                            ),
+                        ),
                   ),
                 ),
               ],
@@ -206,53 +210,56 @@ class _CustomerProfileState extends State<CustomerProfile> {
     );
   }
 
-  Widget buildDismissible(Order targetOrder, CustomerProvider customerProvider,
+  Widget buildDismissible(Order targetOrder,
       BuildContext context, String registerStr, String deadlineStr) {
-    return Dismissible(
-        key: Key(targetOrder.id),
-        onDismissed: (direction) {
-          customerProvider.getOrders.removeWhere((element) => element.id == targetOrder.id);
-          Customer.removeOrder(customerId: widget.customerId, removableOrder: targetOrder);
-          ScaffoldMessenger.of(context).hideCurrentSnackBar();
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              width: MediaQuery.of(context).size.width * 90 / 100,
-              action: SnackBarAction(
-                label: 'Undo',
-                onPressed: () async {
-                  customerProvider.getOrders.add(targetOrder);
-                  await Customer.updateOrderList(
-                      customer: customerProvider.customer(widget.customerId),
-                      newOrderList: customerProvider.getOrders);
-                },
+    return Selector<CustomerProvider,CustomerProvider>(
+      selector: (ctx, provider) => provider,
+      builder:(_,providerValue,__) => Dismissible(
+          key: Key(targetOrder.id),
+          onDismissed: (direction) {
+            providerValue.removeOrderFromOrderList(removableOrder: targetOrder,customerId: widget.customerId);
+
+            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                width: MediaQuery.of(context).size.width * 90 / 100,
+                action: SnackBarAction(
+                  label: 'Undo',
+                  onPressed: () async{
+                    providerValue.addOrderToOrderList(targetOrder: targetOrder);
+                    await Customer.updateOrderList(
+                        customer: providerValue.customer(targetOrder.customerId),
+                        newOrderList: providerValue.getOrders);
+                  },
+                ),
+                content: const Text('Order is removed successfully',style: TextStyle(fontSize: 15),),
               ),
-              content: const Text('Order is removed successfully',style: TextStyle(fontSize: 15),),
-            ),
-          );
-        },
-        confirmDismiss: (direction) async {
-          return await buildShowDialogWhenRemovingOrder(context);
-        },
-        background: Container(
-          color: Colors.red,
-          alignment: Alignment.center,
-          child: const Text(
-            'order removed',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 20,
+            );
+          },
+          confirmDismiss: (direction) async {
+            return await buildShowDialogWhenRemovingOrder(context);
+          },
+          background: Container(
+            color: Colors.red,
+            alignment: Alignment.center,
+            child: const Text(
+              'order removed',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+              ),
             ),
           ),
-        ),
-        direction: DismissDirection.endToStart,
-        child: buildCardListView(
-          order: targetOrder,
-          provider: customerProvider,
-          registerDate: registerStr,
-          deadline: deadlineStr,
-          // popUp: Icon(Icons.phone_android)
-        ));
+          direction: DismissDirection.endToStart,
+          child: buildCardListView(
+            order: targetOrder,
+            provider: providerValue,
+            registerDate: registerStr,
+            deadline: deadlineStr,
+            // popUp: Icon(Icons.phone_android)
+          )),
+    );
   }
 
   /// show a dialog box when removing an existing order
@@ -360,8 +367,7 @@ class CustomPopupMenuButton extends StatelessWidget {
         const PopupMenuDivider(height: 10),
         PopupMenuItem(
           value: sewnAndDelivered,
-          onTap: () =>
-              provider.onPopupMenu(order: order, value: sewnAndDelivered, customer: customer),
+          onTap: () => provider.onPopupMenu(order: order, value: sewnAndDelivered, customer: customer),
           child: _SimpleRowForTextIcon(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             mainAxisSize: MainAxisSize.max,
@@ -390,7 +396,8 @@ class CustomPopupMenuButton extends StatelessWidget {
   }
 }
 
-// Simple row to show icon and date next to each other
+// Simple row to show icon and a text next to each other like. which one usage is inside popup
+// menu buttons on Orders
 class _SimpleRowForTextIcon extends StatelessWidget {
   final String text;
   final Icon icon;
@@ -435,11 +442,13 @@ class _SimpleRowForTextIcon extends StatelessWidget {
 }
 
 // show card for user phones
-Widget buildPhoneCard({required String phoneNumber}) {
+Widget _buildPhoneCard({required String phoneNumber}) {
   return Expanded(
     child: Card(
-      color: Colors.white54,
+      elevation: 5,
+      shadowColor: AppColorsAndThemes.secondaryColor,
       child: ListTile(
+        tileColor: AppColorsAndThemes.subPrimaryColor,
         contentPadding: const EdgeInsets.only(left: 3),
         leading: const Icon(
           Icons.phone_android,

@@ -80,12 +80,28 @@ class CustomerProvider extends ChangeNotifier {
   bool get customerStatus => _customerStatus;
 
   // METHODS ========================================================================
-
+  /// To initialize orders for the first time
+  void initializeAllOrders({required String customerId}){
+    final targetCustomer = _customerList.firstWhere((element) => element.id == customerId);
+    _allCustomersOrders = targetCustomer.customerOrder;
+  }
   /// getting target customer out of list
   Customer customer(String customerId) => _customerList.firstWhere((foundCustomer) => foundCustomer.id == customerId);
 
+  /// this method is used to delete an order from both order list and the database.
+  void removeOrderFromOrderList({required Order removableOrder, required String customerId}){
+    _allCustomersOrders.removeWhere((element) => element.id == removableOrder.id,);
+    Customer.removeOrder(customerId: customerId, removableOrder: removableOrder);
+    notifyListeners();
+  }
+  /// this method is used to add an order to the order list only not to the database. to add an
+  /// order to the db use Customer class.
+  void addOrderToOrderList({required Order targetOrder}) {
+    _allCustomersOrders.add(targetOrder);
+    notifyListeners();
+  }
   /// this method return list of orders of customer by getting customerId
-  List<Order> findOrderListByCustomerList(String customerId)=> _allCustomersOrders.where((element) => element.customerId == customerId,).toList();
+  List<Order> findOrderListByCustomerId(String customerId)=> _allCustomersOrders.where((element) => element.customerId == customerId,).toList();
 
   /// TO change deadline color when it is selected or not [blue] while selected [red] while not selected
   void changeDeadlineColor({required bool changeToRed}) {
@@ -264,7 +280,6 @@ class CustomerProvider extends ChangeNotifier {
         newOrder: newOrder,
         customerId: customerId,
         replaceOrderId: targetOrder.id);
-    _allCustomersOrders.add(newOrder);
     _orderTotalPrice = 0;
     _orderReceivedPrice = 0;
     _orderRemainingPrice = 0;
@@ -465,7 +480,6 @@ class CustomerProvider extends ChangeNotifier {
             .where((foundOrder) =>
                 foundOrder.isDone == true && foundOrder.isDelivered == false)
             .toList();
-        print('########S N D######## ${_allCustomersOrders}');
         notifyListeners();
         break;
       case 'Sewn & Delivered':
@@ -474,7 +488,7 @@ class CustomerProvider extends ChangeNotifier {
             .where((foundOrder) =>
                 foundOrder.isDelivered == true && foundOrder.isDone == true)
             .toList();
-        print('######## S  D ######## ${_allCustomersOrders}');
+
         notifyListeners();
         break;
       case 'In Progress':
@@ -483,7 +497,6 @@ class CustomerProvider extends ChangeNotifier {
             .where((foundOrder) =>
                 foundOrder.isDone == false && foundOrder.isDelivered == false)
             .toList();
-        print('######## In Progress ######## ${_allCustomersOrders}');
         notifyListeners();
         break;
     }

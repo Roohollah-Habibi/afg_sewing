@@ -1,13 +1,11 @@
 import 'package:equatable/equatable.dart';
 import 'order.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:uuid/uuid.dart';
 
 part 'customer.g.dart';
 
-const String swingDb = 'SwingDb';
-var uuid = const Uuid();
-
+const String _swingDb = 'SwingDb';
+final Box _swingBox = Hive.box(_swingDb);
 @HiveType(typeId: 1)
 class Customer extends HiveObject with EquatableMixin {
   @HiveField(0)
@@ -45,33 +43,28 @@ class Customer extends HiveObject with EquatableMixin {
     required this.registerDate
   });
 
-  /// THIS METHOS IS USE FOR ADDING NEW ORDER TO THE TARGET USER
+  /// this method check if any specific order is exist inside customer order replace it otherwise
+  /// add it as a new order
   static Future <void> addNewOrder(
       {required Order newOrder, required String customerId,required String replaceOrderId}) async {
 
-    if (Hive.isBoxOpen(swingDb)) {
-      final swingBox = Hive.box(swingDb);
-      final Customer customer = swingBox.get(customerId) as Customer;
+      final Customer customer = _swingBox.get(customerId) as Customer;
       if(replaceOrderId.isEmpty){
       customer.customerOrder.add(newOrder);
       }else{
-        Order foundOrder= customer.customerOrder.firstWhere((element) => element.id == replaceOrderId);
+        Order foundOrder= customer.customerOrder.firstWhere((element) => element.id ==
+            replaceOrderId);// first we find the order then find the index to replace it
         int orderIndex = customer.customerOrder.indexOf(foundOrder);
         customer.customerOrder.removeAt(orderIndex);
         customer.customerOrder.insert(orderIndex, newOrder);
       }
-      await swingBox.put(customerId, customer);
-    } else {
-      throw const FormatException(
-          '====CUSTOMER PAGE======>BOX [$swingDb] IS NOT EXISTS OR OPENED <=========');
-    }
+      await _swingBox.put(customerId, customer);
   }
 
-  /// This method is use for updating customer order list. by new order list
+  /// Usage of this method is for updating customer order list. by new order list
   static Future<void> updateOrderList({required Customer customer, required List<Order> newOrderList}) async {
-    if (Hive.isBoxOpen(swingDb)) {
-      final swingBox = Hive.box(swingDb);
-      final updatedCustomer= Customer(id: customer.id,
+
+      final updatedCustomer = Customer(id: customer.id,
           registerDate: customer.registerDate,
           firstName: customer.firstName,
           lastName: customer.lastName,
@@ -79,18 +72,16 @@ class Customer extends HiveObject with EquatableMixin {
           phoneNumber2: customer.phoneNumber2,
           customerOrder: newOrderList,
           status: customer.status);
-      await swingBox.put(customer.id, updatedCustomer);
-    }
+      await _swingBox.put(customer.id, updatedCustomer);
+
   }
 
   /// This method is used for removing an order from database of a customer
   static Future<void> removeOrder({required String customerId, required Order removableOrder})async{
-    if (Hive.isBoxOpen(swingDb)) {
-      final swingBox = Hive.box(swingDb);
-      final Customer targetCustomer = swingBox.get(customerId);
+
+      final Customer targetCustomer = _swingBox.get(customerId);
       targetCustomer.customerOrder.removeWhere((element) => element.id == removableOrder.id);
-      await swingBox.put(customerId, targetCustomer);
-    }
+      await _swingBox.put(customerId, targetCustomer);
   }
 
 

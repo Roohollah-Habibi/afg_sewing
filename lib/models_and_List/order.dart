@@ -5,6 +5,8 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 
 part 'order.g.dart';
+const String _swingDb = 'SwingDb';
+final Box _swingBox = Hive.box(_swingDb);
 
 @HiveType(typeId: 2)
 class Order extends HiveObject with EquatableMixin {
@@ -178,14 +180,6 @@ class Order extends HiveObject with EquatableMixin {
   }
 
   factory Order._emptyOrder({required String customerId}) {
-    late Customer targetCustomer;
-    if (Hive.isBoxOpen(swingDb)) {
-      final Box swingBox = Hive.box(swingDb);
-      List<Customer> customers =
-      swingBox.values.whereType<Customer>().toList().cast<Customer>();
-      targetCustomer =
-          customers.firstWhere((element) => element.id == customerId,);
-    }
     return Order(
         id: '',
         customerId: customerId,
@@ -224,9 +218,8 @@ class Order extends HiveObject with EquatableMixin {
   factory Order.fromId({required String orderId, required String customerId}) {
     late Order foundOrder;
     late Customer foundCustomer;
-    if (Hive.isBoxOpen(swingDb)) {
-      final Box swingBox = Hive.box(swingDb);
-      List<Customer> customers = swingBox.values.whereType<Customer>()
+
+      List<Customer> customers = _swingBox.values.whereType<Customer>()
           .toList()
           .cast<Customer>();
       foundCustomer =
@@ -239,7 +232,6 @@ class Order extends HiveObject with EquatableMixin {
           element.id ==
               orderId,
             orElse: () => Order._emptyOrder(customerId: foundCustomer.id),);
-    }
     return Order(
         id: orderId,
         isDelivered: foundOrder.isDelivered,
