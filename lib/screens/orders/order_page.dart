@@ -16,31 +16,6 @@ class OrderPage extends StatefulWidget {
 }
 
 class _OrderPageState extends State<OrderPage> {
-  // late TextEditingController
-  // ghad,
-  //     shane,
-  //     astinSade,
-  //     astinKaf,
-  //     yegha,
-  //     baghal,
-  //     shalwar,
-  //     parche,
-  //     ghot,
-  //     damAstin,
-  //     barAstin,
-  //     jibShalwar,
-  //     ghadPuti,
-  //     barShalwar,
-  //     fagh,
-  //     doorezano,
-  //     kaf,
-  //     jibroo,
-  //     damanRast,
-  //     damanGerd,
-  //     model,
-  //     total,
-  //     received,
-  //     remaining;
 
   final Map<String, String> _userData = {};
   List<Map<String, dynamic>> myField = [];
@@ -65,67 +40,7 @@ class _OrderPageState extends State<OrderPage> {
         price: PriceType.remaining,
         value: foundOrder.remainingMoney.toString());
     myField = textFields(targetOrder: foundOrder, provider: customerProvider);
-    // ghad = TextEditingController(text: foundOrder.qad);
-    // shane = TextEditingController(text: foundOrder.shana);
-    // astinSade = TextEditingController(text: foundOrder.astinSada);
-    // astinKaf = TextEditingController(text: foundOrder.astinKaf);
-    // yegha = TextEditingController(text: foundOrder.yeqa);
-    // baghal = TextEditingController(text: foundOrder.beghal);
-    // shalwar = TextEditingController(text: foundOrder.shalwar);
-    // parche = TextEditingController(text: foundOrder.parcha);
-    // ghot = TextEditingController(text: foundOrder.qout);
-    // damAstin = TextEditingController(text: foundOrder.damAstin);
-    // barAstin = TextEditingController(text: foundOrder.barAstin);
-    // jibShalwar = TextEditingController(text: foundOrder.jibShalwar);
-    // ghadPuti = TextEditingController(text: foundOrder.qadPuti);
-    // barShalwar = TextEditingController(text: foundOrder.barShalwar);
-    // fagh = TextEditingController(text: foundOrder.faq);
-    // doorezano = TextEditingController(text: foundOrder.doorezano);
-    // kaf = TextEditingController(text: foundOrder.kaf);
-    // jibroo = TextEditingController(text: foundOrder.jibRoo);
-    // damanRast = TextEditingController(text: foundOrder.damanRast);
-    // damanGerd = TextEditingController(text: foundOrder.damanGerd);
-    // model = TextEditingController(text: foundOrder.model);
-    // total = TextEditingController(text: foundOrder.totalCost.toString());
-    // received = TextEditingController(text: foundOrder.receivedMoney.toString());
-    // remaining = TextEditingController(text: customerProvider.getOrderRemainingPrice.toString());
 
-    // _textFields = [
-    //   {'fieldKey': 'ghad', 'controller': ghad, 'label': 'قد'},
-    //   {'fieldKey': 'shane', 'controller': shane, 'label': 'شانه'},
-    //   {
-    //     'fieldKey': 'astinSade',
-    //     'controller': astinSade,
-    //     'label': 'آستین '
-    //         'ساده'
-    //   },
-    //   {'fieldKey': 'astinKaf', 'controller': astinKaf, 'label': 'آستین کف'},
-    //   {'fieldKey': 'yeghe', 'controller': yegha, 'label': 'یقه'},
-    //   {'fieldKey': 'baghal', 'controller': baghal, 'label': 'بغل'},
-    //   {'fieldKey': 'shalwar', 'controller': shalwar, 'label': 'شلوار'},
-    //   {'fieldKey': 'parche', 'controller': parche, 'label': 'پاچه'},
-    //   {'fieldKey': 'ghot', 'controller': ghot, 'label': 'قوت'},
-    //   {'fieldKey': 'damAstin', 'controller': damAstin, 'label': 'دم آستین'},
-    //   {'fieldKey': 'barAstin', 'controller': barAstin, 'label': 'بر آستین'},
-    //   {
-    //     'fieldKey': 'jibShalwar',
-    //     'controller': jibShalwar,
-    //     'label': 'جیب '
-    //         'شلوار'
-    //   },
-    //   {'fieldKey': 'qhadPuti', 'controller': ghadPuti, 'label': 'قد پوتی'},
-    //   {'fieldKey': 'barShalwar', 'controller': barShalwar, 'label': 'بر شلوار'},
-    //   {'fieldKey': 'fagh', 'controller': fagh, 'label': 'فاق'},
-    //   {'fieldKey': 'doorezano', 'controller': doorezano, 'label': 'دور زانو'},
-    //   {'fieldKey': 'kaf', 'controller': kaf, 'label': 'کف'},
-    //   {'fieldKey': 'jibroo', 'controller': jibroo, 'label': 'جیب رو'},
-    //   {'fieldKey': 'damanRast', 'controller': damanRast, 'label': 'دامن راست'},
-    //   {'fieldKey': 'damanGerd', 'controller': damanGerd, 'label': 'دامن گرد'},
-    //   {'fieldKey': 'model', 'controller': model, 'label': 'مدل'},
-    //   {'fieldKey': 'total', 'controller': total, 'label': 'قیمت'},
-    //   {'fieldKey': 'received', 'controller': received, 'label': 'رسیده'},
-    //   {'fieldKey': 'remaining', 'controller': remaining, 'label': 'باقی مانده'},
-    // ];
   }
 
   @override
@@ -202,9 +117,8 @@ class _OrderPageState extends State<OrderPage> {
                 ),
 
                 const SizedBox(height: 60),
-                //Save Button
-
                 ElevatedButton.icon(
+                //Save Button
                   onPressed: () {
                     for (var map in myField) {
                       _userData[map['fieldKey']] =

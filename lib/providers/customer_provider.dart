@@ -37,11 +37,10 @@ class CustomerProvider extends ChangeNotifier {
   DateTime? _registerDate;
   final Map<String, bool> _errors = {};
 
-  List<Customer> _customerList =
-      _swingBox.values.whereType<Customer>().toList().cast<Customer>();
-  List<Order> _customerOrders = [];
-  String _selectedFilter =
-      (_swingBox.get('filterValueKey') as String?) ?? 'In Progress';
+  List<Customer> _customerList = _swingBox.values.whereType<Customer>().toList().cast<Customer>();
+  List<Order> _allCustomersOrders = [];
+
+  String _selectedFilter = (_swingBox.get('filterValueKey') as String?) ?? 'In Progress';
 
   bool _customerStatus = false;
   final List<String> filterOptions = [
@@ -65,7 +64,7 @@ class CustomerProvider extends ChangeNotifier {
 
   DateTime? get getOrderDeadline => _orderDeadline;
 
-  List<Order> get getOrders => _customerOrders;
+  List<Order> get getOrders => _allCustomersOrders;
 
   Map<String, String> get getOrderInfo => _orderTimesInfo;
   double get getTotalPrice => _orderTotalPrice;
@@ -83,10 +82,10 @@ class CustomerProvider extends ChangeNotifier {
   // METHODS ========================================================================
 
   /// getting target customer out of list
-  Customer customer(String customerId) {
-    return _customerList
-        .firstWhere((foundCustomer) => foundCustomer.id == customerId);
-  }
+  Customer customer(String customerId) => _customerList.firstWhere((foundCustomer) => foundCustomer.id == customerId);
+
+  /// this method return list of orders of customer by getting customerId
+  List<Order> findOrderListByCustomerList(String customerId)=> _allCustomersOrders.where((element) => element.customerId == customerId,).toList();
 
   /// TO change deadline color when it is selected or not [blue] while selected [red] while not selected
   void changeDeadlineColor({required bool changeToRed}) {
@@ -228,8 +227,6 @@ class CustomerProvider extends ChangeNotifier {
       {required BuildContext context,
       required Order targetOrder,
       required String customerId}) async {
-    print(
-        'p1- inside saveNewOrder M- in Cp ${targetOrder.id} =================');
     const uuid = Uuid();
     final Order newOrder = Order(
       customerId: customerId,
@@ -263,11 +260,11 @@ class CustomerProvider extends ChangeNotifier {
       receivedMoney: targetOrder.receivedMoney,
       remainingMoney: _orderRemainingPrice,
     );
-
     await Customer.addNewOrder(
         newOrder: newOrder,
         customerId: customerId,
         replaceOrderId: targetOrder.id);
+    _allCustomersOrders.add(newOrder);
     _orderTotalPrice = 0;
     _orderReceivedPrice = 0;
     _orderRemainingPrice = 0;
@@ -385,8 +382,7 @@ class CustomerProvider extends ChangeNotifier {
         customerOrder: customer != null ? customer.customerOrder : [],
         status: customerStatus);
     await _swingBox.put(newCustomer.id, newCustomer);
-    _customerList =
-        _swingBox.values.whereType<Customer>().cast<Customer>().toList();
+    _customerList = _swingBox.values.whereType<Customer>().cast<Customer>().toList();
     notifyListeners();
     for (Customer cc in _customerList) {
       print('Name: ${cc.firstName} \t ${cc.status}');
@@ -460,34 +456,34 @@ class CustomerProvider extends ChangeNotifier {
       {required String? value, required String customerId}) async {
     switch (value) {
       case 'All':
-        _customerOrders = customer(customerId).customerOrder;
+        _allCustomersOrders = customer(customerId).customerOrder;
         notifyListeners();
         break;
       case 'Swen NOT Delivered':
-        _customerOrders = customer(customerId)
+        _allCustomersOrders = customer(customerId)
             .customerOrder
             .where((foundOrder) =>
                 foundOrder.isDone == true && foundOrder.isDelivered == false)
             .toList();
-        print('########S N D######## ${_customerOrders}');
+        print('########S N D######## ${_allCustomersOrders}');
         notifyListeners();
         break;
       case 'Sewn & Delivered':
-        _customerOrders = customer(customerId)
+        _allCustomersOrders = customer(customerId)
             .customerOrder
             .where((foundOrder) =>
                 foundOrder.isDelivered == true && foundOrder.isDone == true)
             .toList();
-        print('######## S  D ######## ${_customerOrders}');
+        print('######## S  D ######## ${_allCustomersOrders}');
         notifyListeners();
         break;
       case 'In Progress':
-        _customerOrders = customer(customerId)
+        _allCustomersOrders = customer(customerId)
             .customerOrder
             .where((foundOrder) =>
                 foundOrder.isDone == false && foundOrder.isDelivered == false)
             .toList();
-        print('######## In Progress ######## ${_customerOrders}');
+        print('######## In Progress ######## ${_allCustomersOrders}');
         notifyListeners();
         break;
     }

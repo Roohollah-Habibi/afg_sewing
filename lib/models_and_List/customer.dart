@@ -45,6 +45,7 @@ class Customer extends HiveObject with EquatableMixin {
     required this.registerDate
   });
 
+  /// THIS METHOS IS USE FOR ADDING NEW ORDER TO THE TARGET USER
   static Future <void> addNewOrder(
       {required Order newOrder, required String customerId,required String replaceOrderId}) async {
 
@@ -66,6 +67,7 @@ class Customer extends HiveObject with EquatableMixin {
     }
   }
 
+  /// This method is use for updating customer order list. by new order list
   static Future<void> updateOrderList({required Customer customer, required List<Order> newOrderList}) async {
     if (Hive.isBoxOpen(swingDb)) {
       final swingBox = Hive.box(swingDb);
@@ -81,12 +83,13 @@ class Customer extends HiveObject with EquatableMixin {
     }
   }
 
+  /// This method is used for removing an order from database of a customer
   static Future<void> removeOrder({required String customerId, required Order removableOrder})async{
     if (Hive.isBoxOpen(swingDb)) {
       final swingBox = Hive.box(swingDb);
-      final Customer cs = swingBox.get(customerId);
-      cs.customerOrder.removeWhere((element) => element.id == removableOrder.id);
-      await swingBox.put(customerId, cs);
+      final Customer targetCustomer = swingBox.get(customerId);
+      targetCustomer.customerOrder.removeWhere((element) => element.id == removableOrder.id);
+      await swingBox.put(customerId, targetCustomer);
     }
   }
 

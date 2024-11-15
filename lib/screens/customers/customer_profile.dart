@@ -1,11 +1,8 @@
-
 import 'package:afg_sewing/models_and_List/customer.dart';
 import 'package:afg_sewing/models_and_List/order.dart';
 import 'package:afg_sewing/page_routing/rout_manager.dart';
 import 'package:afg_sewing/providers/customer_provider.dart';
-
 import 'package:afg_sewing/themes/app_colors_themes.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
@@ -40,6 +37,8 @@ class _CustomerProfileState extends State<CustomerProfile> {
       body: Builder(
         builder: (context) {
           final customerProvider = Provider.of<CustomerProvider>(context);
+          print('Orders--- ${customerProvider.getOrders}');
+          print('Customers Orders--- ${customerProvider.customer(widget.customerId).customerOrder}');
           return Padding(
             padding: const EdgeInsets.all(8.0),
             child: Column(
@@ -53,18 +52,12 @@ class _CustomerProfileState extends State<CustomerProfile> {
                   'ID: ${customerProvider.customer(widget.customerId).id}',
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
-                Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      buildPhoneCard(
-                          phoneNumber: customerProvider
-                              .customer(widget.customerId)
-                              .phoneNumber1),
-                      buildPhoneCard(
-                          phoneNumber: customerProvider
-                              .customer(widget.customerId)
-                              .phoneNumber2),
-                    ]),
+                Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                  buildPhoneCard(
+                      phoneNumber: customerProvider.customer(widget.customerId).phoneNumber1),
+                  buildPhoneCard(
+                      phoneNumber: customerProvider.customer(widget.customerId).phoneNumber2),
+                ]),
                 const SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -73,10 +66,13 @@ class _CustomerProfileState extends State<CustomerProfile> {
                     Flexible(
                       child: Padding(
                         padding: const EdgeInsets.only(right: 20),
-                        child: Text(
-                          'Orders: ${customerProvider.customer(widget.customerId).customerOrder.length}',
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        child: Selector<CustomerProvider,int>(
+                          selector: (p0, cP) => cP.customer(widget.customerId).customerOrder.length,
+                          builder: (_, selectorValue, __) => Text(
+                            'Orders: $selectorValue',
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
                         ),
                       ),
                     ),
@@ -107,99 +103,27 @@ class _CustomerProfileState extends State<CustomerProfile> {
                             'No available Order for ${customerProvider.customer(widget.customerId).firstName} to '
                             'this filter option')
                         : ListView.builder(
-                            itemCount: customerProvider.customer(widget.customerId).customerOrder.length,
+                            itemCount:
+                                customerProvider.customer(widget.customerId).customerOrder.length,
                             itemBuilder: (context, index) {
-                              Order targetOrder = customerProvider.customer(widget.customerId).customerOrder[index];
-                              String registerStr = customerProvider.betterFormatedDate(targetOrder.registeredDate);
-                              String deadlineStr = customerProvider.betterFormatedDate(targetOrder.deadLineDate);
+                              Order targetOrder =
+                                  customerProvider.customer(widget.customerId).customerOrder[index];
+                              String registerStr =
+                                  customerProvider.betterFormatedDate(targetOrder.registeredDate);
+                              String deadlineStr =
+                                  customerProvider.betterFormatedDate(targetOrder.deadLineDate);
 
-                              //             return Dismissible(
-                              //               key: Key(order.id),
-                              //               onDismissed: (direction) {
-                              //                 customerProvider.getOrders.removeWhere(
-                              //                   (element) => element.id == order.id,
-                              //                 );
-                              //                 Customer.removeOrder(
-                              //                     customerId: widget.customerId,
-                              //                     removableOrder: order);
-                              //                 ScaffoldMessenger.of(context)
-                              //                     .hideCurrentSnackBar();
-                              //                 ScaffoldMessenger.of(context).showSnackBar(
-                              //                   SnackBar(
-                              //                     action: SnackBarAction(
-                              //                       label: 'Undo',
-                              //                       onPressed: () async {
-                              //                         customerProvider.getOrders.add(order);
-                              //                         await Customer.updateOrderList(
-                              //                             customer: customerProvider
-                              //                                 .customer(widget.customerId),
-                              //                             newOrderList:
-                              //                                 customerProvider.getOrders);
-                              //                       },
-                              //                     ),
-                              //                     content: const Text(
-                              //                         'Order is removed successfully'),
-                              //                   ),
-                              //                 );
-                              //               },
-                              //               confirmDismiss: (direction) async {
-                              //                 return await showDialog(
-                              //                   context: context,
-                              //                   builder: (context) => AlertDialog(
-                              //                     title: const Icon(
-                              //                       Icons.warning_amber_outlined,
-                              //                       size: 100,
-                              //                     ),
-                              //                     alignment: Alignment.center,
-                              //                     content: const Text(
-                              //                       'Are you sure you wanna remove the order?',
-                              //                       textAlign: TextAlign.center,
-                              //                     ),
-                              //                     actions: [
-                              //                       TextButton(
-                              //                         onPressed: () =>
-                              //                             Navigator.of(context).pop(false),
-                              //                         child: const Text('Cancel'),
-                              //                       ),
-                              //                       TextButton(
-                              //                         onPressed: () =>
-                              //                             Navigator.of(context).pop(true),
-                              //                         child: const Text('Delete'),
-                              //                       ),
-                              //                     ],
-                              //                   ),
-                              //                 );
-                              //               },
-                              //               background: Container(
-                              //                 color: Colors.red,
-                              //                 alignment: Alignment.center,
-                              //                 child: const Text(
-                              //                   'order removed',
-                              //                   style: TextStyle(
-                              //                     color: Colors.white,
-                              //                     fontWeight: FontWeight.bold,
-                              //                     fontSize: 20,
-                              //                   ),
-                              //                 ),
-                              //               ),
-                              //               direction: DismissDirection.endToStart,
-                              //               child:
-                              return buildCardListView(
-                                order: targetOrder,
-                                provider: customerProvider,
-                                registerDate: registerStr,
-                                deadline: deadlineStr,
-                                // popUp: Icon(Icons.phone_android)
-                              );
+                              return buildDismissible(
+                                  targetOrder, customerProvider, context, registerStr, deadlineStr);
                               //                     Card(
                               //                 color: customerProvider.deadlineColor(
-                              //                     order,
+                              //                     targetOrder,
                               //                     Colors.white70,
                               //                     Colors.red.shade200,
                               //                     Colors.orange.shade200),
                               //                 child: ListTile(
                               //                   tileColor: customerProvider.deadlineColor(
-                              //                       order,
+                              //                       targetOrder,
                               //                       AppColorsAndThemes.subPrimaryColor,
                               //                       Colors.red.shade200,
                               //                       Colors.orange.shade200),
@@ -208,7 +132,7 @@ class _CustomerProfileState extends State<CustomerProfile> {
                               //                       .pushNamed(RouteManager.orderPage,
                               //                           arguments: {
                               //                         'customerId': widget.customerId,
-                              //                         'orderId': order.id
+                              //                         'orderId': targetOrder.id
                               //                       }),
                               //                   trailing: PopupMenuButton(
                               //                     itemBuilder: (context) =>
@@ -282,6 +206,84 @@ class _CustomerProfileState extends State<CustomerProfile> {
     );
   }
 
+  Widget buildDismissible(Order targetOrder, CustomerProvider customerProvider,
+      BuildContext context, String registerStr, String deadlineStr) {
+    return Dismissible(
+        key: Key(targetOrder.id),
+        onDismissed: (direction) {
+          customerProvider.getOrders.removeWhere((element) => element.id == targetOrder.id);
+          Customer.removeOrder(customerId: widget.customerId, removableOrder: targetOrder);
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              width: MediaQuery.of(context).size.width * 90 / 100,
+              action: SnackBarAction(
+                label: 'Undo',
+                onPressed: () async {
+                  customerProvider.getOrders.add(targetOrder);
+                  await Customer.updateOrderList(
+                      customer: customerProvider.customer(widget.customerId),
+                      newOrderList: customerProvider.getOrders);
+                },
+              ),
+              content: const Text('Order is removed successfully',style: TextStyle(fontSize: 15),),
+            ),
+          );
+        },
+        confirmDismiss: (direction) async {
+          return await buildShowDialogWhenRemovingOrder(context);
+        },
+        background: Container(
+          color: Colors.red,
+          alignment: Alignment.center,
+          child: const Text(
+            'order removed',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 20,
+            ),
+          ),
+        ),
+        direction: DismissDirection.endToStart,
+        child: buildCardListView(
+          order: targetOrder,
+          provider: customerProvider,
+          registerDate: registerStr,
+          deadline: deadlineStr,
+          // popUp: Icon(Icons.phone_android)
+        ));
+  }
+
+  /// show a dialog box when removing an existing order
+  Future<bool?> buildShowDialogWhenRemovingOrder(BuildContext context) {
+    return showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Icon(
+              Icons.warning_amber_outlined,
+              size: 100,
+            ),
+            alignment: Alignment.center,
+            content: const Text(
+              'Are you sure you wanna remove the order?',
+              textAlign: TextAlign.center,
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('Delete'),
+              ),
+            ],
+          ),
+        );
+  }
+
+  /// this method shows every single card showing on the profile.
   Widget buildCardListView(
       {required CustomerProvider provider,
       required String registerDate,
@@ -293,10 +295,9 @@ class _CustomerProfileState extends State<CustomerProfile> {
       child: ListTile(
         onTap: () {
           Navigator.of(context).pushNamed(RouteManager.orderPage,
-            arguments: {'customerId': widget.customerId, 'orderId': order.id});
-          provider.checkAndSetOrderDeadline(orderId: order.id,customerId: widget.customerId);
+              arguments: {'customerId': widget.customerId, 'orderId': order.id});
+          provider.checkAndSetOrderDeadline(orderId: order.id, customerId: widget.customerId);
         },
-
         leading: Icon(
           Icons.circle,
           color: provider.circleMatchWithPopupValueColor(order: order),
@@ -339,10 +340,7 @@ class CustomPopupMenuButton extends StatelessWidget {
   final Customer customer;
 
   const CustomPopupMenuButton(
-      {super.key,
-      required this.order,
-      required this.customer,
-      required this.provider});
+      {super.key, required this.order, required this.customer, required this.provider});
 
   @override
   Widget build(BuildContext context) {
@@ -350,21 +348,20 @@ class CustomPopupMenuButton extends StatelessWidget {
       return <PopupMenuEntry<String>>[
         PopupMenuItem(
           value: sewnNotDelivered,
-          onTap: () => provider.onPopupMenu(
-              order: order, value: sewnNotDelivered, customer: customer),
+          onTap: () =>
+              provider.onPopupMenu(order: order, value: sewnNotDelivered, customer: customer),
           child: _SimpleRowForTextIcon(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               mainAxisSize: MainAxisSize.max,
               text: sewnNotDelivered,
-              icon: const Icon(Icons.circle,
-                  color: AppColorsAndThemes.secondaryColor),
+              icon: const Icon(Icons.circle, color: AppColorsAndThemes.secondaryColor),
               firstIconThenText: false),
         ),
         const PopupMenuDivider(height: 10),
         PopupMenuItem(
           value: sewnAndDelivered,
-          onTap: () => provider.onPopupMenu(
-              order: order, value: sewnAndDelivered, customer: customer),
+          onTap: () =>
+              provider.onPopupMenu(order: order, value: sewnAndDelivered, customer: customer),
           child: _SimpleRowForTextIcon(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             mainAxisSize: MainAxisSize.max,
@@ -379,8 +376,7 @@ class CustomPopupMenuButton extends StatelessWidget {
         const PopupMenuDivider(height: 10),
         PopupMenuItem(
           value: inProgress,
-          onTap: () => provider.onPopupMenu(
-              order: order, value: inProgress, customer: customer),
+          onTap: () => provider.onPopupMenu(order: order, value: inProgress, customer: customer),
           child: _SimpleRowForTextIcon(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             mainAxisSize: MainAxisSize.max,
@@ -451,8 +447,7 @@ Widget buildPhoneCard({required String phoneNumber}) {
         ),
         title: Text(
           phoneNumber.length > 2 ? phoneNumber : 'Not Available',
-          style: const TextStyle(
-              fontWeight: FontWeight.bold, color: Colors.black, fontSize: 17),
+          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black, fontSize: 17),
         ),
       ),
     ),
