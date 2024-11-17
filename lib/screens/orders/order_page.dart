@@ -17,7 +17,7 @@ class OrderPage extends StatefulWidget {
 
 class _OrderPageState extends State<OrderPage> {
 
-  final Map<String, String> _userData = {};
+  final Map<String, dynamic> _userData = {};
   List<Map<String, dynamic>> myField = [];
   late Order foundOrder;
 
@@ -124,6 +124,8 @@ class _OrderPageState extends State<OrderPage> {
                       _userData[map['fieldKey']] =
                           (map['controller'] as TextEditingController).text;
                     }
+                    _userData['isDone'] = foundOrder.isDone;
+                    _userData['isDelivered'] = foundOrder.isDelivered;
                     if (customerProvider.handleErrorWhileSaving(context)) {
                       return;
                     }

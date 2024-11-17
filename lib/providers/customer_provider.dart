@@ -11,6 +11,8 @@ import 'package:uuid/uuid.dart';
 
 final Box _swingBox = Hive.box('SwingDb');
 enum PriceType {total,received, remaining}
+enum FilterOption {inProgress, swenNotDelivered,swenAndDelivered,all}
+
 class CustomerProvider extends ChangeNotifier {
   //constructor initialize all orders
   CustomerProvider() {
@@ -22,7 +24,12 @@ class CustomerProvider extends ChangeNotifier {
   static const fieldKeyForPhone = 'phone';
   /// saves the new created order id into hive database
   static int _orderIdNew = (_swingBox.get('oi') as int?) ?? 0;
-
+  Map<FilterOption,String> _filterOptionMap ={
+    FilterOption.all : 'All',
+    FilterOption.inProgress : 'In Progress',
+    FilterOption.swenAndDelivered : 'Sewn & Delivered',
+    FilterOption.swenNotDelivered : 'Sewn NOT Delivered'
+  };
   Color _deadlineOrderColor = AppColorsAndThemes.secondaryColor;
   double _orderTotalPrice = 0;
   double _orderReceivedPrice = 0;
@@ -40,15 +47,16 @@ class CustomerProvider extends ChangeNotifier {
   List<Customer> _customerList = _swingBox.values.whereType<Customer>().toList().cast<Customer>();
   List<Order> _allCustomersOrders = [];
 
-  String _selectedFilter = (_swingBox.get('filterValueKey') as String?) ?? 'In Progress';
+  // String _selectedFilter = (_swingBox.get('filterValueKey') as String) ?? 'All';
+  String _selectedFilter =  'All';
 
   bool _customerStatus = false;
-  final List<String> filterOptions = [
-    'In Progress',
-    'Swen NOT Delivered',
-    'Sewn & Delivered',
-    'All'
-  ];
+  // final List<String> filterOptions = [
+  //   'In Progress',
+  //   'Swen NOT Delivered',
+  //   'Sewn & Delivered',
+  //   'All'
+  // ];
   final List<String> selectableOrderStatus = [
     'In Progress',
     'Swen NOT Delivered',
@@ -57,6 +65,8 @@ class CustomerProvider extends ChangeNotifier {
 
   // Getters ====================================================================
   List<Customer> get getCustomers => _customerList;
+
+  Map<FilterOption,String> get getFilterOptionMap => _filterOptionMap;
 
   Color get getDeadlineOrderColor => _deadlineOrderColor;
 
@@ -73,7 +83,7 @@ class CustomerProvider extends ChangeNotifier {
 
   bool getError(String field) => _errors[field] ?? false;
 
-  String? get getSelectedFilter => _selectedFilter;
+  String get getSelectedFilter => _selectedFilter;
 
   DateTime? get showRegisterDate => _registerDate;
 
@@ -244,6 +254,7 @@ class CustomerProvider extends ChangeNotifier {
       required Order targetOrder,
       required String customerId}) async {
     const uuid = Uuid();
+    print('saveNewOrdrerINFOOOOOOO $targetOrder');
     final Order newOrder = Order(
       customerId: customerId,
       id: uuid.v4(),
@@ -465,92 +476,107 @@ class CustomerProvider extends ChangeNotifier {
             : 16;
     notifyListeners();
   }
+  /// filter options
+  List<DropdownMenuItem<String>> filterList() {
+    return _filterOptionMap.values.map((e) =>
+      DropdownMenuItem<String>(child:
+  Text(e),value: e)).toList();
+    notifyListeners();
+  }
 
+  void selectedValue(String newValue){
+    _selectedFilter = newValue;
+    notifyListeners();
+  }
   // SHOW FILTER VALUES FOR DROPDOWN BUTTON
   void filterValues(
-      {required String? value, required String customerId}) async {
-    switch (value) {
-      case 'All':
+      {required String value, required String customerId}) async {
+    final FilterOption filterOption = _filterOptionMap.entries.firstWhere((element) => element
+        .value == value,).key;
+    switch (filterOption) {
+      case FilterOption.all:
         _allCustomersOrders = customer(customerId).customerOrder;
+        print('filter option all $_allCustomersOrders');
         notifyListeners();
         break;
-      case 'Swen NOT Delivered':
-        _allCustomersOrders = customer(customerId)
-            .customerOrder
-            .where((foundOrder) =>
-                foundOrder.isDone == true && foundOrder.isDelivered == false)
-            .toList();
+      case FilterOption.swenNotDelivered:
+        _allCustomersOrders = customer(customerId).customerOrder.where((foundOrder) => foundOrder.isDone == true && foundOrder.isDelivered == false).toList();
+        print('filter option SND $_allCustomersOrders');
         notifyListeners();
         break;
-      case 'Sewn & Delivered':
+      case FilterOption.swenAndDelivered:
         _allCustomersOrders = customer(customerId)
-            .customerOrder
-            .where((foundOrder) =>
-                foundOrder.isDelivered == true && foundOrder.isDone == true)
-            .toList();
-
+            .customerOrder.where((foundOrder) => foundOrder.isDelivered == true && foundOrder.isDone == true).toList();
+        print('filter option SAD $_allCustomersOrders');
         notifyListeners();
         break;
-      case 'In Progress':
+      case FilterOption.inProgress:
         _allCustomersOrders = customer(customerId)
-            .customerOrder
-            .where((foundOrder) =>
-                foundOrder.isDone == false && foundOrder.isDelivered == false)
-            .toList();
+            .customerOrder.where((foundOrder) => foundOrder.isDone == false && foundOrder.isDelivered == false).toList();
+        print('filter option in progress $_allCustomersOrders');
         notifyListeners();
         break;
     }
+    notifyListeners();
   }
 
   // CHANGE THE ORDER STATUS [Swen NOT Delivered , Sewn & Delivered , In Progress]
   void onChangeFilterValue(
-      {required String? newValue, required String customerId}) async {
-    if (newValue != null) {
+      {required String newValue, required String customerId}) async {
       _selectedFilter = newValue;
       filterValues(value: newValue, customerId: customerId);
-      await _swingBox.put('filterValueKey', newValue);
       notifyListeners();
-    }
+      await _swingBox.put('filterValueKey', newValue);
   }
 
-  // This METHOD MATCHED THE COLOR OF POPUPMENU CIRCLES WITH THE LEADING
-  // CIRCLE OF EACH CARD
+  /// This METHOD MATCHED THE COLOR OF POPUPMENU CIRCLES WITH THE LEADING CIRCLE OF EACH CARD
   Color circleMatchWithPopupValueColor({required Order order}) {
-    return (order.isDone && order.isDelivered)
-        ? Colors.green.shade800
-        : (order.isDone && !order.isDelivered)
-            ? AppColorsAndThemes.secondaryColor
-            : Colors.orange.shade700;
-    notifyListeners();
+    late Color circleColor;
+    if(order.isDone && order.isDelivered){
+      circleColor = Colors.green.shade800;
+    }
+    if(order.isDone && !order.isDelivered){
+      circleColor = AppColorsAndThemes.secondaryColor;
+    }
+    if(!order.isDone && !order.isDelivered){
+      circleColor = Colors.orange.shade700;
+    }
+    return circleColor;
   }
 
 // ON ORDER POPUP
   void onPopupMenu(
       {required Order order,
-      required String value,
+      required FilterOption value,
       required Customer customer}) async {
-    const String sewnNotDelivered = 'Sewn NOT delivered';
-    const String sewnAndDelivered = 'Sewn & delivered';
-    const String inProgress = 'In progress';
     switch (value) {
-      case sewnNotDelivered:
+      case FilterOption.swenNotDelivered:
         order.isDone = true;
         order.isDelivered = false;
+
         notifyListeners();
         break;
-      case sewnAndDelivered:
+      case FilterOption.swenAndDelivered:
         order.isDone = true;
         order.isDelivered = true;
+
         notifyListeners();
         break;
-      case inProgress:
+      case FilterOption.inProgress:
         order.isDone = false;
         order.isDelivered = false;
+
         notifyListeners();
         break;
+      default:
+        FilterOption.all;
+        notifyListeners();
     }
+    _selectedFilter = _filterOptionMap[value]!;
+
+    notifyListeners();
     await Customer.addNewOrder(
         newOrder: order, customerId: customer.id, replaceOrderId: order.id);
-    notifyListeners();
+
   }
 }

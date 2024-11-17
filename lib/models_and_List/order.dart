@@ -144,11 +144,13 @@ class Order extends HiveObject with EquatableMixin {
 
   factory Order.fromMaps({required String customerId,
     required String orderId,
-    required Map<String, String> orderInfo,
+    required Map<String, dynamic> orderInfo,
     required DateTime register,
     required DateTime deadline,
   }){
     return Order(id: orderId,
+        isDelivered: orderInfo['isDelivered'],
+        isDone: orderInfo['isDone'],
         customerId: customerId,
         registeredDate: register,
         deadLineDate: deadline,
