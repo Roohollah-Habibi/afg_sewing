@@ -1,5 +1,5 @@
 import 'package:afg_sewing/providers/sample_provider.dart';
-import 'package:afg_sewing/screens/all_order_screens.dart';
+import 'package:afg_sewing/screens/orders/all_order_screens.dart';
 import 'package:afg_sewing/screens/customers/customer_page.dart';
 import 'package:afg_sewing/screens/customers/customer_profile.dart';
 import 'package:afg_sewing/screens/home_page.dart';
