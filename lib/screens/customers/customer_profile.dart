@@ -7,8 +7,6 @@ import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
 
-const String swingDb = 'SwingDb';
-
 class CustomerProfile extends StatefulWidget {
   final String customerId;
 
@@ -19,12 +17,6 @@ class CustomerProfile extends StatefulWidget {
 }
 
 class _CustomerProfileState extends State<CustomerProfile> {
-  @override
-  void initState() {
-    super.initState();
-    Provider.of<CustomerProvider>(context, listen: false)
-        .initializeAllOrders(customerId: widget.customerId);
-  }
 
   @override
   Widget build(BuildContext context) {

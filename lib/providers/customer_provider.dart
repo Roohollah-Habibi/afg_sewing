@@ -97,11 +97,7 @@ class CustomerProvider extends ChangeNotifier {
   bool get customerStatus => _customerStatus;
 
   // METHODS ========================================================================
-  /// To initialize orders for the first time
-  void initializeAllOrders({required String customerId}) {
-    final targetCustomer = _customerList.firstWhere((element) => element.id == customerId);
-    _allCustomersOrders = targetCustomer.customerOrder;
-  }
+
 
   /// getting target customer out of list
   Customer customer(String customerId) =>
@@ -299,8 +295,7 @@ class CustomerProvider extends ChangeNotifier {
     );
     await Customer.addNewOrder(
         newOrder: newOrder, customerId: customerId, replaceOrderId: targetOrder.id);
-    _reportOrders.add(newOrder);
-    _allCustomersOrders.add(newOrder);
+
     _orderTotalPrice = 0;
     _orderReceivedPrice = 0;
     _orderRemainingPrice = 0;
@@ -565,9 +560,9 @@ class CustomerProvider extends ChangeNotifier {
 
   // CHANGE THE ORDER STATUS [Swen NOT Delivered , Sewn & Delivered , In Progress]
   void onChangeFilterValue({required String newValue, required String customerId}) async {
-    filterValues(value: newValue, customerId: customerId);
     _selectedFilter = newValue;
     await _swingBox.put('profileFilterValue', _selectedFilter);
+    filterValues(value: _selectedFilter, customerId: customerId);
   }
 
   void onChangeReportFilterValue(String newValue) {
@@ -614,6 +609,7 @@ class CustomerProvider extends ChangeNotifier {
         notifyListeners();
         break;
     }
+    filterValues(value: _selectedFilter,customerId: customer.id);
     await Customer.addNewOrder(newOrder: order, customerId: customer.id, replaceOrderId: order.id);
     notifyListeners();
   }
