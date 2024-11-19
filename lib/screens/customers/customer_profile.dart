@@ -17,6 +17,12 @@ class CustomerProfile extends StatefulWidget {
 }
 
 class _CustomerProfileState extends State<CustomerProfile> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<CustomerProvider>().filterValues(
+        value: context.read<CustomerProvider>().getSelectedFilter, shouldNotify: false, customerId: widget.customerId);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,9 +31,11 @@ class _CustomerProfileState extends State<CustomerProfile> {
         title: const Text('Profile'),
       ),
       floatingActionButton: ElevatedButton.icon(
-        onPressed: () {
-          Navigator.of(context).pushNamed(RouteManager.orderPage,
-              arguments: {'customerId': widget.customerId, 'orderId': ''});
+        onPressed: () async {
+          await Navigator.of(context)
+              .pushNamed(RouteManager.orderPage, arguments: {'customerId': widget.customerId, 'orderId': ''}).then(
+            (value) => setState(() {}),
+          );
           // Provider.of<CustomerProvider>(context,listen: false).setOrderTimes(orderId: '',customerId: widget.customerId);
         },
         label: const Text('New Order'),
@@ -36,10 +44,8 @@ class _CustomerProfileState extends State<CustomerProfile> {
       body: Builder(
         builder: (context) {
           final customerProvider = Provider.of<CustomerProvider>(context);
-          int x = customerProvider.getOrders.length;
-          print('PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP');
           return Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.fromLTRB(8, 8, 8, 60),
             child: Column(
               children: [
                 Text(
@@ -52,10 +58,8 @@ class _CustomerProfileState extends State<CustomerProfile> {
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                  _buildPhoneCard(
-                      phoneNumber: customerProvider.customer(widget.customerId).phoneNumber1),
-                  _buildPhoneCard(
-                      phoneNumber: customerProvider.customer(widget.customerId).phoneNumber2),
+                  _buildPhoneCard(phoneNumber: customerProvider.customer(widget.customerId).phoneNumber1),
+                  _buildPhoneCard(phoneNumber: customerProvider.customer(widget.customerId).phoneNumber2),
                 ]),
                 const SizedBox(height: 16),
                 Row(
@@ -105,17 +109,14 @@ class _CustomerProfileState extends State<CustomerProfile> {
                             'No available Order for ${customerProvider.customer(widget.customerId).firstName} to '
                             'this filter option')
                         : Consumer<CustomerProvider>(
-                          builder: (context, providerValue, child) => ListView.builder(
+                            builder: (context, providerValue, child) => ListView.builder(
                               itemCount: providerValue.getOrders.length,
                               itemBuilder: (context, index) {
                                 Order targetOrder = providerValue.getOrders[index];
-                                String registerStr =
-                                    customerProvider.betterFormatedDate(targetOrder.registeredDate);
-                                String deadlineStr =
-                                    customerProvider.betterFormatedDate(targetOrder.deadLineDate);
+                                String registerStr = customerProvider.betterFormatedDate(targetOrder.registeredDate);
+                                String deadlineStr = customerProvider.betterFormatedDate(targetOrder.deadLineDate);
 
-                                return buildDismissible(
-                                    targetOrder, context, registerStr, deadlineStr);
+                                return buildDismissible(targetOrder, context, registerStr, deadlineStr);
                                 //                     Card(
                                 //                 color: customerProvider.deadlineColor(
                                 //                     targetOrder,
@@ -197,7 +198,7 @@ class _CustomerProfileState extends State<CustomerProfile> {
                                 //             );
                               },
                             ),
-                        ),
+                          ),
                   ),
                 ),
               ],
@@ -208,15 +209,13 @@ class _CustomerProfileState extends State<CustomerProfile> {
     );
   }
 
-  Widget buildDismissible(
-      Order targetOrder, BuildContext context, String registerStr, String deadlineStr) {
+  Widget buildDismissible(Order targetOrder, BuildContext context, String registerStr, String deadlineStr) {
     return Selector<CustomerProvider, CustomerProvider>(
       selector: (ctx, provider) => provider,
       builder: (_, providerValue, __) => Dismissible(
           key: Key(targetOrder.id),
           onDismissed: (direction) {
-            providerValue.removeOrderFromOrderList(
-                removableOrder: targetOrder, customerId: widget.customerId);
+            providerValue.removeOrderFromOrderList(removableOrder: targetOrder, customerId: widget.customerId);
             providerValue.getReportOrders.removeWhere(
               (element) => element.id == targetOrder.id,
             );
@@ -306,8 +305,8 @@ class _CustomerProfileState extends State<CustomerProfile> {
       shadowColor: AppColorsAndThemes.secondaryColor,
       child: ListTile(
         onTap: () {
-          Navigator.of(context).pushNamed(RouteManager.orderPage,
-              arguments: {'customerId': widget.customerId, 'orderId': order.id});
+          Navigator.of(context)
+              .pushNamed(RouteManager.orderPage, arguments: {'customerId': widget.customerId, 'orderId': order.id});
           provider.checkAndSetOrderDeadline(orderId: order.id, customerId: widget.customerId);
         },
         leading: Icon(
@@ -348,55 +347,49 @@ class CustomPopupMenuButton extends StatelessWidget {
   final CustomerProvider provider;
   final Customer customer;
 
-  const CustomPopupMenuButton(
-      {super.key, required this.order, required this.customer, required this.provider});
+  const CustomPopupMenuButton({super.key, required this.order, required this.customer, required this.provider});
 
   @override
   Widget build(BuildContext context) {
     return PopupMenuButton(
-        itemBuilder: (context) =>
-        <PopupMenuEntry<String>>
-        [
-          PopupMenuItem(
-                  value: 'Sewn NOT Delivered',
-                  onTap: () => provider.onPopupMenu(
-                      order: order, value: 'Sewn NOT Delivered', customer: customer),
-                  child: _SimpleRowForTextIcon(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      mainAxisSize: MainAxisSize.max,
-                      text: 'Sewn NOT Delivered',
-                      icon: const Icon(Icons.circle, color: AppColorsAndThemes.secondaryColor),
-                      firstIconThenText: false)),
-              const PopupMenuDivider(height: 10),
-              PopupMenuItem(
-                value: 'Sewn & Delivered',
-                onTap: () => provider.onPopupMenu(
-                    order: order, value: 'Sewn & Delivered', customer: customer),
-                child: _SimpleRowForTextIcon(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  mainAxisSize: MainAxisSize.max,
-                  text: 'Sewn & Delivered',
-                  icon: Icon(
-                    Icons.circle,
-                    color: Colors.green[800],
-                  ),
-                  firstIconThenText: false,
-                ),
-              ),
-              const PopupMenuDivider(height: 10),
-              PopupMenuItem(
-                value: 'In Progress',
-                onTap: () =>
-                    provider.onPopupMenu(order: order, value: 'In Progress', customer: customer),
-                child: _SimpleRowForTextIcon(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  mainAxisSize: MainAxisSize.max,
-                  text: 'In Progress',
-                  icon: Icon(Icons.circle, color: Colors.orange.shade700),
-                  firstIconThenText: false,
-                ),
-              ),
-            ],
+      itemBuilder: (context) => <PopupMenuEntry<String>>[
+        PopupMenuItem(
+            value: 'Sewn NOT Delivered',
+            onTap: () => provider.onPopupMenu(order: order, value: 'Sewn NOT Delivered', customer: customer),
+            child: _SimpleRowForTextIcon(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisSize: MainAxisSize.max,
+                text: 'Sewn NOT Delivered',
+                icon: const Icon(Icons.circle, color: AppColorsAndThemes.secondaryColor),
+                firstIconThenText: false)),
+        const PopupMenuDivider(height: 10),
+        PopupMenuItem(
+          value: 'Sewn & Delivered',
+          onTap: () => provider.onPopupMenu(order: order, value: 'Sewn & Delivered', customer: customer),
+          child: _SimpleRowForTextIcon(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisSize: MainAxisSize.max,
+            text: 'Sewn & Delivered',
+            icon: Icon(
+              Icons.circle,
+              color: Colors.green[800],
+            ),
+            firstIconThenText: false,
+          ),
+        ),
+        const PopupMenuDivider(height: 10),
+        PopupMenuItem(
+          value: 'In Progress',
+          onTap: () => provider.onPopupMenu(order: order, value: 'In Progress', customer: customer),
+          child: _SimpleRowForTextIcon(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisSize: MainAxisSize.max,
+            text: 'In Progress',
+            icon: Icon(Icons.circle, color: Colors.orange.shade700),
+            firstIconThenText: false,
+          ),
+        ),
+      ],
     );
   }
 }

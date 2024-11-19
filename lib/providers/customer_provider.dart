@@ -263,7 +263,7 @@ class CustomerProvider extends ChangeNotifier {
     const uuid = Uuid();
     final Order newOrder = Order(
       customerId: customerId,
-      id: uuid.v4(),
+      id: targetOrder.id.isEmpty ? uuid.v4() : targetOrder.id,
       isDone: targetOrder.isDone,
       isDelivered: targetOrder.isDelivered,
       registeredDate: targetOrder.registeredDate,
@@ -293,8 +293,7 @@ class CustomerProvider extends ChangeNotifier {
       receivedMoney: targetOrder.receivedMoney,
       remainingMoney: _orderRemainingPrice,
     );
-    await Customer.addNewOrder(
-        newOrder: newOrder, customerId: customerId, replaceOrderId: targetOrder.id);
+    await Customer.addNewOrder(newOrder: newOrder, customerId: customerId, replaceOrderId: targetOrder.id);
 
     _orderTotalPrice = 0;
     _orderReceivedPrice = 0;
@@ -302,6 +301,7 @@ class CustomerProvider extends ChangeNotifier {
     notifyListeners();
     if (context.mounted) {
       Navigator.of(context).pop(RouteManager.orderPage);
+      filterValues(value: _selectedFilter,customerId: customerId);
     }
     _orderTimesInfo = {};
     _orderRegister = DateTime.now();
@@ -474,9 +474,13 @@ class CustomerProvider extends ChangeNotifier {
             : 16;
   }
 
-  // SHOW FILTER VALUES FOR DROPDOWN BUTTON
+  /// SHOW FILTER VALUES FOR DROPDOWN BUTTON this should be called first in init state in profile
+  /// when navigating back and come back to the profile show the appropriate list according to the filter options and
+  /// also when saving new to automatically filter values and shows order. otherwise user must change the filter in
+  /// order to see the changes.
   void filterValues(
-      {required String value, String customerId = '', bool filterValueForReport = false}) async {
+      {required String value, String customerId = '', bool filterValueForReport = false,bool
+      shouldNotify = true}) async {
     List<Order> allOrders = _swingBox.values
         .whereType<Customer>()
         .toList()
@@ -485,7 +489,6 @@ class CustomerProvider extends ChangeNotifier {
           (element) => element.customerOrder,
         )
         .toList();
-
     DateTime today = formatMyDate(myDate: DateTime.now()) as DateTime;
     switch (value) {
       case 'All':
@@ -497,7 +500,7 @@ class CustomerProvider extends ChangeNotifier {
               )
               .toList();
         _reportOrders = allOrders;
-        notifyListeners();
+        if(shouldNotify)notifyListeners();
         print('filter option all $_allCustomersOrders');
         break;
       case 'Sewn NOT Delivered':
@@ -510,7 +513,7 @@ class CustomerProvider extends ChangeNotifier {
             .where((element) => element.isDone == true && element.isDelivered == false)
             .toList();
         print('filter option SND $_allCustomersOrders');
-        notifyListeners();
+        if(shouldNotify)notifyListeners();
         break;
 
       case 'Sewn & Delivered':
@@ -523,7 +526,7 @@ class CustomerProvider extends ChangeNotifier {
             .where((element) => element.isDelivered == true && element.isDone == true)
             .toList();
         print('filter option SAD $_allCustomersOrders');
-        notifyListeners();
+        if(shouldNotify)notifyListeners();
         break;
 
       case 'In Progress':
@@ -536,26 +539,26 @@ class CustomerProvider extends ChangeNotifier {
             .where((element) => element.isDone == false && element.isDelivered == false)
             .toList();
         print('filter option in progress $_allCustomersOrders');
-        notifyListeners();
+        if(shouldNotify)notifyListeners();
         break;
       case 'Expired':
         _reportOrders = allOrders.where((element) => element.deadLineDate.isBefore(today)).toList();
-        notifyListeners();
+        if(shouldNotify)notifyListeners();
         break;
       case 'Just today':
         _reportOrders =
             allOrders.where((element) => element.deadLineDate.isAtSameMomentAs(today)).toList();
-        notifyListeners();
+        if(shouldNotify)notifyListeners();
         break;
       case '2 days left':
         _reportOrders = allOrders
             .where((element) =>
                 today.isAtSameMomentAs(element.deadLineDate.subtract(const Duration(days: 2))))
             .toList();
-        notifyListeners();
+        if(shouldNotify)notifyListeners();
         break;
     }
-    notifyListeners();
+    if(shouldNotify)notifyListeners();
   }
 
   // CHANGE THE ORDER STATUS [Swen NOT Delivered , Sewn & Delivered , In Progress]

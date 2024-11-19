@@ -140,7 +140,7 @@ class _OrderPageState extends State<OrderPage> {
                         customerId: widget.customerId,
                         targetOrder: foundOrder);
                   },
-                  label: const Text('Save'),
+                  label: Text(widget.orderId.isEmpty ?'Save' : 'Edit'),
                   icon: const Icon(Icons.save),
                 ),
                 const SizedBox(
