@@ -1,3 +1,4 @@
+import 'package:afg_sewing/custom_widgets/text_icon_row.dart';
 import 'package:afg_sewing/models_and_List/customer.dart';
 import 'package:afg_sewing/models_and_List/order.dart';
 import 'package:afg_sewing/page_routing/rout_manager.dart';
@@ -50,7 +51,7 @@ class _CustomerProfileState extends State<CustomerProfile> {
               children: [
                 Text(
                   '${customerProvider.customer(widget.customerId).firstName}'
-                  '\t${customerProvider.customer(widget.customerId).lastName}',
+                  ' ${customerProvider.customer(widget.customerId).lastName}',
                   style: Theme.of(context).textTheme.headlineLarge,
                 ),
                 Text(
@@ -86,11 +87,11 @@ class _CustomerProfileState extends State<CustomerProfile> {
                         alignment: Alignment.center,
                         iconSize: 30,
                         value: providerValue.getSelectedFilter,
-                        items: providerValue.profileFilterList
+                        items: providerValue.profileFilterList.where((element) =>
+                          element != 'Just today')
                             .map((e) => DropdownMenuItem<String>(child: Text(e), value: e))
                             .toList(),
                         onChanged: (value) {
-                          print('THIS IS THE VALUE: $value');
                           providerValue.onChangeFilterValue(
                             newValue: value!,
                             customerId: widget.customerId,
@@ -322,13 +323,13 @@ class _CustomerProfileState extends State<CustomerProfile> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _SimpleRowForTextIcon(
+            SimpleRowForTextIcon(
                 text: registerDate,
                 icon: const Icon(
                   Icons.calendar_month,
                 )),
             const SizedBox(height: 20),
-            _SimpleRowForTextIcon(
+            SimpleRowForTextIcon(
               text: deadline,
               icon: const Icon(
                 Icons.alarm,
@@ -356,17 +357,17 @@ class CustomPopupMenuButton extends StatelessWidget {
         PopupMenuItem(
             value: 'Sewn NOT Delivered',
             onTap: () => provider.onPopupMenu(order: order, value: 'Sewn NOT Delivered', customer: customer),
-            child: _SimpleRowForTextIcon(
+            child: SimpleRowForTextIcon(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 mainAxisSize: MainAxisSize.max,
                 text: 'Sewn NOT Delivered',
-                icon: const Icon(Icons.circle, color: AppColorsAndThemes.secondaryColor),
+                icon: const Icon(Icons.circle, color: AppColorsAndThemes.accentColor),
                 firstIconThenText: false)),
         const PopupMenuDivider(height: 10),
         PopupMenuItem(
           value: 'Sewn & Delivered',
           onTap: () => provider.onPopupMenu(order: order, value: 'Sewn & Delivered', customer: customer),
-          child: _SimpleRowForTextIcon(
+          child: SimpleRowForTextIcon(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             mainAxisSize: MainAxisSize.max,
             text: 'Sewn & Delivered',
@@ -381,7 +382,7 @@ class CustomPopupMenuButton extends StatelessWidget {
         PopupMenuItem(
           value: 'In Progress',
           onTap: () => provider.onPopupMenu(order: order, value: 'In Progress', customer: customer),
-          child: _SimpleRowForTextIcon(
+          child: SimpleRowForTextIcon(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             mainAxisSize: MainAxisSize.max,
             text: 'In Progress',
@@ -394,50 +395,6 @@ class CustomPopupMenuButton extends StatelessWidget {
   }
 }
 
-// Simple row to show icon and a text next to each other like. which one usage is inside popup
-// menu buttons on Orders
-class _SimpleRowForTextIcon extends StatelessWidget {
-  final String text;
-  final Icon icon;
-  final bool firstIconThenText;
-  final MainAxisAlignment mainAxisAlignment;
-  final CrossAxisAlignment crossAxisAlignment;
-  final MainAxisSize mainAxisSize;
-
-  const _SimpleRowForTextIcon(
-      {super.key,
-      required this.text,
-      required this.icon,
-      this.firstIconThenText = true,
-      this.mainAxisAlignment = MainAxisAlignment.start,
-      this.crossAxisAlignment = CrossAxisAlignment.start,
-      this.mainAxisSize = MainAxisSize.min});
-
-  @override
-  Widget build(BuildContext context) {
-    return firstIconThenText
-        ? Row(
-            mainAxisSize: mainAxisSize,
-            mainAxisAlignment: mainAxisAlignment,
-            crossAxisAlignment: crossAxisAlignment,
-            children: [
-              icon,
-              const SizedBox(width: 15),
-              Text(text, style: Theme.of(context).textTheme.bodyMedium),
-            ],
-          )
-        : Row(
-            mainAxisSize: mainAxisSize,
-            mainAxisAlignment: mainAxisAlignment,
-            crossAxisAlignment: crossAxisAlignment,
-            children: [
-              Text(text),
-              const SizedBox(width: 15),
-              icon,
-            ],
-          );
-  }
-}
 
 // show card for user phones
 Widget _buildPhoneCard({required String phoneNumber}) {

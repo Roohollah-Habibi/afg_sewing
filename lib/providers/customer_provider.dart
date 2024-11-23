@@ -3,6 +3,7 @@ import 'package:afg_sewing/models_and_List/order.dart';
 import 'package:afg_sewing/page_routing/rout_manager.dart';
 import 'package:afg_sewing/screens/customers/add_customer_panel.dart';
 import 'package:afg_sewing/themes/app_colors_themes.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
@@ -11,24 +12,27 @@ import 'package:uuid/uuid.dart';
 final Box _swingBox = Hive.box('SwingDb');
 
 enum PriceType { total, received, remaining }
-
+Map<String,int> _orderStatusColorFromDb = (_swingBox.get('orderStatusColor') as Map?)?.cast<String,int>() ?? {};
 class CustomerProvider extends ChangeNotifier {
   //constructor initialize all orders
   CustomerProvider() {
     _orderRegister = formatMyDate(myDate: DateTime.now()) as DateTime;
   }
 
-  final profileFilterList = [
+  final List<String> profileFilterList = [
     'All',
     'In Progress',
     'Sewn & Delivered',
     'Sewn NOT Delivered',
     'Expired',
+    'Just today',
   ];
+  Map<String, Color> _reportOrderStatusColor = _orderStatusColorFromDb.map((key, value) => MapEntry(key, Color(value)));
   static const fieldKeyForName = 'name';
   static const fieldKeyForLast = 'last';
   static const fieldKeyForPhone = 'phone';
   Color _deadlineOrderColor = AppColorsAndThemes.secondaryColor;
+  Color _circleMatchColor = AppColorsAndThemes.accentColor;
   double _orderTotalPrice = 0;
   double _orderReceivedPrice = 0;
   int _orderRemainingPrice = 0;
@@ -45,7 +49,7 @@ class CustomerProvider extends ChangeNotifier {
   List<Customer> _customerList = _swingBox.values.whereType<Customer>().toList().cast<Customer>();
 
   List<Order> _allCustomersOrders = [];
-
+  List<bool> _expandedStatusForReports = [];
   late List<Order> _reportOrders = _swingBox.values
       .whereType<Customer>()
       .toList()
@@ -56,8 +60,8 @@ class CustomerProvider extends ChangeNotifier {
       .toList();
 
   String _selectedFilter = (_swingBox.get('profileFilterValue') as String?) ?? 'All';
-  String _reportSelectedFilterValue = 'All';
-
+  String _reportSelectedFilterValue = (_swingBox.get('reportFilterValue') as String?) ?? 'All';
+  // bool _isCollapsed = true
   bool _customerStatus = false;
   final List<String> selectableOrderStatus = [
     'In Progress',
@@ -67,11 +71,14 @@ class CustomerProvider extends ChangeNotifier {
 
   // Getters ====================================================================
   List<Customer> get getCustomers => _customerList;
-
+  Color get getCircleMatchedColor => _circleMatchColor;
+  Map<String,Color> get getReportOrderStatusColor => _reportOrderStatusColor;
+  List<bool> get getExpandedStatusListForReports => _expandedStatusForReports;
+  bool isCollapsed(int index) => getExpandedStatusListForReports[index];
   String get getSelectedReport => _reportSelectedFilterValue;
-
+  List<Order> get reportOrders => _reportOrders;
   List<Order> get getReportOrders => _reportOrders;
-
+  List<String> get getProfileFilters => profileFilterList;
   Color get getDeadlineOrderColor => _deadlineOrderColor;
 
   DateTime? get getOrderRegister => _orderRegister;
@@ -97,17 +104,30 @@ class CustomerProvider extends ChangeNotifier {
   bool get customerStatus => _customerStatus;
 
   // METHODS ========================================================================
-
+  void toggleExpansion({bool isExpanded = true, int? index}){
+    if(index != null){
+      _expandedStatusForReports.removeAt(index);
+      _expandedStatusForReports.insert(index, !isExpanded);
+    notifyListeners();
+    }else{
+      setExpanded();
+    notifyListeners();
+    }
+  }
+  /// to change the status of each expanded list by calling change notifier
+  void setExpanded() {
+    _expandedStatusForReports = List.generate(_reportOrders.length, (index) => true);
+  }
 
   /// getting target customer out of list
-  Customer customer(String customerId) =>
-      _customerList.firstWhere((foundCustomer) => foundCustomer.id == customerId);
+  Customer customer(String customerId) => _customerList.firstWhere((foundCustomer) => foundCustomer.id == customerId);
 
   /// this method is used to delete an order from both order list and the database.
   void removeOrderFromOrderList({required Order removableOrder, required String customerId}) {
     _allCustomersOrders.removeWhere(
       (element) => element.id == removableOrder.id,
     );
+    _reportOrders.removeWhere((element) => element.id == removableOrder.id);
     Customer.removeOrder(customerId: customerId, removableOrder: removableOrder);
     notifyListeners();
   }
@@ -294,10 +314,12 @@ class CustomerProvider extends ChangeNotifier {
       remainingMoney: _orderRemainingPrice,
     );
     await Customer.addNewOrder(newOrder: newOrder, customerId: customerId, replaceOrderId: targetOrder.id);
-
     _orderTotalPrice = 0;
     _orderReceivedPrice = 0;
     _orderRemainingPrice = 0;
+    if(targetOrder.id.isEmpty){
+      _reportOrderStatusColor[newOrder.id] = Colors.orange;
+    }
     notifyListeners();
     if (context.mounted) {
       Navigator.of(context).pop(RouteManager.orderPage);
@@ -376,7 +398,7 @@ class CustomerProvider extends ChangeNotifier {
     return false;
   }
 
-// ON SAVING NEW CUSTOMER to Hive through show model button sheet when pressing on [+ New Customer]
+/// ON SAVING NEW CUSTOMER to Hive through show model button sheet when pressing on [+ New Customer]
   Future<void> onSave({
     required String name,
     required String lastName,
@@ -444,6 +466,7 @@ class CustomerProvider extends ChangeNotifier {
   Future<void> deleteCustomer({required BuildContext context, required Customer customer}) async {
     await _swingBox.delete(customer.id);
     _customerList.removeWhere((element) => element == customer);
+    _reportOrders.removeWhere((element) => element.customerId == customer.id);
     notifyListeners();
     if (context.mounted) {
       Navigator.of(context).pop();
@@ -501,7 +524,7 @@ class CustomerProvider extends ChangeNotifier {
               .toList();
         _reportOrders = allOrders;
         if(shouldNotify)notifyListeners();
-        print('filter option all $_allCustomersOrders');
+
         break;
       case 'Sewn NOT Delivered':
         if (!filterValueForReport)
@@ -512,7 +535,6 @@ class CustomerProvider extends ChangeNotifier {
         _reportOrders = allOrders
             .where((element) => element.isDone == true && element.isDelivered == false)
             .toList();
-        print('filter option SND $_allCustomersOrders');
         if(shouldNotify)notifyListeners();
         break;
 
@@ -525,36 +547,28 @@ class CustomerProvider extends ChangeNotifier {
         _reportOrders = allOrders
             .where((element) => element.isDelivered == true && element.isDone == true)
             .toList();
-        print('filter option SAD $_allCustomersOrders');
         if(shouldNotify)notifyListeners();
         break;
 
       case 'In Progress':
         if (!filterValueForReport)
-          _allCustomersOrders = customer(customerId)
-              .customerOrder
-              .where((foundOrder) => foundOrder.isDone == false && foundOrder.isDelivered == false)
-              .toList();
-        _reportOrders = allOrders
-            .where((element) => element.isDone == false && element.isDelivered == false)
+          _allCustomersOrders = customer(customerId).customerOrder.where((foundOrder) => foundOrder.isDone == false && foundOrder.isDelivered == false).toList();
+        _reportOrders = allOrders.where((element) => element.isDone == false && element.isDelivered == false)
             .toList();
-        print('filter option in progress $_allCustomersOrders');
         if(shouldNotify)notifyListeners();
         break;
+
       case 'Expired':
+        if(!filterValueForReport)_allCustomersOrders = customer(customerId).customerOrder.where((foundOrder) => foundOrder.deadLineDate.isBefore
+          (today)).toList();
+
         _reportOrders = allOrders.where((element) => element.deadLineDate.isBefore(today)).toList();
+
         if(shouldNotify)notifyListeners();
         break;
       case 'Just today':
         _reportOrders =
             allOrders.where((element) => element.deadLineDate.isAtSameMomentAs(today)).toList();
-        if(shouldNotify)notifyListeners();
-        break;
-      case '2 days left':
-        _reportOrders = allOrders
-            .where((element) =>
-                today.isAtSameMomentAs(element.deadLineDate.subtract(const Duration(days: 2))))
-            .toList();
         if(shouldNotify)notifyListeners();
         break;
     }
@@ -568,10 +582,10 @@ class CustomerProvider extends ChangeNotifier {
     filterValues(value: _selectedFilter, customerId: customerId);
   }
 
-  void onChangeReportFilterValue(String newValue) {
+  void onChangeReportFilterValue(String newValue) async{
     _reportSelectedFilterValue = newValue;
+    await _swingBox.put('reportFilterValue', _reportSelectedFilterValue);
     filterValues(value: newValue, filterValueForReport: true);
-    notifyListeners();
   }
 
   /// This METHOD MATCHED THE COLOR OF POPUPMENU CIRCLES WITH THE LEADING CIRCLE OF EACH CARD
@@ -581,7 +595,7 @@ class CustomerProvider extends ChangeNotifier {
       circleColor = Colors.green.shade800;
     }
     if (order.isDone && !order.isDelivered) {
-      circleColor = AppColorsAndThemes.secondaryColor;
+      circleColor = AppColorsAndThemes.accentColor;
     }
     if (!order.isDone && !order.isDelivered) {
       circleColor = Colors.orange.shade700;
@@ -592,28 +606,31 @@ class CustomerProvider extends ChangeNotifier {
 // ON ORDER POPUP
   void onPopupMenu(
       {required Order order, required String value, required Customer customer}) async {
+    Map<String,int> _localStatusOrderColor = {};
     switch (value) {
       case 'Sewn NOT Delivered':
         order.isDone = true;
         order.isDelivered = false;
-
-        notifyListeners();
+        _reportOrderStatusColor[order.id] = AppColorsAndThemes.accentColor;
+            notifyListeners();
         break;
       case 'Sewn & Delivered':
         order.isDone = true;
         order.isDelivered = true;
-
+        _reportOrderStatusColor[order.id] = Colors.green.shade800;
         notifyListeners();
         break;
       case 'In Progress':
         order.isDone = false;
         order.isDelivered = false;
-
+        _reportOrderStatusColor[order.id] = Colors.orange.shade700;
         notifyListeners();
         break;
     }
     filterValues(value: _selectedFilter,customerId: customer.id);
     await Customer.addNewOrder(newOrder: order, customerId: customer.id, replaceOrderId: order.id);
+    _localStatusOrderColor = _reportOrderStatusColor.map((key, value) => MapEntry(key, value.value));
+    await _swingBox.put('orderStatusColor', _localStatusOrderColor);
     notifyListeners();
   }
 }

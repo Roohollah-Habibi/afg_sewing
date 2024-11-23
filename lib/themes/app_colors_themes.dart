@@ -5,7 +5,7 @@ class AppColorsAndThemes {
   static const primaryColor = Color.fromRGBO(243, 243, 224, 1);
   static const subPrimaryColor = Color.fromRGBO(199, 203, 208, 1.0);
   static const secondaryColor = Color.fromARGB(255, 19, 62, 135);
-  static const accentColor = Color.fromARGB(255, 72, 98, 203);
+  static const accentColor = Color.fromARGB(255, 163, 86, 196);
   static const optional = Color.fromARGB(255, 203, 220, 235);
 
   static const darkPrimaryColor = Color.fromRGBO(54, 48, 98, 1);

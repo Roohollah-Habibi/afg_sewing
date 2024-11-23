@@ -1,14 +1,12 @@
-
+import 'package:afg_sewing/custom_widgets/popup_menu_button.dart';
 import 'package:afg_sewing/models_and_List/customer.dart';
 import 'package:afg_sewing/models_and_List/order.dart';
 import 'package:afg_sewing/page_routing/rout_manager.dart';
 import 'package:afg_sewing/providers/customer_provider.dart';
+import 'package:afg_sewing/screens/reports.dart';
+import 'package:afg_sewing/themes/app_colors_themes.dart';
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:tuple/tuple.dart';
-const String swingDb = 'SwingDb';
 
 class AllOrderScreens extends StatefulWidget {
   const AllOrderScreens({super.key});
@@ -18,31 +16,38 @@ class AllOrderScreens extends StatefulWidget {
 }
 
 class _AllOrderScreensState extends State<AllOrderScreens> {
-  late List<Customer> allCustomers;
-  final List<String> selectableOrderStatus = [
-    'In Progress',
-    'Swen NOT Delivered',
-    'Sewn & Delivered',
-  ];
-  final List<String> filterOptions = [
-    'In Progress',
-    'Swen NOT Delivered',
-    'Sewn & Delivered',
-    'expired',
-    '2 days left',
-    'just today',
-    'All'
-  ];
-  String selectedFilter = 'All';
+  final ScrollController _scrollController = ScrollController();
+//   // late List<Customer> allCustomers;
+//   final List<String> selectableOrderStatus = [
+//     'In Progress',
+//     'Swen NOT Delivered',
+//     'Sewn & Delivered',
+//   ];
+//   final List<String> filterOptions = [
+//     'In Progress',
+//     'Swen NOT Delivered',
+//     'Sewn & Delivered',
+//     'expired',
+//     '2 days left',
+//     'just today',
+//     'All'
+//   ];
+//   String selectedFilter = 'All';
+  @override
+  void initState() {
+    super.initState();
+    Provider.of<CustomerProvider>(context, listen: false).onChangeReportFilterValue(context.read<CustomerProvider>().getSelectedReport);
+    Provider.of<CustomerProvider>(context, listen: false).setExpanded();
+    // _scrollController.addListener(_expansionController.collapse);
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //
-  //   allOrders = [for (var order in allCustomers) ...order.customerOrder];
-  //   selectedFilter = swingBox.get('filterValueKey') ?? 'In Progress';
-  //   filterValues(selectedFilter);
-  // }
+    // selectedFilter = swingBox.get('filterValueKey') ?? 'In Progress';
+    // filterValues(selectedFilter);
+  }
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   // void changeOrderStatusValues(
   //     {required String value, required Order selectedOrder}){
@@ -82,8 +87,7 @@ class _AllOrderScreensState extends State<AllOrderScreens> {
   //   onChangeDropdownFilterValue(selectedFilter);
   // }
   //
-  // List<PopupMenuEntry<String>> orderStatusSelection(
-  //         BuildContext context, Order order) =>
+  // List<PopupMenuEntry<String>> orderStatusSelection(BuildContext context, Order order) =>
   //     [
   //       PopupMenuItem<String>(
   //           onTap: () {
@@ -112,7 +116,7 @@ class _AllOrderScreensState extends State<AllOrderScreens> {
   //         child: const Text('In Progress'),
   //       ),
   //     ];
-  //
+
   // // SHOW FILTER VALUES FOR DROPDOWN BUTTON
   // void filterValues(String? value) async {
   //   final todayStr = DateFormat('yyyy-MM-dd').format(DateTime.now());
@@ -162,14 +166,14 @@ class _AllOrderScreensState extends State<AllOrderScreens> {
   //   }
   //   setState(() {});
   // }
-  //
+
   // void onChangeDropdownFilterValue(String? newValue) async {
   //   if (newValue != null) {
   //     setState(() {
   //       selectedFilter = newValue;
   //     });
-  //     // await swingBox.put('filterValueKey', newValue);
-  //     // filterValues(newValue);
+  // await swingBox.put('filterValueKey', newValue);
+  // filterValues(newValue);
   //   }
   // }
 
@@ -186,14 +190,13 @@ class _AllOrderScreensState extends State<AllOrderScreens> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Selector<CustomerProvider,int>(
+              Selector<CustomerProvider, int>(
                 selector: (_, provider) => provider.getReportOrders.length,
-                builder: (context, providerValue, child) => Padding(
+                builder: (_, providerValue, __) => Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Text(
                     'Orders: $providerValue',
-                    style: const TextStyle(
-                        fontSize: 18, fontWeight: FontWeight.bold),
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
@@ -209,8 +212,7 @@ class _AllOrderScreensState extends State<AllOrderScreens> {
                       iconSize: 30,
                       value: providerValue.getSelectedReport,
                       onChanged: (value) => providerValue.onChangeReportFilterValue(value!),
-                      items: filterOptions
-                          .map<DropdownMenuItem<String>>((String value) {
+                      items: providerValue.profileFilterList.map<DropdownMenuItem<String>>((String value) {
                         return DropdownMenuItem<String>(
                           value: value,
                           child: Text(value),
@@ -222,108 +224,191 @@ class _AllOrderScreensState extends State<AllOrderScreens> {
               ),
             ],
           ),
-          // allOrders.isEmpty
-          //     ? const Expanded(
-          //         child: Center(
-          //           child: Text(
-          //             'No Order is Available',
-          //             style: TextStyle(
-          //                 fontWeight: FontWeight.bold,
-          //                 fontSize: 25,
-          //                 color: Colors.indigo),
-          //           ),
-          //         ),
-          //       )
-          //     : Expanded(
-          //         child: ListView.builder(
-          //           itemCount: allOrders.length,
-          //           itemBuilder: (context, index) {
-          //             final Order order = allOrders[index];
-          //             Customer myCustomer = allCustomers.firstWhere(
-          //               (element) => element.id == order.customerId,
-          //             );
-          //             return buildCard(context,
-          //                 customerName: myCustomer.firstName,
-          //                 customerLastName: myCustomer.lastName,
-          //                 registeredDate: order.registeredDate,
-          //                 deadLine: order.deadLineDate,
-          //                 orderId: order.id,
-          //                 customerId: myCustomer.id);
-          //           },
-          //         ),
-          //       ),
+          Consumer<CustomerProvider>(
+            builder: (context, providerValue, child) => providerValue.getReportOrders.isEmpty
+                ? Expanded(
+                    child: Center(
+                      child: Text(
+                        textAlign: TextAlign.center,
+                        'No Order is Available for this Filter',
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: AppColorsAndThemes.secondaryColor),
+                      ),
+                    ),
+                  )
+                : Expanded(
+                    child: ListView.builder(
+                      controller: _scrollController,
+                      itemCount: providerValue.getReportOrders.length,
+                      itemBuilder: (context, index) {
+                        final Order order = providerValue.getReportOrders[index];
+                        Customer myCustomer = context.read<CustomerProvider>().getCustomers.firstWhere((element) => element.id == order.customerId);
+                        int differenceDates = (providerValue.formatMyDate(myDate: order.deadLineDate) as DateTime)
+                            .difference((providerValue.formatMyDate(myDate: DateTime.now()) as DateTime))
+                            .inDays;
+                        bool isTileCollapsed = providerValue.isCollapsed(index);
+                        return Card(
+                          child: ExpansionTile(
+                            backgroundColor: AppColorsAndThemes.secondaryColor,
+                            collapsedBackgroundColor: AppColorsAndThemes.optional,
+                            collapsedTextColor: AppColorsAndThemes.secondaryColor,
+                            textColor: AppColorsAndThemes.primaryColor,
+                            collapsedIconColor: AppColorsAndThemes.secondaryColor,
+                            iconColor: isTileCollapsed ? AppColorsAndThemes.secondaryColor : AppColorsAndThemes.optional,
+                            onExpansionChanged: (value) => providerValue.toggleExpansion(index: index, isExpanded: value),
+                            title: InkWell(
+                              onTap: () => Navigator.of(context).pushNamed(RouteManager.customerProfile, arguments: {'id': myCustomer.id}),
+                              child: Text('${myCustomer.firstName} ${myCustomer.lastName}',
+                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+                            ),
+                            subtitle: Container(
+                              padding: const EdgeInsets.all(10),
+                              margin: const EdgeInsets.symmetric(vertical: 10),
+                              decoration: BoxDecoration(
+                                  color: isTileCollapsed ? AppColorsAndThemes.secondaryColor : AppColorsAndThemes.optional,
+                                  boxShadow: <BoxShadow>[
+                                    BoxShadow(
+                                      color: Colors.black,
+                                      blurRadius: 10,
+                                    )
+                                  ],
+                                  borderRadius: BorderRadiusDirectional.all(Radius.circular(20))),
+                              // margin: const EdgeInsets.all(16),
+                              width: MediaQuery.of(context).size.width * 50 / 100,
+                              height: MediaQuery.of(context).size.height * 20 / 100,
+                              child: Column(
+                                children: [
+                                  Text('Registered: ${providerValue.formatMyDate(myDate: order.registeredDate, returnAsDate: false) as String}',
+                                      style: TextStyle(
+                                          fontSize: 17,
+                                          fontWeight: FontWeight.bold,
+                                          color: isTileCollapsed ? AppColorsAndThemes.subPrimaryColor : AppColorsAndThemes.secondaryColor)),
+                                  const SizedBox(height: 20),
+                                  Text('DeadLine : ${providerValue.formatMyDate(myDate: order.deadLineDate, returnAsDate: false) as String}',
+                                      style: TextStyle(
+                                          fontSize: 17,
+                                          fontWeight: FontWeight.bold,
+                                          color: isTileCollapsed ? AppColorsAndThemes.subPrimaryColor : AppColorsAndThemes.secondaryColor)),
+                                  const SizedBox(height: 10),
+                                  Flexible(
+                                    child: Text(
+                                      differenceDates < 0 ? 'Days past: $differenceDates' : 'Days left: $differenceDates',
+                                      style: TextStyle(
+                                          fontSize: 17,
+                                          fontWeight: FontWeight.bold,
+                                          color: isTileCollapsed ? AppColorsAndThemes.subPrimaryColor : AppColorsAndThemes.secondaryColor),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            children: [
+                              Card(child: ListTile(
+                                trailing: CustomPopupMenuButton(order: order, customer: myCustomer, provider: providerValue),
+                                title: ElevatedButton.icon(
+                                  icon: Icon(Icons.circle,color: providerValue.getReportOrderStatusColor[order.id]),
+                                  onPressed: () => Navigator.of(context).pushNamed(RouteManager.orderPage, arguments: {
+                                    'customerId': myCustomer.id,
+                                    'orderId'
+                                        '': order.id
+                                  }),
+                                  label: Text(
+                                    'Order: ${myCustomer.id}',
+                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17, color: Colors.yellow),
+                                  ),
+                                  style: ElevatedButton.styleFrom(elevation: 5,shadowColor: AppColorsAndThemes.optional),
+                                ),
+                              ),),
+                              const SizedBox(height: 10),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+          )
         ],
       ),
     );
   }
 
-  // Widget buildCard(BuildContext context,
-  //     {required String customerName,
-  //     required String customerLastName,
-  //     required String orderId,
-  //     required DateTime registeredDate,
-  //     required DateTime deadLine,
-  //     required String customerId}) {
-  //   return Card(
-  //     color: Colors.white10,
-  //     child: ListTile(
-  //       trailing: PopupMenuButton(
-  //         itemBuilder: (context) =>
-  //             orderStatusSelection(context, Order.fromId(orderId: orderId,customerId: customerId)),
-  //       ),
-  //       title: Container(
-  //         padding: const EdgeInsets.all(10),
-  //         margin: const EdgeInsets.symmetric(vertical: 10),
-  //         decoration: const BoxDecoration(
-  //             color: Colors.white,
-  //             boxShadow: <BoxShadow>[
-  //               BoxShadow(
-  //                 color: Colors.black,
-  //                 blurRadius: 10,
-  //               )
-  //             ],
-  //             borderRadius: BorderRadiusDirectional.all(Radius.circular(20))),
-  //         // margin: const EdgeInsets.all(16),
-  //         width: MediaQuery.of(context).size.width * 50 / 100,
-  //         height: MediaQuery.of(context).size.width * 50 / 100,
-  //         child: Column(
-  //           children: [
-  //             GestureDetector(
-  //               onTap: () => Navigator.of(context).pushNamed(
-  //                   RouteManager.customerProfile,
-  //                   arguments: {'id': customerId}),
-  //               child: Text(
-  //                 '$customerName $customerLastName',
-  //                 style: const TextStyle(
-  //                     fontWeight: FontWeight.bold,
-  //                     fontSize: 18,
-  //                     color: Colors.blue),
-  //               ),
-  //             ),
-  //             GestureDetector(
-  //               onTap: () => Navigator.of(context).pushNamed(
-  //                   RouteManager.orderPage,
-  //                   arguments: {'customerId': customerId, 'orderId': orderId}),
-  //               child: Text(
-  //                 orderId,
-  //                 style: const TextStyle(
-  //                     fontWeight: FontWeight.bold,
-  //                     fontSize: 18,
-  //                     color: Colors.green),
-  //               ),
-  //             ),
-  //             Text(
-  //                 'Registered: ${registeredDate.year}/${registeredDate.month}/${registeredDate.day}',style: const TextStyle(fontSize: 17,fontWeight: FontWeight.bold)),
-  //             Text(
-  //                 'DeadLine : ${deadLine.year}/${deadLine.month}/${deadLine.day}',style: const TextStyle(fontSize: 17,fontWeight: FontWeight.bold)),
-  //             Flexible(
-  //               child: Text(
-  //                   'Days Left: ${deadLine.difference(registeredDate).inDays}',style: const TextStyle(fontSize: 17,fontWeight: FontWeight.bold),),
-  //             ),
-  //           ],
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  // }
+// Widget buildCard(
+//   BuildContext context, {
+//   required Customer customer,
+//   bool expandedStatus = false,
+//   required int cardIndex,
+//   required Order order,
+//   required DateTime registeredDate,
+//   required DateTime deadLine,
+//   required CustomerProvider provider,
+// }) {
+//   return ExpansionTile(
+//     trailing: CustomPopupMenuButton(order: order, customer: customer, provider: provider),
+//     title: Container(
+//       padding: const EdgeInsets.all(10),
+//       margin: const EdgeInsets.symmetric(vertical: 10),
+//       decoration: const BoxDecoration(
+//           color: AppColorsAndThemes.secondaryColor,
+//           boxShadow: <BoxShadow>[
+//             BoxShadow(
+//               color: Colors.black,
+//               blurRadius: 10,
+//             )
+//           ],
+//           borderRadius: BorderRadiusDirectional.all(Radius.circular(20))),
+//       // margin: const EdgeInsets.all(16),
+//       width: MediaQuery.of(context).size.width * 50 / 100,
+//       height: MediaQuery.of(context).size.width * 50 / 100,
+//       child: Column(
+//         children: [
+//           ListTile(
+//               title: Text('${customer.firstName} ${customer.lastName}'),
+//               onTap: () => Navigator.of(context).pushNamed(RouteManager.customerProfile, arguments: {'id': customer.id}),
+//               trailing: ExpandIcon(
+//                 onPressed: (value) {
+//                   print('=== index: $cardIndex ====== $value ============');
+//                   bool newValue = provider.getExpandedStatusListForReports[cardIndex];
+//                   print('----------- $newValue --------------');
+//                   // provider.toggleExpansion(cardIndex, !newValue);
+//                 },
+//                 color: Colors.yellow,
+//                 expandedColor: Colors.black,
+//               )),
+//
+//           // ElevatedButton(
+//           //   style: ElevatedButton.styleFrom(
+//           //     shadowColor: AppColorsAndThemes.subPrimaryColor,
+//           //   ),
+//           //   onPressed: () =>
+//           //       Navigator.of(context).pushNamed(RouteManager.customerProfile, arguments: {'id': customerId}),
+//           //   child: Text(
+//           //     '$customerName $customerLastName',
+//           //     style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Colors.blue),
+//           //   ),
+//           // ),
+//
+//           if (expandedStatus)
+//             SizedBox(
+//               height: 50,
+//               child: GestureDetector(
+//                 onTap: () => Navigator.of(context).pushNamed(RouteManager.orderPage, arguments: {'customerId': customer.id, 'orderId': order.id}),
+//                 child: Text(
+//                   'Order: ${customer.id}',
+//                   style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: AppColorsAndThemes.optional),
+//                 ),
+//               ),
+//             ),
+//           Text('Registered: ${registeredDate.year}/${registeredDate.month}/${registeredDate.day}',
+//               style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
+//           Text('DeadLine : ${deadLine.year}/${deadLine.month}/${deadLine.day}', style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
+//           Flexible(
+//             child: Text(
+//               'Days Left: ${deadLine.difference(registeredDate).inDays}',
+//               style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+//             ),
+//           ),
+//         ],
+//       ),
+//     ),
+//   );
+// }
 }

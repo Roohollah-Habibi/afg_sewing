@@ -48,7 +48,7 @@ class _OrderPageState extends State<OrderPage> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: const Text('Order'),
+        title: Text(widget.orderId.isEmpty ? 'Order' : 'Edit Order'),
       ),
       body: Builder(builder: (context) {
         final CustomerProvider customerProvider =

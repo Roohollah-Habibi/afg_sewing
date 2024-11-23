@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 import 'order.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
@@ -49,8 +50,12 @@ class Customer extends HiveObject with EquatableMixin {
       {required Order newOrder, required String customerId,required String replaceOrderId}) async {
 
       final Customer customer = _swingBox.get(customerId) as Customer;
+      Map<String,int> _orderStatusColor = {};
       if(replaceOrderId.isEmpty){
       customer.customerOrder.add(newOrder);
+      _orderStatusColor[newOrder.id] = Colors.orange.value;
+      await _swingBox.put('orderStatusColor', _orderStatusColor);
+      print('PPPPPP=> ${Colors.orange.value}');
       }else{
         Order foundOrder= customer.customerOrder.firstWhere((element) => element.id ==
             replaceOrderId);// first we find the order then find the index to replace it
@@ -59,6 +64,7 @@ class Customer extends HiveObject with EquatableMixin {
         customer.customerOrder.insert(orderIndex, newOrder);
       }
       await _swingBox.put(customerId, customer);
+
   }
 
   /// Usage of this method is for updating customer order list. by new order list
