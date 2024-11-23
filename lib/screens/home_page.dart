@@ -1,3 +1,4 @@
+import 'package:afg_sewing/constants/constants.dart';
 import 'package:afg_sewing/custom_widgets/screen_items.dart';
 import 'package:afg_sewing/page_routing/rout_manager.dart';
 import 'package:afg_sewing/providers/theme_provider.dart';
@@ -34,15 +35,17 @@ class _HomePageState extends State<HomePage> {
       ),
       body: GridView(
           gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-            maxCrossAxisExtent: 200,
+            maxCrossAxisExtent: MediaQuery.of(context).size.width * 50 / 100,
             mainAxisExtent: MediaQuery.of(context).size.height * 40 / 100,
           ),
           children: [
             ScreenItems(
               backgroundImg: sampleImgSrc,
               childText: 'Samples',
-              onTap: () => Navigator.of(context)
-                  .pushNamed(RouteManager.samples),
+              onTap: () async {
+                 await Navigator.of(context)
+                  .pushNamed(RouteManager.samples);
+              },
             ),
             ScreenItems(
               backgroundImg: customerImgSrc,

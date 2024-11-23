@@ -14,71 +14,53 @@ final Box _swingBox = Hive.box('SwingDb');
 enum PriceType { total, received, remaining }
 Map<String,int> _orderStatusColorFromDb = (_swingBox.get('orderStatusColor') as Map?)?.cast<String,int>() ?? {};
 class CustomerProvider extends ChangeNotifier {
-  //constructor initialize all orders
   CustomerProvider() {
     _orderRegister = formatMyDate(myDate: DateTime.now()) as DateTime;
-  }
-
-  final List<String> profileFilterList = [
+  }  //constructor initialize all orders ==================================================
+  static const fieldKeyForName = 'name';
+  static const fieldKeyForLast = 'last';
+  static const fieldKeyForPhone = 'phone';
+  double _orderTotalPrice = 0;
+  double _orderReceivedPrice = 0;
+  int _orderRemainingPrice = 0;
+  final List<String> _profileFilterList = [
     'All',
     'In Progress',
     'Sewn & Delivered',
     'Sewn NOT Delivered',
     'Expired',
-    'Just today',
-  ];
+    'Just today'];// this variable shows filters in profile and report pages
+  String _selectedFilter = (_swingBox.get('profileFilterValue') as String?) ?? 'All';
+  String _reportSelectedFilterValue = (_swingBox.get('reportFilterValue') as String?) ?? 'All';
+  // this stores the status color for each order in order to use them inside report page
   Map<String, Color> _reportOrderStatusColor = _orderStatusColorFromDb.map((key, value) => MapEntry(key, Color(value)));
-  static const fieldKeyForName = 'name';
-  static const fieldKeyForLast = 'last';
-  static const fieldKeyForPhone = 'phone';
-  Color _deadlineOrderColor = AppColorsAndThemes.secondaryColor;
-  Color _circleMatchColor = AppColorsAndThemes.accentColor;
-  double _orderTotalPrice = 0;
-  double _orderReceivedPrice = 0;
-  int _orderRemainingPrice = 0;
-
+  Color _deadlineOrderColor = AppColorsAndThemes.secondaryColor;// this is default color but changes when user not select a deadline
   /// This map is used to save register and deadline date info. as String
   Map<String, String> _orderTimesInfo = {};
 
   late DateTime _orderRegister; //=> this is valued in constructor
   DateTime? _orderDeadline;
-
-  DateTime? _registerDate;
+  DateTime? _customerRegisterDate;
   final Map<String, bool> _errors = {};
 
   List<Customer> _customerList = _swingBox.values.whereType<Customer>().toList().cast<Customer>();
-
+  List<Order> _reportOrders = _swingBox.values.whereType<Customer>().toList().cast<Customer>().expand((element) => element.customerOrder).toList();
   List<Order> _allCustomersOrders = [];
-  List<bool> _expandedStatusForReports = [];
-  late List<Order> _reportOrders = _swingBox.values
-      .whereType<Customer>()
-      .toList()
-      .cast<Customer>()
-      .expand(
-        (element) => element.customerOrder,
-      )
-      .toList();
 
-  String _selectedFilter = (_swingBox.get('profileFilterValue') as String?) ?? 'All';
-  String _reportSelectedFilterValue = (_swingBox.get('reportFilterValue') as String?) ?? 'All';
+  List<bool> _expandedStatusForReports = [];
+
   // bool _isCollapsed = true
   bool _customerStatus = false;
-  final List<String> selectableOrderStatus = [
-    'In Progress',
-    'Swen NOT Delivered',
-    'Sewn & Delivered',
-  ];
 
   // Getters ====================================================================
   List<Customer> get getCustomers => _customerList;
-  Color get getCircleMatchedColor => _circleMatchColor;
   Map<String,Color> get getReportOrderStatusColor => _reportOrderStatusColor;
   List<bool> get getExpandedStatusListForReports => _expandedStatusForReports;
   bool isCollapsed(int index) => getExpandedStatusListForReports[index];
   String get getSelectedReport => _reportSelectedFilterValue;
   List<Order> get reportOrders => _reportOrders;
   List<Order> get getReportOrders => _reportOrders;
-  List<String> get getProfileFilters => profileFilterList;
+  List<String> get getProfileFilters => _profileFilterList;
   Color get getDeadlineOrderColor => _deadlineOrderColor;
 
   DateTime? get getOrderRegister => _orderRegister;
@@ -99,7 +81,7 @@ class CustomerProvider extends ChangeNotifier {
 
   String get getSelectedFilter => _selectedFilter;
 
-  DateTime? get showRegisterDate => _registerDate;
+  DateTime? get showRegisterDate => _customerRegisterDate;
 
   bool get customerStatus => _customerStatus;
 
@@ -314,6 +296,9 @@ class CustomerProvider extends ChangeNotifier {
       remainingMoney: _orderRemainingPrice,
     );
     await Customer.addNewOrder(newOrder: newOrder, customerId: customerId, replaceOrderId: targetOrder.id);
+    final Customer saveCustomerWithStatus = customer(customerId);
+    saveCustomerWithStatus.status = true;
+    await _swingBox.put(customerId, saveCustomerWithStatus);
     _orderTotalPrice = 0;
     _orderReceivedPrice = 0;
     _orderRemainingPrice = 0;
@@ -331,14 +316,22 @@ class CustomerProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // format date to show as String
-  String betterFormatedDate(DateTime dateTime) {
-    return '${dateTime.day}-${dateTime.month}-${dateTime.year}';
+  /// DELETE AN EXISTING CUSTOMER and show an snack bar to notify user for successful deletion
+  Future<void> deleteCustomer({required BuildContext context, required Customer customer}) async {
+    await _swingBox.delete(customer.id);
+    _customerList.removeWhere((element) => element == customer);
+    _reportOrders.removeWhere((element) => element.customerId == customer.id);
+    notifyListeners();
+    if (context.mounted) {
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Profile successfully Deleted'),duration: const Duration(milliseconds: 400),));
+    }
   }
 
   void changeCustomerStatus(bool status) {
     _customerStatus = status;
-    notifyListeners();
   }
 
   // SELECT NEW DATE WHEN ADDING NEW CUSTOMER
@@ -346,7 +339,7 @@ class CustomerProvider extends ChangeNotifier {
     final getDate =
         await showDatePicker(context: context, firstDate: DateTime(2000), lastDate: DateTime(2200));
     if (getDate != null) {
-      _registerDate = getDate;
+      _customerRegisterDate = getDate;
     }
     notifyListeners();
   }
@@ -399,7 +392,7 @@ class CustomerProvider extends ChangeNotifier {
   }
 
 /// ON SAVING NEW CUSTOMER to Hive through show model button sheet when pressing on [+ New Customer]
-  Future<void> onSave({
+  Future<void> onSaveCustomer({
     required String name,
     required String lastName,
     required String phoneOne,
@@ -422,7 +415,7 @@ class CustomerProvider extends ChangeNotifier {
     final DateTime today = DateFormat('yyyy-MM-ddd').parse(todayStr);
     Customer newCustomer = Customer(
         id: customer != null ? customer.id : newCustomerId,
-        registerDate: customer != null ? customer.registerDate : _registerDate ?? today,
+        registerDate: customer != null ? customer.registerDate : _customerRegisterDate ?? today,
         firstName: name,
         lastName: lastName,
         phoneNumber1: '07$phoneOne',
@@ -432,15 +425,13 @@ class CustomerProvider extends ChangeNotifier {
     await _swingBox.put(newCustomer.id, newCustomer);
     _customerList = _swingBox.values.whereType<Customer>().cast<Customer>().toList();
     notifyListeners();
-    for (Customer cc in _customerList) {
-      print('Name: ${cc.firstName} \t ${cc.status}');
-    }
+
     if (context.mounted) {
       Navigator.of(context).pop(RouteManager.customerProfile);
     }
   }
 
-  // ADD NEW CUSTOMER
+  /// ADD NEW CUSTOMER
   void onAddNewCustomerBtn(BuildContext context, {Customer? customer}) {
     showModalBottomSheet(
       useSafeArea: true,
@@ -460,19 +451,6 @@ class CustomerProvider extends ChangeNotifier {
       ),
     );
     notifyListeners();
-  }
-
-// DELETE AN EXISTING CUSTOMER
-  Future<void> deleteCustomer({required BuildContext context, required Customer customer}) async {
-    await _swingBox.delete(customer.id);
-    _customerList.removeWhere((element) => element == customer);
-    _reportOrders.removeWhere((element) => element.customerId == customer.id);
-    notifyListeners();
-    if (context.mounted) {
-      Navigator.of(context).pop();
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Profile successfully Deleted')));
-    }
   }
 
   // change color of the orders base on expiration date

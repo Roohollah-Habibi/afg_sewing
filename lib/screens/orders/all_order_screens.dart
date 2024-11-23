@@ -212,7 +212,7 @@ class _AllOrderScreensState extends State<AllOrderScreens> {
                       iconSize: 30,
                       value: providerValue.getSelectedReport,
                       onChanged: (value) => providerValue.onChangeReportFilterValue(value!),
-                      items: providerValue.profileFilterList.map<DropdownMenuItem<String>>((String value) {
+                      items: providerValue.getProfileFilters.map<DropdownMenuItem<String>>((String value) {
                         return DropdownMenuItem<String>(
                           value: value,
                           child: Text(value),

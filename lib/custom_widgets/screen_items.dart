@@ -1,3 +1,4 @@
+import 'package:afg_sewing/constants/constants.dart';
 import 'package:afg_sewing/custom_widgets/custom_container.dart';
 import 'package:afg_sewing/themes/app_colors_themes.dart';
 
@@ -18,10 +19,11 @@ class ScreenItems extends StatelessWidget {
   Widget build(BuildContext context) {
     List<BoxShadow> boxShadow = const [
       BoxShadow(
-          color: AppColorsAndThemes.accentColor,
-          spreadRadius: 5,
-          blurRadius: 30,
-          offset: Offset(0, 10))
+          color: AppColorsAndThemes.secondaryColor,
+          spreadRadius: 0,
+          blurRadius: 12,
+          blurStyle: BlurStyle.outer,
+          offset: Offset(10, 10))
     ];
     TextStyle? txtTheme = Theme.of(context).textTheme.titleLarge;
 
@@ -30,11 +32,12 @@ class ScreenItems extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           CustomContainer(
             width: MediaQuery.of(context).size.width * 50 / 100,
             height: MediaQuery.of(context).size.height * 30 / 100,
-            margin: const EdgeInsets.all(15.0),
+            margin: const EdgeInsets.fromLTRB(10,20,20,20),
             boxShadow: boxShadow,
             backgroundImg: DecorationImage(
               fit: BoxFit.cover,

@@ -37,50 +37,46 @@ class _CustomersState extends State<Customers> {
         icon: const Icon(Icons.add),
         label: const Text('New Customer'),
       ),
-      body: Consumer<CustomerProvider>(
-        builder: (context, customerProvider, _) => Center(
-          child: customerProvider.getCustomers.isEmpty
-              ? Text(
-                  'No Customer is available',
-                  style: Theme.of(context).textTheme.titleLarge,
-                )
+      body: Center(
+          child: Selector<CustomerProvider,List<Customer>>(
+            selector: (_, provider) => provider.getCustomers,
+            builder:(_,providerVaue,__) => providerVaue.isEmpty ?Text(
+                    'No Customer is available',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  )
               : Consumer<CustomerProvider>(
                   builder: (context, customerProvider, _) {
-
-                    return ListView.separated(
-                    itemCount: customerProvider.getCustomers.length,
-                    itemBuilder: (context, index) {
-                      Customer customer = customerProvider.getCustomers[index];
-                      return ListTile(
-                        onTap: () {
-                          Navigator.of(context).pushNamed(
-                              RouteManager.customerProfile,
-                              arguments: {'id': customer.id});
-                        },
-                        title: Text(
-                            customerProvider.getCustomers[index].firstName),
-                        leading: customer.status
-                            ? const Icon(
-                                Icons.online_prediction_outlined,
-                                color: Colors.green,
-                              )
-                            : const Icon(
-                                Icons.online_prediction,
-                                color: Colors.red,
-                              ),
-                        subtitle:
-                            Text('Orders: ${customer.customerOrder.length}'),
-                        trailing: buildPopupMenuButton(
-                            customerProvider, context, customer),
-                      );
-                    },
-                    separatorBuilder: (BuildContext context, int index) =>
-                        const Divider(),
-                  );
+                    return Padding(
+                      padding: const EdgeInsets.fromLTRB(8,8,8,70),
+                      child: ListView.separated(
+                      itemCount: providerVaue.length,
+                      itemBuilder: (context, index) {
+                        Customer targetCustomer = providerVaue[index];
+                        return ListTile(
+                          onTap: () {
+                            Navigator.of(context).pushNamed(
+                                RouteManager.customerProfile,
+                                arguments: {'id': targetCustomer.id});
+                          },
+                          title: Text(
+                              targetCustomer.firstName),
+                          leading: targetCustomer.status ?
+                               const Icon(Icons.online_prediction_outlined,color: Colors.green)
+                              : const Icon(Icons.online_prediction,color: Colors.red),
+                          subtitle:
+                              Text('Orders: ${targetCustomer.customerOrder.length}'),
+                          trailing: buildPopupMenuButton(
+                              context.read<CustomerProvider>(), context, targetCustomer),
+                        );
+                      },
+                      separatorBuilder: (BuildContext context, int index) =>
+                          const Divider(color: AppColorsAndThemes.secondaryColor,indent: 10,endIndent: 10,thickness: 1.5,),
+                                        ),
+                    );
                   },
                 ),
         ),
-      ),
+      )
     );
   }
 
@@ -111,8 +107,10 @@ class _CustomersState extends State<Customers> {
                   child: const Text('Cancel'),
                 ),
                 TextButton(
-                  onPressed: () async => await customerProvider.deleteCustomer(
-                      context: context, customer: customer),
+                  onPressed: () async {
+                    await customerProvider.deleteCustomer(
+                      context: context, customer: customer);
+                  },
                   child: const Text('OKey'),
                 ),
               ],

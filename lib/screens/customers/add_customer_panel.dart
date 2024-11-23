@@ -38,7 +38,7 @@ class _CustomShowModelSheetState extends State<CustomShowModelSheet> {
     String last = lastNameController.text;
     String phone = phoneOneController.text;
     String phone2 = phoneTwoController.text;
-    provider.onSave(
+    provider.onSaveCustomer(
         context: context,
         customer: widget.customer,
         name: name,

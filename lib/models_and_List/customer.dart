@@ -28,7 +28,7 @@ class Customer extends HiveObject with EquatableMixin {
   final List<Order> customerOrder;
 
   @HiveField(6)
-  final bool status;
+  bool status;
 
   @HiveField(7)
   final DateTime registerDate;
@@ -40,7 +40,7 @@ class Customer extends HiveObject with EquatableMixin {
     required this.phoneNumber1,
     required this.phoneNumber2,
     required this.customerOrder,
-    required this.status,
+    this.status = false,
     required this.registerDate
   });
 
@@ -50,12 +50,11 @@ class Customer extends HiveObject with EquatableMixin {
       {required Order newOrder, required String customerId,required String replaceOrderId}) async {
 
       final Customer customer = _swingBox.get(customerId) as Customer;
-      Map<String,int> _orderStatusColor = {};
+      Map<String,int> orderStatusColor = {};
       if(replaceOrderId.isEmpty){
       customer.customerOrder.add(newOrder);
-      _orderStatusColor[newOrder.id] = Colors.orange.value;
-      await _swingBox.put('orderStatusColor', _orderStatusColor);
-      print('PPPPPP=> ${Colors.orange.value}');
+      orderStatusColor[newOrder.id] = Colors.orange.value;
+      await _swingBox.put('orderStatusColor', orderStatusColor);
       }else{
         Order foundOrder= customer.customerOrder.firstWhere((element) => element.id ==
             replaceOrderId);// first we find the order then find the index to replace it

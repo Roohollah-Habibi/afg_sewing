@@ -6,7 +6,6 @@ class CustomContainer extends StatelessWidget {
   final double borderRadius;
   final List<BoxShadow>? boxShadow;
   final DecorationImage? backgroundImg;
-
   final double? width;
   final double? height;
   final EdgeInsetsGeometry? margin;

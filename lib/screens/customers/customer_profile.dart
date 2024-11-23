@@ -1,3 +1,4 @@
+import 'package:afg_sewing/constants/constants.dart';
 import 'package:afg_sewing/custom_widgets/text_icon_row.dart';
 import 'package:afg_sewing/models_and_List/customer.dart';
 import 'package:afg_sewing/models_and_List/order.dart';
@@ -87,7 +88,7 @@ class _CustomerProfileState extends State<CustomerProfile> {
                         alignment: Alignment.center,
                         iconSize: 30,
                         value: providerValue.getSelectedFilter,
-                        items: providerValue.profileFilterList.where((element) =>
+                        items: providerValue.getProfileFilters.where((element) =>
                           element != 'Just today')
                             .map((e) => DropdownMenuItem<String>(child: Text(e), value: e))
                             .toList(),
@@ -114,9 +115,8 @@ class _CustomerProfileState extends State<CustomerProfile> {
                               itemCount: providerValue.getOrders.length,
                               itemBuilder: (context, index) {
                                 Order targetOrder = providerValue.getOrders[index];
-                                String registerStr = customerProvider.betterFormatedDate(targetOrder.registeredDate);
-                                String deadlineStr = customerProvider.betterFormatedDate(targetOrder.deadLineDate);
-
+                                String registerStr = customerProvider.formatMyDate(myDate: targetOrder.registeredDate,returnAsDate: false) as String;
+                                String deadlineStr = customerProvider.formatMyDate(myDate: targetOrder.deadLineDate,returnAsDate: false) as String;
                                 return buildDismissible(targetOrder, context, registerStr, deadlineStr);
                                 //                     Card(
                                 //                 color: customerProvider.deadlineColor(
@@ -215,7 +215,7 @@ class _CustomerProfileState extends State<CustomerProfile> {
       selector: (ctx, provider) => provider,
       builder: (_, providerValue, __) => Dismissible(
           key: Key(targetOrder.id),
-          onDismissed: (direction) {
+          onDismissed: (direction) async {
             providerValue.removeOrderFromOrderList(removableOrder: targetOrder, customerId: widget.customerId);
             providerValue.getReportOrders.removeWhere(
               (element) => element.id == targetOrder.id,
@@ -240,6 +240,9 @@ class _CustomerProfileState extends State<CustomerProfile> {
                 ),
               ),
             );
+            final Customer saveCustomerWithStatus = providerValue.customer(targetOrder.customerId);
+            if(saveCustomerWithStatus.customerOrder.isEmpty)saveCustomerWithStatus.status = false;
+            await Constants.swingBox.put(saveCustomerWithStatus.id, saveCustomerWithStatus);
           },
           confirmDismiss: (direction) async {
             return await buildShowDialogWhenRemovingOrder(context);
