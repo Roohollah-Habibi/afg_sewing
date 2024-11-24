@@ -4,7 +4,7 @@ import 'package:afg_sewing/screens/customers/customer_page.dart';
 import 'package:afg_sewing/screens/customers/customer_profile.dart';
 import 'package:afg_sewing/screens/home_page.dart';
 import 'package:afg_sewing/screens/orders/order_page.dart';
-import 'package:afg_sewing/screens/reports.dart';
+import 'package:afg_sewing/screens/reports/reports.dart';
 import 'package:afg_sewing/screens/samples/Astin.dart';
 import 'package:afg_sewing/screens/samples/sample_full_screen.dart';
 import 'package:afg_sewing/screens/samples/sample_page.dart';

@@ -3,7 +3,7 @@ import 'package:afg_sewing/models_and_List/customer.dart';
 import 'package:afg_sewing/models_and_List/order.dart';
 import 'package:afg_sewing/page_routing/rout_manager.dart';
 import 'package:afg_sewing/providers/customer_provider.dart';
-import 'package:afg_sewing/screens/reports.dart';
+import 'package:afg_sewing/screens/reports/reports.dart';
 import 'package:afg_sewing/themes/app_colors_themes.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
