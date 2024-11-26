@@ -1,3 +1,4 @@
+import 'package:afg_sewing/constants/constants.dart';
 import 'package:afg_sewing/models_and_List/customer.dart';
 import 'package:afg_sewing/models_and_List/order.dart';
 import 'package:afg_sewing/page_routing/rout_manager.dart';
@@ -17,9 +18,6 @@ class CustomerProvider extends ChangeNotifier {
   CustomerProvider() {
     _orderRegister = formatMyDate(myDate: DateTime.now()) as DateTime;
   }  //constructor initialize all orders ==================================================
-  static const fieldKeyForName = 'name';
-  static const fieldKeyForLast = 'last';
-  static const fieldKeyForPhone = 'phone';
   double _orderTotalPrice = 0;
   double _orderReceivedPrice = 0;
   int _orderRemainingPrice = 0;
@@ -40,7 +38,7 @@ class CustomerProvider extends ChangeNotifier {
 
   late DateTime _orderRegister; //=> this is valued in constructor
   DateTime? _orderDeadline;
-  DateTime? _customerRegisterDate;
+  late DateTime _customerRegisterDate;
   final Map<String, bool> _errors = {};
 
   List<Customer> _customerList = _swingBox.values.whereType<Customer>().toList().cast<Customer>();
@@ -81,7 +79,7 @@ class CustomerProvider extends ChangeNotifier {
 
   String get getSelectedFilter => _selectedFilter;
 
-  DateTime? get showRegisterDate => _customerRegisterDate;
+  DateTime get getCustomerRegisterDate => _customerRegisterDate;
 
   bool get customerStatus => _customerStatus;
 
@@ -336,10 +334,10 @@ class CustomerProvider extends ChangeNotifier {
 
   // SELECT NEW DATE WHEN ADDING NEW CUSTOMER
   void selectRegisterDate({required BuildContext context}) async {
-    final getDate =
-        await showDatePicker(context: context, firstDate: DateTime(2000), lastDate: DateTime(2200));
+    final getDate = await showDatePicker(context: context, firstDate: DateTime(2000), lastDate: DateTime(2200));
     if (getDate != null) {
-      _customerRegisterDate = getDate;
+      _customerRegisterDate = formatMyDate(myDate: getDate) as DateTime;
+    notifyListeners();
     }
     notifyListeners();
   }
@@ -352,9 +350,9 @@ class CustomerProvider extends ChangeNotifier {
 
   // on Cancel ADDING CUSTOMERS
   void onCancel(BuildContext context) {
-    validate(fieldKeyForName, 'some thing not to show error on cancel and return');
-    validate(fieldKeyForLast, 'some thing not to show error on cancel and return');
-    validate(fieldKeyForPhone, 'some thing not to show error on cancel and return');
+    validate(Constants.fieldKeyForName, 'some thing not to show error on cancel and return');
+    validate(Constants.fieldKeyForLast, 'some thing not to show error on cancel and return');
+    validate(Constants.fieldKeyForPhone, 'some thing not to show error on cancel and return');
     Navigator.of(context).pop(RouteManager.customerProfile);
   }
 
@@ -400,10 +398,10 @@ class CustomerProvider extends ChangeNotifier {
     required BuildContext context,
     Customer? customer,
   }) async {
-    validate(fieldKeyForName, name);
-    validate(fieldKeyForLast, lastName);
-    validate(fieldKeyForPhone, phoneOne);
 
+    validate(Constants.fieldKeyForName, name);
+    validate(Constants.fieldKeyForLast, lastName);
+    validate(Constants.fieldKeyForPhone, phoneOne);
     bool ifInputEmpty = _ifInputsEmpty(context, name, lastName, phoneOne);
     bool ifLengthInvalid = _ifInputLengthInvalid(context, phoneOne);
     bool ifLengthInvalidTwo = _ifInputLengthInvalid(context, phoneTwo);
@@ -411,28 +409,53 @@ class CustomerProvider extends ChangeNotifier {
       return;
     }
     String newCustomerId = '$name${phoneOne.substring(4)}';
-    final String todayStr = DateFormat('yyyy-MM-ddd').format(DateTime.now());
-    final DateTime today = DateFormat('yyyy-MM-ddd').parse(todayStr);
-    Customer newCustomer = Customer(
-        id: customer != null ? customer.id : newCustomerId,
-        registerDate: customer != null ? customer.registerDate : _customerRegisterDate ?? today,
-        firstName: name,
-        lastName: lastName,
-        phoneNumber1: '07$phoneOne',
-        phoneNumber2: '07$phoneTwo',
-        customerOrder: customer != null ? customer.customerOrder : [],
-        status: customerStatus);
-    await _swingBox.put(newCustomer.id, newCustomer);
-    _customerList = _swingBox.values.whereType<Customer>().cast<Customer>().toList();
-    notifyListeners();
-
-    if (context.mounted) {
-      Navigator.of(context).pop(RouteManager.customerProfile);
+    late Customer newCustomer;
+    if(customer != null){
+      newCustomer = Customer(
+          id: customer.id,
+          registerDate: _customerRegisterDate,
+          firstName: name,
+          lastName: lastName,
+          phoneNumber1: '07$phoneOne',
+          phoneNumber2: '07$phoneTwo',
+          customerOrder: customer.customerOrder ,
+          status: customerStatus);
+      notifyListeners();
+    }else{
+      newCustomer = Customer(
+          id: newCustomerId,
+          registerDate:_customerRegisterDate,
+          firstName: name,
+          lastName: lastName,
+          phoneNumber1: '07$phoneOne',
+          phoneNumber2: '07$phoneTwo',
+          customerOrder:  [],
+          status: customerStatus);
+      notifyListeners();
     }
+    await Constants.swingBox.put(newCustomer.id, newCustomer);
+    notifyListeners();
+    _customerList = Constants.swingBox.values.whereType<Customer>().toList();
+    int foundCustomerIndexFromList = _customerList.indexOf(newCustomer);
+    if(foundCustomerIndexFromList < 0){
+      _customerList.insert(0, newCustomer);
+    notifyListeners();
+    }else{
+      _customerList.removeAt(foundCustomerIndexFromList);
+      _customerList.insert(foundCustomerIndexFromList, newCustomer);
+      notifyListeners();
+    }
+    if (context.mounted) {
+      Navigator.of(context).pop();
+    }
+    notifyListeners();
   }
 
   /// ADD NEW CUSTOMER
   void onAddNewCustomerBtn(BuildContext context, {Customer? customer}) {
+    notifyListeners();
+    _customerRegisterDate = formatMyDate(myDate: customer?.registerDate ?? DateTime.now()) as DateTime;
+    print('========== $_customerRegisterDate');
     showModalBottomSheet(
       useSafeArea: true,
       isDismissible: false,
@@ -444,7 +467,7 @@ class CustomerProvider extends ChangeNotifier {
         heightFactor: .9,
         child: ClipRRect(
           borderRadius: const BorderRadius.vertical(top: Radius.circular(50)),
-          child: CustomShowModelSheet(
+          child: AddCustomerPanel(
             customer: customer,
           ),
         ),

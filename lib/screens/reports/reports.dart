@@ -77,8 +77,6 @@ class _ReportsState extends State<Reports> with TickerProviderStateMixin {
     //ORDERS
     List lastWeekOrders = allOrders.where(
       (element) {
-        print('##########> ${element.registeredDate}');
-        print('###LAST WEEK #######> $lastWeekDateTime');
         return element.registeredDate.isAfter(lastWeekDateTime) && element.registeredDate.isBefore(_today);
       },
     ).toList();
@@ -133,45 +131,74 @@ class _ReportsState extends State<Reports> with TickerProviderStateMixin {
                         labelPadding: const EdgeInsets.all(5),
                         indicatorSize: TabBarIndicatorSize.tab,
                         tabs: const [
-                          Text('Last Week'),
-                          Text('Last Month'),
-                          Text('Last Year'),
+                          Text('Week'),
+                          Text('Month'),
+                          Text('Year'),
                           Text('Custom'),
                         ]),
                   ),
                   Flexible(
-                    child: TabBarView(controller: tabController, children: [
+                    child: TabBarView(
+                        controller: tabController,
+                        children: [
                       Consumer<CustomerProvider>(
                         builder: (context, provider, child) {
-                          int numberOfLastWeekCustomers = provider.getCustomers.where((foundCustomer) => _today.difference
-                            (foundCustomer.registerDate).inDays <= 7).length;
-                          print('____NW_____ ${provider.getCustomers.map((foundCustomer) => _today.difference
-                            (foundCustomer.registerDate).inDays)} ___________-');
-                         print('${provider.getCustomers.map((e) =>  print('++++++> ${e.firstName} == ${e.registerDate}')).toList()}');
+                          List<Customer> getCustomers = provider.getCustomers.where((foundCustomer) => _today.difference
+                            (foundCustomer.registerDate).inDays <= 7).toList();
+                          int numberOfLastWeekCustomers = getCustomers.length;
+                          List<Order> getOrders = getCustomers.expand((element) => element.customerOrder).toList();
+                          int numberOfLastWeekOrders = getOrders.where((foundOrder) => _today.difference
+                            (foundOrder.registeredDate).inDays <= 7).toList().length;
                           return buildTabContainer(
-                            reportCustomerTxt: 'customers: ',
-                            reportOrderTxt: 'orders: ',
+                            reportCustomerTxt: 'Customers: ',
+                            reportOrderTxt: 'Orders: ',
                             reportCustomerData: '$numberOfLastWeekCustomers',
-                            reportOrderData: '${info['ordersInLastWeek']}',
+                            reportOrderData: '$numberOfLastWeekOrders',
                           reportTitleColor: AppColorsAndThemes.secondaryColor,
                           reportContentColor: Colors.black
                         );
                         },
                       ),
-                      buildTabContainer(
-                          reportCustomerTxt: 'Last month customers',
-                          reportOrderTxt: 'Last month orders',
-                          reportCustomerData: info['customersInLastMonth'].toString(),
-                          reportOrderData: info['ordersInLastMonth'].toString()),
-                      buildTabContainer(
-                          reportCustomerTxt: 'Last year customers',
-                          reportOrderTxt: 'Last year orders',
-                          reportCustomerData: info['customersInLastYear'].toString(),
-                          reportOrderData: info['ordersInLastYear'].toString()),
+                      Consumer<CustomerProvider>(
+                        builder: (context, provider, child) {
+                          List<Customer> getCustomers = provider.getCustomers.where((foundCustomer) => _today.difference
+                            (foundCustomer.registerDate).inDays <= 30).toList();
+                          int numberOfLastMonthCustomers = getCustomers.length;
+                          List<Order> getOrders = getCustomers.expand((element) => element.customerOrder).toList();
+                          int numberOfLastMonthOrders = getOrders.where((foundOrder) => _today.difference
+                            (foundOrder.registeredDate).inDays <= 30).toList().length;
+                          return buildTabContainer(
+                            reportCustomerTxt: 'Customers',
+                            reportOrderTxt: 'Orders',
+                            reportCustomerData: '$numberOfLastMonthCustomers',
+                            reportOrderData: '$numberOfLastMonthOrders',
+                              reportTitleColor: AppColorsAndThemes.secondaryColor,
+                              reportContentColor: Colors.black,
+                          );
+                        },
+                      ),
+                      Consumer<CustomerProvider>(
+                        builder:(_,provider,__) {
+                          List<Customer> getCustomers = provider.getCustomers.where((foundCustomer) => _today.difference
+                            (foundCustomer.registerDate).inDays <= 365).toList();
+                          int numberOfLastYearCustomers = getCustomers.length;
+                          List<Order> getOrders = getCustomers.expand((element) => element.customerOrder).toList();
+                          int numberOfLastMonthOrders = getOrders.where((foundOrder) => _today.difference
+                            (foundOrder.registeredDate).inDays <= 365).toList().length;
+                          return buildTabContainer(
+                            reportCustomerTxt: 'Customers',
+                            reportOrderTxt: 'Orders',
+                            reportCustomerData: '$numberOfLastYearCustomers',
+                            reportOrderData: '$numberOfLastMonthOrders',
+                              reportTitleColor: AppColorsAndThemes.secondaryColor,
+                              reportContentColor: Colors.black
+                          );
+                        },
+                      ),
                       Container(
                         color: Colors.black12,
                         alignment: Alignment.center,
-                        child: overallReport(),
+                        child: Center(child: Text('Worling on it')),
                       ),
                     ]),
                   ),

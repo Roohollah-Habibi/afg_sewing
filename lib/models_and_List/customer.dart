@@ -1,3 +1,4 @@
+import 'package:afg_sewing/constants/constants.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'order.dart';
@@ -5,8 +6,6 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 part 'customer.g.dart';
 
-const String _swingDb = 'SwingDb';
-final Box _swingBox = Hive.box(_swingDb);
 @HiveType(typeId: 1)
 class Customer extends HiveObject with EquatableMixin {
   @HiveField(0)
@@ -31,7 +30,7 @@ class Customer extends HiveObject with EquatableMixin {
   bool status;
 
   @HiveField(7)
-  final DateTime registerDate;
+  DateTime registerDate;
 
   Customer({
     required this.id,
@@ -49,12 +48,12 @@ class Customer extends HiveObject with EquatableMixin {
   static Future <void> addNewOrder(
       {required Order newOrder, required String customerId,required String replaceOrderId}) async {
 
-      final Customer customer = _swingBox.get(customerId) as Customer;
+      final Customer customer = Constants.swingBox.get(customerId) as Customer;
       Map<String,int> orderStatusColor = {};
       if(replaceOrderId.isEmpty){
       customer.customerOrder.add(newOrder);
       orderStatusColor[newOrder.id] = Colors.orange.value;
-      await _swingBox.put('orderStatusColor', orderStatusColor);
+      await Constants.swingBox.put('orderStatusColor', orderStatusColor);
       }else{
         Order foundOrder= customer.customerOrder.firstWhere((element) => element.id ==
             replaceOrderId);// first we find the order then find the index to replace it
@@ -62,7 +61,7 @@ class Customer extends HiveObject with EquatableMixin {
         customer.customerOrder.removeAt(orderIndex);
         customer.customerOrder.insert(orderIndex, newOrder);
       }
-      await _swingBox.put(customerId, customer);
+      await Constants.swingBox.put(customerId, customer);
 
   }
 
@@ -77,16 +76,16 @@ class Customer extends HiveObject with EquatableMixin {
           phoneNumber2: customer.phoneNumber2,
           customerOrder: newOrderList,
           status: customer.status);
-      await _swingBox.put(customer.id, updatedCustomer);
+      await Constants.swingBox.put(customer.id, updatedCustomer);
 
   }
 
   /// This method is used for removing an order from database of a customer
   static Future<void> removeOrder({required String customerId, required Order removableOrder})async{
 
-      final Customer targetCustomer = _swingBox.get(customerId);
+      final Customer targetCustomer = Constants.swingBox.get(customerId);
       targetCustomer.customerOrder.removeWhere((element) => element.id == removableOrder.id);
-      await _swingBox.put(customerId, targetCustomer);
+      await Constants.swingBox.put(customerId, targetCustomer);
   }
 
 
