@@ -24,13 +24,13 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: const Text('Home'),
         actions: [
-          Switch(
-            value: context.watch<ThemeManagerProvider>().themeMode ==
-                ThemeMode.dark,
-            onChanged: (value) {
-              context.read<ThemeManagerProvider>().switchTheme(value);
-            },
-          ),
+          // Switch(
+          //   value: context.watch<ThemeManagerProvider>().themeMode ==
+          //       ThemeMode.dark,
+          //   onChanged: (value) {
+          //     context.read<ThemeManagerProvider>().switchTheme(value);
+          //   },
+          // ),
         ],
       ),
       body: GridView(

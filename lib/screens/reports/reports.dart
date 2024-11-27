@@ -1,3 +1,4 @@
+import 'package:afg_sewing/custom_widgets/report_tab.dart';
 import 'package:afg_sewing/models_and_List/customer.dart';
 import 'package:afg_sewing/models_and_List/order.dart';
 import 'package:afg_sewing/providers/customer_provider.dart';
@@ -141,60 +142,63 @@ class _ReportsState extends State<Reports> with TickerProviderStateMixin {
                     child: TabBarView(
                         controller: tabController,
                         children: [
-                      Consumer<CustomerProvider>(
-                        builder: (context, provider, child) {
-                          List<Customer> getCustomers = provider.getCustomers.where((foundCustomer) => _today.difference
-                            (foundCustomer.registerDate).inDays <= 7).toList();
-                          int numberOfLastWeekCustomers = getCustomers.length;
-                          List<Order> getOrders = getCustomers.expand((element) => element.customerOrder).toList();
-                          int numberOfLastWeekOrders = getOrders.where((foundOrder) => _today.difference
-                            (foundOrder.registeredDate).inDays <= 7).toList().length;
-                          return buildTabContainer(
-                            reportCustomerTxt: 'Customers: ',
-                            reportOrderTxt: 'Orders: ',
-                            reportCustomerData: '$numberOfLastWeekCustomers',
-                            reportOrderData: '$numberOfLastWeekOrders',
-                          reportTitleColor: AppColorsAndThemes.secondaryColor,
-                          reportContentColor: Colors.black
-                        );
-                        },
-                      ),
-                      Consumer<CustomerProvider>(
-                        builder: (context, provider, child) {
-                          List<Customer> getCustomers = provider.getCustomers.where((foundCustomer) => _today.difference
-                            (foundCustomer.registerDate).inDays <= 30).toList();
-                          int numberOfLastMonthCustomers = getCustomers.length;
-                          List<Order> getOrders = getCustomers.expand((element) => element.customerOrder).toList();
-                          int numberOfLastMonthOrders = getOrders.where((foundOrder) => _today.difference
-                            (foundOrder.registeredDate).inDays <= 30).toList().length;
-                          return buildTabContainer(
-                            reportCustomerTxt: 'Customers',
-                            reportOrderTxt: 'Orders',
-                            reportCustomerData: '$numberOfLastMonthCustomers',
-                            reportOrderData: '$numberOfLastMonthOrders',
-                              reportTitleColor: AppColorsAndThemes.secondaryColor,
-                              reportContentColor: Colors.black,
-                          );
-                        },
-                      ),
-                      Consumer<CustomerProvider>(
-                        builder:(_,provider,__) {
-                          List<Customer> getCustomers = provider.getCustomers.where((foundCustomer) => _today.difference
-                            (foundCustomer.registerDate).inDays <= 365).toList();
-                          int numberOfLastYearCustomers = getCustomers.length;
-                          List<Order> getOrders = getCustomers.expand((element) => element.customerOrder).toList();
-                          int numberOfLastMonthOrders = getOrders.where((foundOrder) => _today.difference
-                            (foundOrder.registeredDate).inDays <= 365).toList().length;
-                          return buildTabContainer(
-                            reportCustomerTxt: 'Customers',
-                            reportOrderTxt: 'Orders',
-                            reportCustomerData: '$numberOfLastYearCustomers',
-                            reportOrderData: '$numberOfLastMonthOrders',
-                              reportTitleColor: AppColorsAndThemes.secondaryColor,
-                              reportContentColor: Colors.black
-                          );
-                        },
-                      ),
+                          const ReportTab(days: 7),
+                      const ReportTab(days: 30),
+                      const ReportTab(days: 365),
+                      // Consumer<CustomerProvider>(
+                      //   builder: (context, provider, child) {
+                      //     List<Customer> getCustomers = provider.getCustomers.where((foundCustomer) => _today.difference
+                      //       (foundCustomer.registerDate).inDays <= 7).toList();
+                      //     int numberOfLastWeekCustomers = getCustomers.length;
+                      //     List<Order> getOrders = getCustomers.expand((element) => element.customerOrder).toList();
+                      //     int numberOfLastWeekOrders = getOrders.where((foundOrder) => _today.difference
+                      //       (foundOrder.registeredDate).inDays <= 7).toList().length;
+                      //     return buildTabContainer(
+                      //       reportCustomerTxt: 'Customers: ',
+                      //       reportOrderTxt: 'Orders: ',
+                      //       reportCustomerData: '$numberOfLastWeekCustomers',
+                      //       reportOrderData: '$numberOfLastWeekOrders',
+                      //     reportTitleColor: AppColorsAndThemes.secondaryColor,
+                      //     reportContentColor: Colors.black
+                      //   );
+                      //   },
+                      // ),
+                      // Consumer<CustomerProvider>(
+                      //   builder: (context, provider, child) {
+                      //     List<Customer> getCustomers = provider.getCustomers.where((foundCustomer) => _today.difference
+                      //       (foundCustomer.registerDate).inDays <= 30).toList();
+                      //     int numberOfLastMonthCustomers = getCustomers.length;
+                      //     List<Order> getOrders = getCustomers.expand((element) => element.customerOrder).toList();
+                      //     int numberOfLastMonthOrders = getOrders.where((foundOrder) => _today.difference
+                      //       (foundOrder.registeredDate).inDays <= 30).toList().length;
+                      //     return buildTabContainer(
+                      //       reportCustomerTxt: 'Customers',
+                      //       reportOrderTxt: 'Orders',
+                      //       reportCustomerData: '$numberOfLastMonthCustomers',
+                      //       reportOrderData: '$numberOfLastMonthOrders',
+                      //         reportTitleColor: AppColorsAndThemes.secondaryColor,
+                      //         reportContentColor: Colors.black,
+                      //     );
+                      //   },
+                      // ),
+                      // Consumer<CustomerProvider>(
+                      //   builder:(_,provider,__) {
+                      //     List<Customer> getCustomers = provider.getCustomers.where((foundCustomer) => _today.difference
+                      //       (foundCustomer.registerDate).inDays <= 365).toList();
+                      //     int numberOfLastYearCustomers = getCustomers.length;
+                      //     List<Order> getOrders = getCustomers.expand((element) => element.customerOrder).toList();
+                      //     int numberOfLastMonthOrders = getOrders.where((foundOrder) => _today.difference
+                      //       (foundOrder.registeredDate).inDays <= 365).toList().length;
+                      //     return buildTabContainer(
+                      //       reportCustomerTxt: 'Customers',
+                      //       reportOrderTxt: 'Orders',
+                      //       reportCustomerData: '$numberOfLastYearCustomers',
+                      //       reportOrderData: '$numberOfLastMonthOrders',
+                      //         reportTitleColor: AppColorsAndThemes.secondaryColor,
+                      //         reportContentColor: Colors.black
+                      //     );
+                      //   },
+                      // ),
                       Container(
                         color: Colors.black12,
                         alignment: Alignment.center,
