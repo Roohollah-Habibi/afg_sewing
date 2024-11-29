@@ -1,12 +1,12 @@
+
 import 'package:afg_sewing/custom_widgets/report_tab.dart';
 import 'package:afg_sewing/models_and_List/customer.dart';
 import 'package:afg_sewing/models_and_List/order.dart';
-import 'package:afg_sewing/providers/customer_provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:afg_sewing/themes/app_colors_themes.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
 
 const String swingDb = 'SwingDb';
 
@@ -42,73 +42,24 @@ class _ReportsState extends State<Reports> with TickerProviderStateMixin {
   late List<Customer> allCustomers;
   late List<Order> allOrders;
   late TabController tabController;
-  late Map<String, dynamic> info;
-  DateTime _today = DateTime.now();
+  // DateTime _today = DateTime.now();
   @override
   void initState() {
     super.initState();
-    _today = context.read<CustomerProvider>().formatMyDate(myDate: _today,returnAsDate: true) as DateTime;
+    // _today = context.read<CustomerProvider>().formatMyDate(myDate: _today,returnAsDate: true) as DateTime;
     tabController = TabController(length: 4, vsync: this);
     setState(() {
       numberOfAllCustomers = swingBox.values.whereType<Customer>().toList().length;
       allCustomers = swingBox.values.whereType<Customer>().cast<Customer>().toList();
       allOrders = [for (Customer eachCustomer in allCustomers) ...eachCustomer.customerOrder];
-      info = getReport();
     });
-  }
-
-  Map<String, dynamic> getReport() {
-    Map<String, dynamic> infoMap = {};
-    //CUSTOMERS
-    List lastWeekCustomers = allCustomers
-        .where(
-          (element) => element.registerDate.isAfter(lastWeekDateTime) && element.registerDate.isBefore(_today),
-        )
-        .toList();
-    List lastMonthCustomers = allCustomers
-        .where(
-          (element) => element.registerDate.isAfter(lastMonthDateTime) && element.registerDate.isBefore(_today.add(const Duration(days: 1))),
-        )
-        .toList();
-    List lastYearCustomers = allCustomers
-        .where(
-          (element) => element.registerDate.isAfter(lastYearDateTime) && element.registerDate.isBefore(_today),
-        )
-        .toList();
-    //ORDERS
-    List lastWeekOrders = allOrders.where(
-      (element) {
-        return element.registeredDate.isAfter(lastWeekDateTime) && element.registeredDate.isBefore(_today);
-      },
-    ).toList();
-    List lastMonthOrders = allOrders
-        .where(
-          (element) => element.registeredDate.isAfter(lastMonthDateTime) && element.registeredDate.isBefore(_today),
-        )
-        .toList();
-    List lastYearOrders = allOrders
-        .where(
-          (element) => element.registeredDate.isAfter(lastYearDateTime) && element.registeredDate.isBefore(_today),
-        )
-        .toList();
-
-    infoMap = {
-      'customersInLastWeek': lastWeekCustomers.length,
-      'customersInLastMonth': lastMonthCustomers.length,
-      'customersInLastYear': lastYearCustomers.length,
-      'ordersInLastWeek': lastWeekOrders.length,
-      'ordersInLastMonth': lastMonthOrders.length,
-      'ordersInLastYear': lastYearOrders.length,
-    };
-
-    return infoMap;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('گزارشات'),
+        title: Text(AppLocalizations.of(context)!.reports),
       ),
       body: Center(
         child: Column(
@@ -131,78 +82,24 @@ class _ReportsState extends State<Reports> with TickerProviderStateMixin {
                         unselectedLabelStyle: customStyle,
                         labelPadding: const EdgeInsets.all(5),
                         indicatorSize: TabBarIndicatorSize.tab,
-                        tabs: const [
-                          Text('Week'),
-                          Text('Month'),
-                          Text('Year'),
-                          Text('Custom'),
+                        tabs: [
+                          Text(AppLocalizations.of(context)!.week),
+                          Text(AppLocalizations.of(context)!.month),
+                          Text(AppLocalizations.of(context)!.year),
+                          Text(AppLocalizations.of(context)!.custom),
                         ]),
                   ),
                   Flexible(
                     child: TabBarView(
                         controller: tabController,
                         children: [
-                          const ReportTab(days: 7),
+                      const ReportTab(days: 7),
                       const ReportTab(days: 30),
                       const ReportTab(days: 365),
-                      // Consumer<CustomerProvider>(
-                      //   builder: (context, provider, child) {
-                      //     List<Customer> getCustomers = provider.getCustomers.where((foundCustomer) => _today.difference
-                      //       (foundCustomer.registerDate).inDays <= 7).toList();
-                      //     int numberOfLastWeekCustomers = getCustomers.length;
-                      //     List<Order> getOrders = getCustomers.expand((element) => element.customerOrder).toList();
-                      //     int numberOfLastWeekOrders = getOrders.where((foundOrder) => _today.difference
-                      //       (foundOrder.registeredDate).inDays <= 7).toList().length;
-                      //     return buildTabContainer(
-                      //       reportCustomerTxt: 'Customers: ',
-                      //       reportOrderTxt: 'Orders: ',
-                      //       reportCustomerData: '$numberOfLastWeekCustomers',
-                      //       reportOrderData: '$numberOfLastWeekOrders',
-                      //     reportTitleColor: AppColorsAndThemes.secondaryColor,
-                      //     reportContentColor: Colors.black
-                      //   );
-                      //   },
-                      // ),
-                      // Consumer<CustomerProvider>(
-                      //   builder: (context, provider, child) {
-                      //     List<Customer> getCustomers = provider.getCustomers.where((foundCustomer) => _today.difference
-                      //       (foundCustomer.registerDate).inDays <= 30).toList();
-                      //     int numberOfLastMonthCustomers = getCustomers.length;
-                      //     List<Order> getOrders = getCustomers.expand((element) => element.customerOrder).toList();
-                      //     int numberOfLastMonthOrders = getOrders.where((foundOrder) => _today.difference
-                      //       (foundOrder.registeredDate).inDays <= 30).toList().length;
-                      //     return buildTabContainer(
-                      //       reportCustomerTxt: 'Customers',
-                      //       reportOrderTxt: 'Orders',
-                      //       reportCustomerData: '$numberOfLastMonthCustomers',
-                      //       reportOrderData: '$numberOfLastMonthOrders',
-                      //         reportTitleColor: AppColorsAndThemes.secondaryColor,
-                      //         reportContentColor: Colors.black,
-                      //     );
-                      //   },
-                      // ),
-                      // Consumer<CustomerProvider>(
-                      //   builder:(_,provider,__) {
-                      //     List<Customer> getCustomers = provider.getCustomers.where((foundCustomer) => _today.difference
-                      //       (foundCustomer.registerDate).inDays <= 365).toList();
-                      //     int numberOfLastYearCustomers = getCustomers.length;
-                      //     List<Order> getOrders = getCustomers.expand((element) => element.customerOrder).toList();
-                      //     int numberOfLastMonthOrders = getOrders.where((foundOrder) => _today.difference
-                      //       (foundOrder.registeredDate).inDays <= 365).toList().length;
-                      //     return buildTabContainer(
-                      //       reportCustomerTxt: 'Customers',
-                      //       reportOrderTxt: 'Orders',
-                      //       reportCustomerData: '$numberOfLastYearCustomers',
-                      //       reportOrderData: '$numberOfLastMonthOrders',
-                      //         reportTitleColor: AppColorsAndThemes.secondaryColor,
-                      //         reportContentColor: Colors.black
-                      //     );
-                      //   },
-                      // ),
                       Container(
                         color: Colors.black12,
                         alignment: Alignment.center,
-                        child: Center(child: Text('Worling on it')),
+                        child: const Center(child: Text('Working on it')),
                       ),
                     ]),
                   ),
@@ -218,10 +115,10 @@ class _ReportsState extends State<Reports> with TickerProviderStateMixin {
   Column overallReport() {
     return Column(
       children: [
-        buildSummaryReport(text: 'Number of Customers: ', content: '$numberOfAllCustomers',),
-        buildSummaryReport(text: 'Number of Orders: ', content: '${allOrders.length}'),
-        buildSummaryReport(text: 'Number of Employees: ', content: '4'),
-        buildSummaryReport(text: 'Last Backup: ', content: '2024-01-22'),
+        buildSummaryReport(text: AppLocalizations.of(context)!.customers, content: '$numberOfAllCustomers',),
+        buildSummaryReport(text: AppLocalizations.of(context)!.orders, content: '${allOrders.length}'),
+        buildSummaryReport(text: AppLocalizations.of(context)!.employees, content: '4'),
+        buildSummaryReport(text: AppLocalizations.of(context)!.lastBackup, content: '2024-01-22'),
       ],
     );
   }
@@ -241,9 +138,12 @@ class _ReportsState extends State<Reports> with TickerProviderStateMixin {
         children: [
           buildSummaryReport(text: reportCustomerTxt, content: reportCustomerData,reportDataColor: reportContentColor,reportTitleColor: reportTitleColor),
           buildSummaryReport(text: reportOrderTxt, content: reportOrderData,reportDataColor: reportContentColor,reportTitleColor: reportTitleColor),
-          buildSummaryReport(text: 'Number of Employees: ', content: 'Coming soon',reportDataColor: reportContentColor,reportTitleColor:
+          buildSummaryReport(text: '${AppLocalizations.of(context)!.employees}: ', content: AppLocalizations.of(context)!.comingSoon,
+              reportDataColor: reportContentColor, reportTitleColor:
           reportTitleColor),
-          buildSummaryReport(text: 'Last Backup: ', content: 'Coming soon',reportDataColor: reportContentColor,reportTitleColor: reportTitleColor),
+          buildSummaryReport(text: AppLocalizations.of(context)!.lastBackup, content: AppLocalizations.of(context)!.comingSoon,reportDataColor:
+          reportContentColor,reportTitleColor:
+          reportTitleColor),
         ],
       ),
     );

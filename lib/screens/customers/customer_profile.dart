@@ -1,5 +1,6 @@
 import 'package:afg_sewing/constants/constants.dart';
 import 'package:afg_sewing/custom_widgets/text_icon_row.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:afg_sewing/models_and_List/customer.dart';
 import 'package:afg_sewing/models_and_List/order.dart';
 import 'package:afg_sewing/page_routing/rout_manager.dart';
@@ -30,7 +31,7 @@ class _CustomerProfileState extends State<CustomerProfile> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profile'),
+        title: Text(AppLocalizations.of(context)!.profile),
       ),
       floatingActionButton: ElevatedButton.icon(
         onPressed: () async {
@@ -40,7 +41,7 @@ class _CustomerProfileState extends State<CustomerProfile> {
           );
           // Provider.of<CustomerProvider>(context,listen: false).setOrderTimes(orderId: '',customerId: widget.customerId);
         },
-        label: const Text('New Order'),
+        label: Text(AppLocalizations.of(context)!.newOrder),
         icon: const Icon(Icons.add),
       ),
       body: Builder(
@@ -56,12 +57,12 @@ class _CustomerProfileState extends State<CustomerProfile> {
                   style: Theme.of(context).textTheme.headlineLarge,
                 ),
                 Text(
-                  'ID: ${customerProvider.customer(widget.customerId).id}',
+                  '${AppLocalizations.of(context)!.id}: ${customerProvider.customer(widget.customerId).id}',
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                  _buildPhoneCard(phoneNumber: customerProvider.customer(widget.customerId).phoneNumber1),
-                  _buildPhoneCard(phoneNumber: customerProvider.customer(widget.customerId).phoneNumber2),
+                  _buildPhoneCard(context: context,phoneNumber: customerProvider.customer(widget.customerId).phoneNumber1),
+                  _buildPhoneCard(context: context,phoneNumber: customerProvider.customer(widget.customerId).phoneNumber2),
                 ]),
                 const SizedBox(height: 16),
                 Row(
@@ -74,30 +75,34 @@ class _CustomerProfileState extends State<CustomerProfile> {
                         child: Selector<CustomerProvider, int>(
                           selector: (p0, provider) => provider.getOrders.length,
                           builder: (_, selectorValue, __) => Text(
-                            'Orders: $selectorValue',
+                            '${AppLocalizations.of(context)!.orders}: $selectorValue',
                             textAlign: TextAlign.center,
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                         ),
                       ),
                     ),
-                    Consumer<CustomerProvider>(
-                      builder: (context, providerValue, child) => DropdownButton<String>(
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                        icon: const Icon(Icons.filter_alt),
-                        alignment: Alignment.center,
-                        iconSize: 30,
-                        value: providerValue.getSelectedFilter,
-                        items: providerValue.getProfileFilters.where((element) =>
-                          element != 'Just today')
-                            .map((e) => DropdownMenuItem<String>(child: Text(e), value: e))
-                            .toList(),
-                        onChanged: (value) {
-                          providerValue.onChangeFilterValue(
-                            newValue: value!,
-                            customerId: widget.customerId,
-                          );
-                        },
+                    Flexible(
+                      flex: 2,
+                      child: Consumer<CustomerProvider>(
+                        builder: (context, providerValue, child) => DropdownButton<String>(
+                          dropdownColor: AppColorsAndThemes.subPrimaryColor,
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          icon: const Icon(Icons.filter_alt),
+                          alignment: Alignment.center,
+                          iconSize: 30,
+                          value: providerValue.getSelectedFilter,
+                          items: providerValue.getProfileFilters.where((element) =>
+                            element != 'Just today')
+                              .map((e) => DropdownMenuItem<String>(value: e, child: Text(providerValue.translateFilter(context, e))))
+                              .toList(),
+                          onChanged: (value) {
+                            providerValue.onChangeFilterValue(
+                              newValue: value!,
+                              customerId: widget.customerId,
+                            );
+                          },
+                        ),
                       ),
                     ),
                   ],
@@ -107,16 +112,14 @@ class _CustomerProfileState extends State<CustomerProfile> {
                   child: Center(
                     child: customerProvider.getOrders.isEmpty
                         ? Text(
-                            textAlign: TextAlign.center,
-                            'No available Order for ${customerProvider.customer(widget.customerId).firstName} to '
-                            'this filter option')
+                            AppLocalizations.of(context)!.noAvailableOrder,textAlign: TextAlign.center,)
                         : Consumer<CustomerProvider>(
                             builder: (context, providerValue, child) => ListView.builder(
                               itemCount: providerValue.getOrders.length,
                               itemBuilder: (context, index) {
                                 Order targetOrder = providerValue.getOrders[index];
-                                String registerStr = customerProvider.formatMyDate(myDate: targetOrder.registeredDate,returnAsDate: false) as String;
-                                String deadlineStr = customerProvider.formatMyDate(myDate: targetOrder.deadLineDate,returnAsDate: false) as String;
+                                String registerStr = Constants.formatMyDate(myDate: targetOrder.registeredDate,returnAsDate: false) as String;
+                                String deadlineStr = Constants.formatMyDate(myDate: targetOrder.deadLineDate,returnAsDate: false) as String;
                                 return buildDismissible(targetOrder, context, registerStr, deadlineStr);
                                 //                     Card(
                                 //                 color: customerProvider.deadlineColor(
@@ -225,7 +228,7 @@ class _CustomerProfileState extends State<CustomerProfile> {
               SnackBar(
                 width: MediaQuery.of(context).size.width * 90 / 100,
                 action: SnackBarAction(
-                  label: 'Undo',
+                  label: AppLocalizations.of(context)!.undo,
                   onPressed: () async {
                     providerValue.addOrderToOrderList(targetOrder: targetOrder);
                     providerValue.getReportOrders.add(targetOrder);
@@ -234,9 +237,9 @@ class _CustomerProfileState extends State<CustomerProfile> {
                         newOrderList: providerValue.getOrders);
                   },
                 ),
-                content: const Text(
-                  'Order is removed successfully',
-                  style: TextStyle(fontSize: 15),
+                content: Text(
+                  AppLocalizations.of(context)!.orderRemovedSuccessfully,
+                  style: const TextStyle(fontSize: 15),
                 ),
               ),
             );
@@ -250,9 +253,9 @@ class _CustomerProfileState extends State<CustomerProfile> {
           background: Container(
             color: Colors.red,
             alignment: Alignment.center,
-            child: const Text(
-              'order removed',
-              style: TextStyle(
+            child: Text(
+              AppLocalizations.of(context)!.orderRemoved,
+              style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
                 fontSize: 20,
@@ -280,18 +283,18 @@ class _CustomerProfileState extends State<CustomerProfile> {
           size: 100,
         ),
         alignment: Alignment.center,
-        content: const Text(
-          'Are you sure you wanna remove the order?',
+        content: Text(
+          AppLocalizations.of(context)!.askToRemoveOrder,
           textAlign: TextAlign.center,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Delete'),
+            child: Text(AppLocalizations.of(context)!.delete),
           ),
         ],
       ),
@@ -363,7 +366,7 @@ class CustomPopupMenuButton extends StatelessWidget {
             child: SimpleRowForTextIcon(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 mainAxisSize: MainAxisSize.max,
-                text: 'Sewn NOT Delivered',
+                text: AppLocalizations.of(context)!.sewnNotDelivered,
                 icon: const Icon(Icons.circle, color: AppColorsAndThemes.accentColor),
                 firstIconThenText: false)),
         const PopupMenuDivider(height: 10),
@@ -373,7 +376,7 @@ class CustomPopupMenuButton extends StatelessWidget {
           child: SimpleRowForTextIcon(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             mainAxisSize: MainAxisSize.max,
-            text: 'Sewn & Delivered',
+            text: AppLocalizations.of(context)!.sewnAndDelivered,
             icon: Icon(
               Icons.circle,
               color: Colors.green[800],
@@ -388,7 +391,7 @@ class CustomPopupMenuButton extends StatelessWidget {
           child: SimpleRowForTextIcon(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             mainAxisSize: MainAxisSize.max,
-            text: 'In Progress',
+            text: AppLocalizations.of(context)!.inProgress,
             icon: Icon(Icons.circle, color: Colors.orange.shade700),
             firstIconThenText: false,
           ),
@@ -400,7 +403,7 @@ class CustomPopupMenuButton extends StatelessWidget {
 
 
 // show card for user phones
-Widget _buildPhoneCard({required String phoneNumber}) {
+Widget _buildPhoneCard({required BuildContext context,required String phoneNumber}) {
   return Expanded(
     child: Card(
       elevation: 5,
@@ -413,7 +416,7 @@ Widget _buildPhoneCard({required String phoneNumber}) {
           color: Colors.black45,
         ),
         title: Text(
-          phoneNumber.length > 2 ? phoneNumber : 'Not Available',
+          phoneNumber.length > 2 ? phoneNumber : AppLocalizations.of(context)!.notAvailable,
           style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black, fontSize: 17),
         ),
       ),

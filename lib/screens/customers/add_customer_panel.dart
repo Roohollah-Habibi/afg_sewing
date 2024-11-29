@@ -1,5 +1,6 @@
 import 'package:afg_sewing/constants/constants.dart';
 import 'package:afg_sewing/custom_widgets/text_field.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:afg_sewing/models_and_List/customer.dart';
 import 'package:afg_sewing/providers/customer_provider.dart';
 import 'package:afg_sewing/themes/app_colors_themes.dart';
@@ -79,7 +80,7 @@ class _AddCustomerPanelState extends State<AddCustomerPanel> {
         child: Column(
           children: [
             Text(
-              widget.customer != null ? 'Edit profile' : 'Profile',
+              widget.customer != null ? AppLocalizations.of(context)!.editProfile: AppLocalizations.of(context)!.profile,
               style: Theme.of(context)
                   .textTheme
                   .copyWith(displayLarge: const TextStyle(color: AppColorsAndThemes.secondaryColor, fontSize: 35, fontWeight: FontWeight.bold))
@@ -94,7 +95,7 @@ class _AddCustomerPanelState extends State<AddCustomerPanel> {
                       providerValue.selectRegisterDate(context: context);
                     },
                     label:
-                       Text(providerValue.formatMyDate(myDate: providerValue.getCustomerRegisterDate, returnAsDate: false) as String),
+                       Text(Constants.formatMyDate(myDate: providerValue.getCustomerRegisterDate, returnAsDate: false) as String),
                     icon: const Icon(Icons.date_range),
                     style: Theme.of(context).textButtonTheme.style,
                   ),
@@ -103,14 +104,14 @@ class _AddCustomerPanelState extends State<AddCustomerPanel> {
               fieldKey: Constants.fieldKeyForName,
               txtEditingController: nameController,
               padding: const EdgeInsets.fromLTRB(8, 0, 8, 5),
-              label: 'First Name',
+              label: AppLocalizations.of(context)!.firstName,
               prefixIcon: const Icon(Icons.person),
             ),
             CustomTextField(
               fieldKey: Constants.fieldKeyForLast,
               txtEditingController: lastNameController,
               padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 8),
-              label: 'Last Name',
+              label: AppLocalizations.of(context)!.lastName,
               prefixIcon: const Icon(Icons.person),
             ),
             CustomTextField(
@@ -120,7 +121,7 @@ class _AddCustomerPanelState extends State<AddCustomerPanel> {
                 keyboardType: TextInputType.number,
                 maxLength: 8,
                 prefixText: '07',
-                label: 'Phone one',
+                label: AppLocalizations.of(context)!.phoneOne,
                 prefixIcon: const Icon(Icons.mobile_screen_share)),
             CustomTextField(
                 txtEditingController: phoneTwoController,
@@ -129,7 +130,7 @@ class _AddCustomerPanelState extends State<AddCustomerPanel> {
                 maxLength: 8,
                 prefixText: '07',
                 keyboardType: TextInputType.number,
-                label: 'Phone two[Optional]',
+                label: AppLocalizations.of(context)!.phoneTwo,
                 prefixIcon: const Icon(Icons.phone_android)),
             Consumer<CustomerProvider>(
               builder: (context, customerProvider, _) => DropdownButtonFormField<String>(
@@ -139,7 +140,7 @@ class _AddCustomerPanelState extends State<AddCustomerPanel> {
                         : _status[1]
                     : _status[1],
                 decoration: InputDecoration(
-                  labelText: 'Status',
+                  labelText: AppLocalizations.of(context)!.status,
                   enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10.0), borderSide: const BorderSide(color: AppColorsAndThemes.accentColor, width: 2.0)),
                   focusedBorder: OutlineInputBorder(
@@ -157,13 +158,13 @@ class _AddCustomerPanelState extends State<AddCustomerPanel> {
               Consumer<CustomerProvider>(
                 builder: (context, customerProvider, _) => ElevatedButton(
                   onPressed: () => _onSave(customerProvider),
-                  child: Text(widget.customer != null ? 'Edit profile' : 'Save profile'),
+                  child: Text(widget.customer != null ? AppLocalizations.of(context)!.editProfile : AppLocalizations.of(context)!.profile),
                 ),
               ),
               Consumer<CustomerProvider>(
                 builder: (context, customerProvider, _) => ElevatedButton(
                   onPressed: () => customerProvider.onCancel(context),
-                  child: const Text('Cancel'),
+                  child: Text(AppLocalizations.of(context)!.cancel),
                 ),
               ),
             ]),

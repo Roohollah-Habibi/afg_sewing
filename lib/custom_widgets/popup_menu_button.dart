@@ -4,6 +4,7 @@ import 'package:afg_sewing/providers/customer_provider.dart';
 import 'package:afg_sewing/custom_widgets/text_icon_row.dart';
 import 'package:afg_sewing/themes/app_colors_themes.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 // custom popup menu to show [swen, delivered , in progress]
 class CustomPopupMenuButton extends StatelessWidget {
@@ -23,8 +24,8 @@ class CustomPopupMenuButton extends StatelessWidget {
             child: SimpleRowForTextIcon(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 mainAxisSize: MainAxisSize.max,
-                text: 'Sewn NOT Delivered',
-                icon: Icon(Icons.circle, color: AppColorsAndThemes.accentColor),
+                text: AppLocalizations.of(context)!.sewnNotDelivered,
+                icon: const Icon(Icons.circle, color: AppColorsAndThemes.accentColor),
                 firstIconThenText: false)),
         const PopupMenuDivider(height: 10),
         PopupMenuItem(
@@ -33,7 +34,7 @@ class CustomPopupMenuButton extends StatelessWidget {
           child: SimpleRowForTextIcon(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             mainAxisSize: MainAxisSize.max,
-            text: 'Sewn & Delivered',
+            text: AppLocalizations.of(context)!.sewnAndDelivered,
             icon: Icon(
               Icons.circle,
               color: Colors.green[800],
@@ -48,7 +49,7 @@ class CustomPopupMenuButton extends StatelessWidget {
           child: SimpleRowForTextIcon(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             mainAxisSize: MainAxisSize.max,
-            text: 'In Progress',
+            text: AppLocalizations.of(context)!.inProgress,
             icon: Icon(Icons.circle, color: Colors.orange.shade700),
             firstIconThenText: false,
           ),

@@ -1,3 +1,4 @@
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:afg_sewing/models_and_List/customer.dart';
 import 'package:afg_sewing/providers/customer_provider.dart';
 import 'package:afg_sewing/themes/app_colors_themes.dart';
@@ -28,20 +29,20 @@ class _CustomersState extends State<Customers> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('مشتری ها'),
+        title: Text(AppLocalizations.of(context)!.customers),
       ),
       floatingActionButton: ElevatedButton.icon(
         onPressed: () {
           provider.onAddNewCustomerBtn(context);
         },
         icon: const Icon(Icons.add),
-        label: const Text('New Customer'),
+        label: Text(AppLocalizations.of(context)!.newCustomer),
       ),
       body: Center(
           child: Selector<CustomerProvider,List<Customer>>(
             selector: (_, provider) => provider.getCustomers,
-            builder:(_,providerVaue,__) => providerVaue.isEmpty ?Text(
-                    'No Customer is available',
+            builder:(_,providerValue,__) => providerValue.isEmpty ?Text(
+                    AppLocalizations.of(context)!.noCustomerAvailable,
                     style: Theme.of(context).textTheme.titleLarge,
                   )
               : Consumer<CustomerProvider>(
@@ -49,9 +50,9 @@ class _CustomersState extends State<Customers> {
                     return Padding(
                       padding: const EdgeInsets.fromLTRB(8,8,8,70),
                       child: ListView.separated(
-                      itemCount: providerVaue.length,
+                      itemCount: providerValue.length,
                       itemBuilder: (context, index) {
-                        Customer targetCustomer = providerVaue[index];
+                        Customer targetCustomer = providerValue[index];
                         return ListTile(
                           onTap: () {
                             Navigator.of(context).pushNamed(
@@ -64,7 +65,7 @@ class _CustomersState extends State<Customers> {
                                const Icon(Icons.online_prediction_outlined,color: Colors.green)
                               : const Icon(Icons.online_prediction,color: Colors.red),
                           subtitle:
-                              Text('Orders: ${targetCustomer.customerOrder.length}'),
+                              Text('${AppLocalizations.of(context)!.orders}: ${targetCustomer.customerOrder.length}'),
                           trailing: buildPopupMenuButton(
                               context.read<CustomerProvider>(), context, targetCustomer),
                         );
@@ -97,21 +98,21 @@ class _CustomersState extends State<Customers> {
                 size: 150,
                 color: AppColorsAndThemes.secondaryColor,
               ),
-              content: const Text(
-                'Customer is about to delete!',
+              content: Text(
+                AppLocalizations.of(context)!.alertRemovingCustomer,
                 textAlign: TextAlign.center,
               ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Cancel'),
+                  child: Text(AppLocalizations.of(context)!.cancel),
                 ),
                 TextButton(
                   onPressed: () async {
                     await customerProvider.deleteCustomer(
                       context: context, customer: customer);
                   },
-                  child: const Text('OKey'),
+                  child: Text(AppLocalizations.of(context)!.oKey),
                 ),
               ],
             ),
@@ -120,13 +121,13 @@ class _CustomersState extends State<Customers> {
       },
       itemBuilder: (BuildContext context) {
         return [
-          const PopupMenuItem<String>(
+          PopupMenuItem<String>(
             value: 'edit',
-            child: Text('Edit'),
+            child: Text(AppLocalizations.of(context)!.edit),
           ),
-          const PopupMenuItem<String>(
+          PopupMenuItem<String>(
             value: 'delete',
-            child: Text('Delete'),
+            child: Text(AppLocalizations.of(context)!.delete),
           ),
         ];
       },

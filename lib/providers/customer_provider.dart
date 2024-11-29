@@ -4,19 +4,15 @@ import 'package:afg_sewing/models_and_List/order.dart';
 import 'package:afg_sewing/page_routing/rout_manager.dart';
 import 'package:afg_sewing/screens/customers/add_customer_panel.dart';
 import 'package:afg_sewing/themes/app_colors_themes.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
-
-final Box _swingBox = Hive.box('SwingDb');
-
 enum PriceType { total, received, remaining }
-Map<String,int> _orderStatusColorFromDb = (_swingBox.get('orderStatusColor') as Map?)?.cast<String,int>() ?? {};
+Map<String,int> _orderStatusColorFromDb = (Constants.swingBox.get('orderStatusColor') as Map?)?.cast<String,int>() ?? {};
 class CustomerProvider extends ChangeNotifier {
   CustomerProvider() {
-    _orderRegister = formatMyDate(myDate: DateTime.now()) as DateTime;
+    _orderRegister = Constants.formatMyDate(myDate: DateTime.now()) as DateTime;
   }  //constructor initialize all orders ==================================================
   double _orderTotalPrice = 0;
   double _orderReceivedPrice = 0;
@@ -28,9 +24,9 @@ class CustomerProvider extends ChangeNotifier {
     'Sewn NOT Delivered',
     'Expired',
     'Just today'];// this variable shows filters in profile and report pages
-  String _selectedFilter = (_swingBox.get('profileFilterValue') as String?) ?? 'All';
-  String _reportSelectedFilterValue = (_swingBox.get('reportFilterValue') as String?) ?? 'All';
-  // this stores the status color for each order in order to use them inside report page
+  String _selectedFilter = (Constants.swingBox.get('profileFilterValue') as String?) ?? 'All';
+  String _reportSelectedFilterValue = (Constants.swingBox.get('reportFilterValue') as String?) ?? 'All';
+  // this stores the status color for each order in order to use them inside all order page
   Map<String, Color> _reportOrderStatusColor = _orderStatusColorFromDb.map((key, value) => MapEntry(key, Color(value)));
   Color _deadlineOrderColor = AppColorsAndThemes.secondaryColor;// this is default color but changes when user not select a deadline
   /// This map is used to save register and deadline date info. as String
@@ -41,8 +37,8 @@ class CustomerProvider extends ChangeNotifier {
   late DateTime _customerRegisterDate;
   final Map<String, bool> _errors = {};
 
-  List<Customer> _customerList = _swingBox.values.whereType<Customer>().toList().cast<Customer>();
-  List<Order> _reportOrders = _swingBox.values.whereType<Customer>().toList().cast<Customer>().expand((element) => element.customerOrder).toList();
+  List<Customer> _customerList = Constants.swingBox.values.whereType<Customer>().toList().cast<Customer>();
+  List<Order> _reportOrders = Constants.swingBox.values.whereType<Customer>().toList().cast<Customer>().expand((element) => element.customerOrder).toList();
   List<Order> _allCustomersOrders = [];
 
   List<bool> _expandedStatusForReports = [];
@@ -52,6 +48,7 @@ class CustomerProvider extends ChangeNotifier {
 
   // Getters ====================================================================
   List<Customer> get getCustomers => _customerList;
+
   Map<String,Color> get getReportOrderStatusColor => _reportOrderStatusColor;
   List<bool> get getExpandedStatusListForReports => _expandedStatusForReports;
   bool isCollapsed(int index) => getExpandedStatusListForReports[index];
@@ -144,14 +141,14 @@ class CustomerProvider extends ChangeNotifier {
       _orderRegister = order.registeredDate;
       _orderDeadline = order.deadLineDate;
       _orderTimesInfo['register'] =
-          formatMyDate(myDate: _orderRegister, returnAsDate: false) as String;
+      Constants.formatMyDate(myDate: _orderRegister, returnAsDate: false) as String;
       _orderTimesInfo['deadline'] =
-          formatMyDate(myDate: _orderDeadline!, returnAsDate: false) as String;
+      Constants.formatMyDate(myDate: _orderDeadline!, returnAsDate: false) as String;
       // changeDeadlineColor(changeToRed: false);
     } else {
-      _orderRegister = formatMyDate(myDate: DateTime.now(), returnAsDate: true) as DateTime;
+      _orderRegister = Constants.formatMyDate(myDate: DateTime.now(), returnAsDate: true) as DateTime;
       _orderTimesInfo['register'] =
-          formatMyDate(myDate: _orderRegister, returnAsDate: false) as String;
+      Constants.formatMyDate(myDate: _orderRegister, returnAsDate: false) as String;
       _orderTimesInfo['deadline'] = 'Pick a deadline';
     }
   }
@@ -166,22 +163,22 @@ class CustomerProvider extends ChangeNotifier {
     _orderRegister = order.registeredDate;
     _orderDeadline = order.deadLineDate;
     _orderTimesInfo['register'] =
-        formatMyDate(myDate: _orderRegister, returnAsDate: false) as String;
+    Constants.formatMyDate(myDate: _orderRegister, returnAsDate: false) as String;
     _orderTimesInfo['deadline'] =
-        formatMyDate(myDate: _orderDeadline!, returnAsDate: false) as String;
+    Constants.formatMyDate(myDate: _orderDeadline!, returnAsDate: false) as String;
   }
 
   /// Pick register date while saving or editing an order
   Future<void> pickRegisterDate(BuildContext context) async {
     final DateTime? pickedDate = await showDatePicker(
       context: context,
-      initialDate: formatMyDate(myDate: DateTime.now()) as DateTime,
+      initialDate: Constants.formatMyDate(myDate: DateTime.now()) as DateTime,
       firstDate: DateTime(2000), // Set the earliest date
       lastDate: DateTime(2100), // Set the latest date
     );
     if (pickedDate != null) {
-      _orderRegister = formatMyDate(myDate: pickedDate, returnAsDate: true) as DateTime;
-      _orderTimesInfo['register'] = formatMyDate(myDate: pickedDate, returnAsDate: false) as String;
+      _orderRegister = Constants.formatMyDate(myDate: pickedDate, returnAsDate: true) as DateTime;
+      _orderTimesInfo['register'] = Constants.formatMyDate(myDate: pickedDate, returnAsDate: false) as String;
       notifyListeners();
     }
   }
@@ -190,13 +187,13 @@ class CustomerProvider extends ChangeNotifier {
   Future<void> pickDeadline(BuildContext context) async {
     final DateTime? pickedDate = await showDatePicker(
       context: context,
-      initialDate: formatMyDate(myDate: DateTime.now()) as DateTime,
+      initialDate: Constants.formatMyDate(myDate: DateTime.now()) as DateTime,
       firstDate: DateTime(2000), // Set the earliest date
       lastDate: DateTime(2100), // Set the latest date
     );
     if (pickedDate != null) {
-      _orderDeadline = formatMyDate(myDate: pickedDate, returnAsDate: true) as DateTime;
-      _orderTimesInfo['deadline'] = formatMyDate(myDate: pickedDate, returnAsDate: false) as String;
+      _orderDeadline = Constants.formatMyDate(myDate: pickedDate, returnAsDate: true) as DateTime;
+      _orderTimesInfo['deadline'] = Constants.formatMyDate(myDate: pickedDate, returnAsDate: false) as String;
       changeDeadlineColor(changeToRed: false);
       notifyListeners();
     }
@@ -219,13 +216,6 @@ class CustomerProvider extends ChangeNotifier {
   double setRemainingPrice({required double total, required double received}) {
     _orderRemainingPrice = (_orderTotalPrice.toInt() - _orderReceivedPrice.toInt());
     return _orderReceivedPrice;
-  }
-
-  // This method is to get a date and return a formatted date just to make the future codes more cleaner LIKE 2024-01-21 - 00:00:00
-  dynamic formatMyDate({required DateTime? myDate, bool returnAsDate = true}) {
-    final String dateStr = DateFormat('yyyy-MM-dd').format(myDate!);
-    DateTime myTime = DateFormat('yyyy-MM-dd').parse(dateStr);
-    return returnAsDate ? myTime : '${myTime.day}-${myTime.month}-${myTime.year}';
   }
 
   // handle error while saving new or edited order
@@ -296,7 +286,7 @@ class CustomerProvider extends ChangeNotifier {
     await Customer.addNewOrder(newOrder: newOrder, customerId: customerId, replaceOrderId: targetOrder.id);
     final Customer saveCustomerWithStatus = customer(customerId);
     saveCustomerWithStatus.status = true;
-    await _swingBox.put(customerId, saveCustomerWithStatus);
+    await Constants.swingBox.put(customerId, saveCustomerWithStatus);
     _orderTotalPrice = 0;
     _orderReceivedPrice = 0;
     _orderRemainingPrice = 0;
@@ -316,7 +306,7 @@ class CustomerProvider extends ChangeNotifier {
 
   /// DELETE AN EXISTING CUSTOMER and show an snack bar to notify user for successful deletion
   Future<void> deleteCustomer({required BuildContext context, required Customer customer}) async {
-    await _swingBox.delete(customer.id);
+    await Constants.swingBox.delete(customer.id);
     _customerList.removeWhere((element) => element == customer);
     _reportOrders.removeWhere((element) => element.customerId == customer.id);
     notifyListeners();
@@ -336,7 +326,7 @@ class CustomerProvider extends ChangeNotifier {
   void selectRegisterDate({required BuildContext context}) async {
     final getDate = await showDatePicker(context: context, firstDate: DateTime(2000), lastDate: DateTime(2200));
     if (getDate != null) {
-      _customerRegisterDate = formatMyDate(myDate: getDate) as DateTime;
+      _customerRegisterDate = Constants.formatMyDate(myDate: getDate) as DateTime;
     notifyListeners();
     }
     notifyListeners();
@@ -454,7 +444,7 @@ class CustomerProvider extends ChangeNotifier {
   /// ADD NEW CUSTOMER
   void onAddNewCustomerBtn(BuildContext context, {Customer? customer}) {
     notifyListeners();
-    _customerRegisterDate = formatMyDate(myDate: customer?.registerDate ?? DateTime.now()) as DateTime;
+    _customerRegisterDate = Constants.formatMyDate(myDate: customer?.registerDate ?? DateTime.now()) as DateTime;
     print('========== $_customerRegisterDate');
     showModalBottomSheet(
       useSafeArea: true,
@@ -505,7 +495,7 @@ class CustomerProvider extends ChangeNotifier {
   void filterValues(
       {required String value, String customerId = '', bool filterValueForReport = false,bool
       shouldNotify = true}) async {
-    List<Order> allOrders = _swingBox.values
+    List<Order> allOrders = Constants.swingBox.values
         .whereType<Customer>()
         .toList()
         .cast<Customer>()
@@ -513,16 +503,17 @@ class CustomerProvider extends ChangeNotifier {
           (element) => element.customerOrder,
         )
         .toList();
-    DateTime today = formatMyDate(myDate: DateTime.now()) as DateTime;
+    DateTime today = Constants.formatMyDate(myDate: DateTime.now()) as DateTime;
     switch (value) {
       case 'All':
-        if (!filterValueForReport)
+        if (!filterValueForReport) {
           _allCustomersOrders = customer(customerId)
               .customerOrder
               .where(
                 (element) => element.customerId == customerId,
               )
               .toList();
+        }
         _reportOrders = allOrders;
         if(shouldNotify)notifyListeners();
 
@@ -579,13 +570,13 @@ class CustomerProvider extends ChangeNotifier {
   // CHANGE THE ORDER STATUS [Swen NOT Delivered , Sewn & Delivered , In Progress]
   void onChangeFilterValue({required String newValue, required String customerId}) async {
     _selectedFilter = newValue;
-    await _swingBox.put('profileFilterValue', _selectedFilter);
+    await Constants.swingBox.put('profileFilterValue', _selectedFilter);
     filterValues(value: _selectedFilter, customerId: customerId);
   }
 
   void onChangeReportFilterValue(String newValue) async{
     _reportSelectedFilterValue = newValue;
-    await _swingBox.put('reportFilterValue', _reportSelectedFilterValue);
+    await Constants.swingBox.put('reportFilterValue', _reportSelectedFilterValue);
     filterValues(value: newValue, filterValueForReport: true);
   }
 
@@ -607,7 +598,7 @@ class CustomerProvider extends ChangeNotifier {
 // ON ORDER POPUP
   void onPopupMenu(
       {required Order order, required String value, required Customer customer}) async {
-    Map<String,int> _localStatusOrderColor = {};
+    Map<String,int> localStatusOrderColor = {};
     switch (value) {
       case 'Sewn NOT Delivered':
         order.isDone = true;
@@ -630,8 +621,36 @@ class CustomerProvider extends ChangeNotifier {
     }
     filterValues(value: _selectedFilter,customerId: customer.id);
     await Customer.addNewOrder(newOrder: order, customerId: customer.id, replaceOrderId: order.id);
-    _localStatusOrderColor = _reportOrderStatusColor.map((key, value) => MapEntry(key, value.value));
-    await _swingBox.put('orderStatusColor', _localStatusOrderColor);
+    localStatusOrderColor = _reportOrderStatusColor.map((key, value) => MapEntry(key, value.value));
+    await Constants.swingBox.put('orderStatusColor', localStatusOrderColor);
     notifyListeners();
   }
+  Map<String,dynamic> reportInfoBaseDate({int day = 1}){
+    List<Order> allOrder = _customerList.expand((element) => element.customerOrder).toList();
+    List<Customer> customer = _customerList.where((foundCustomer) => Constants.todayAsDate.difference(foundCustomer.registerDate).inDays <= day).toList();
+    List<Order> orders = allOrder.where((foundOrder) => Constants.todayAsDate.difference(foundOrder.registeredDate).inDays <= day).toList();
+    return {
+      'customers': customer.length,
+      'orders':orders.length};
+  }
+
+  String translateFilter(BuildContext context, String filter) {
+    switch (filter) {
+      case 'All':
+        return AppLocalizations.of(context)!.all;
+      case 'In Progress':
+        return AppLocalizations.of(context)!.inProgress;
+      case 'Sewn & Delivered':
+        return AppLocalizations.of(context)!.sewnAndDelivered;
+      case 'Sewn NOT Delivered':
+        return AppLocalizations.of(context)!.sewnNotDelivered;
+      case 'Expired':
+        return AppLocalizations.of(context)!.expired;
+      case 'Just today':
+        return AppLocalizations.of(context)!.justToday;
+      default:
+        return filter;
+    }
+  }
+
 }

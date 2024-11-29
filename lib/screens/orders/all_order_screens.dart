@@ -1,9 +1,10 @@
+import 'package:afg_sewing/constants/constants.dart';
 import 'package:afg_sewing/custom_widgets/popup_menu_button.dart';
 import 'package:afg_sewing/models_and_List/customer.dart';
 import 'package:afg_sewing/models_and_List/order.dart';
 import 'package:afg_sewing/page_routing/rout_manager.dart';
 import 'package:afg_sewing/providers/customer_provider.dart';
-import 'package:afg_sewing/screens/reports/reports.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:afg_sewing/themes/app_colors_themes.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -181,7 +182,7 @@ class _AllOrderScreensState extends State<AllOrderScreens> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('All Orders'),
+        title: Text(AppLocalizations.of(context)!.allOrders),
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -195,7 +196,7 @@ class _AllOrderScreensState extends State<AllOrderScreens> {
                 builder: (_, providerValue, __) => Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Text(
-                    'Orders: $providerValue',
+                    '${AppLocalizations.of(context)!.orders}: $providerValue',
                     style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -215,7 +216,7 @@ class _AllOrderScreensState extends State<AllOrderScreens> {
                       items: providerValue.getProfileFilters.map<DropdownMenuItem<String>>((String value) {
                         return DropdownMenuItem<String>(
                           value: value,
-                          child: Text(value),
+                          child: Text(providerValue.translateFilter(context, value)),
                         );
                       }).toList(),
                     ),
@@ -226,12 +227,12 @@ class _AllOrderScreensState extends State<AllOrderScreens> {
           ),
           Consumer<CustomerProvider>(
             builder: (context, providerValue, child) => providerValue.getReportOrders.isEmpty
-                ? Expanded(
+                ?  Expanded(
                     child: Center(
                       child: Text(
                         textAlign: TextAlign.center,
-                        'No Order is Available for this Filter',
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: AppColorsAndThemes.secondaryColor),
+                        AppLocalizations.of(context)!.noAvailableOrder,
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: AppColorsAndThemes.secondaryColor),
                       ),
                     ),
                   )
@@ -242,8 +243,8 @@ class _AllOrderScreensState extends State<AllOrderScreens> {
                       itemBuilder: (context, index) {
                         final Order order = providerValue.getReportOrders[index];
                         Customer myCustomer = context.read<CustomerProvider>().getCustomers.firstWhere((element) => element.id == order.customerId);
-                        int differenceDates = (providerValue.formatMyDate(myDate: order.deadLineDate) as DateTime)
-                            .difference((providerValue.formatMyDate(myDate: DateTime.now()) as DateTime))
+                        int differenceDates = (Constants.formatMyDate(myDate: order.deadLineDate) as DateTime)
+                            .difference((Constants.formatMyDate(myDate: DateTime.now()) as DateTime))
                             .inDays;
                         bool isTileCollapsed = providerValue.isCollapsed(index);
                         return Card(
@@ -265,25 +266,28 @@ class _AllOrderScreensState extends State<AllOrderScreens> {
                               margin: const EdgeInsets.symmetric(vertical: 10),
                               decoration: BoxDecoration(
                                   color: isTileCollapsed ? AppColorsAndThemes.secondaryColor : AppColorsAndThemes.optional,
-                                  boxShadow: <BoxShadow>[
+                                  boxShadow: const <BoxShadow>[
                                     BoxShadow(
                                       color: Colors.black,
                                       blurRadius: 10,
                                     )
                                   ],
-                                  borderRadius: BorderRadiusDirectional.all(Radius.circular(20))),
+                                  borderRadius: const BorderRadiusDirectional.all(Radius.circular(20))),
                               // margin: const EdgeInsets.all(16),
                               width: MediaQuery.of(context).size.width * 50 / 100,
                               height: MediaQuery.of(context).size.height * 20 / 100,
                               child: Column(
                                 children: [
-                                  Text('Registered: ${providerValue.formatMyDate(myDate: order.registeredDate, returnAsDate: false) as String}',
+                                  Text('${AppLocalizations.of(context)!.registered} ${Constants.formatMyDate(myDate: order.registeredDate,
+                                returnAsDate: false)
+                              as String}',
                                       style: TextStyle(
                                           fontSize: 17,
                                           fontWeight: FontWeight.bold,
                                           color: isTileCollapsed ? AppColorsAndThemes.subPrimaryColor : AppColorsAndThemes.secondaryColor)),
                                   const SizedBox(height: 20),
-                                  Text('DeadLine : ${providerValue.formatMyDate(myDate: order.deadLineDate, returnAsDate: false) as String}',
+                                  Text('${AppLocalizations.of(context)!.deadline}: ${Constants.formatMyDate(myDate: order.deadLineDate,
+                                      returnAsDate: false) as String}',
                                       style: TextStyle(
                                           fontSize: 17,
                                           fontWeight: FontWeight.bold,
@@ -291,7 +295,9 @@ class _AllOrderScreensState extends State<AllOrderScreens> {
                                   const SizedBox(height: 10),
                                   Flexible(
                                     child: Text(
-                                      differenceDates < 0 ? 'Days past: $differenceDates' : 'Days left: $differenceDates',
+                                      differenceDates < 0 ? '${AppLocalizations.of(context)!.daysPast} $differenceDates' : '${AppLocalizations.of
+                                        (context)!.daysLeft} '
+                                          '$differenceDates',
                                       style: TextStyle(
                                           fontSize: 17,
                                           fontWeight: FontWeight.bold,
@@ -312,7 +318,7 @@ class _AllOrderScreensState extends State<AllOrderScreens> {
                                         '': order.id
                                   }),
                                   label: Text(
-                                    'Order: ${myCustomer.id}',
+                                    '${AppLocalizations.of(context)!.orderId} ${myCustomer.id}',
                                     style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17, color: Colors.yellow),
                                   ),
                                   style: ElevatedButton.styleFrom(elevation: 5,shadowColor: AppColorsAndThemes.optional),

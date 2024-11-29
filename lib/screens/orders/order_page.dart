@@ -1,10 +1,11 @@
+import 'package:afg_sewing/constants/constants.dart';
 import 'package:afg_sewing/custom_widgets/text_field.dart';
 import 'package:afg_sewing/models_and_List/order.dart';
 import 'package:afg_sewing/models_and_List/textfields_key_value_map.dart';
 import 'package:afg_sewing/providers/customer_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 class OrderPage extends StatefulWidget {
   final String customerId;
   final String orderId;
@@ -48,7 +49,7 @@ class _OrderPageState extends State<OrderPage> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Text(widget.orderId.isEmpty ? 'Order' : 'Edit Order'),
+        title: Text(widget.orderId.isEmpty ? AppLocalizations.of(context)!.orders : AppLocalizations.of(context)!.editOrder),
       ),
       body: Builder(builder: (context) {
         final CustomerProvider customerProvider =
@@ -94,7 +95,7 @@ class _OrderPageState extends State<OrderPage> {
                   child: TextButton.icon(
                     onPressed: () async =>
                         await customerProvider.pickRegisterDate(context),
-                    label: Text(customerProvider.formatMyDate(
+                    label: Text(Constants.formatMyDate(
                         myDate: customerProvider.getOrderRegister!,
                         returnAsDate: false) as String),
                     icon: const Icon(Icons.date_range),
@@ -111,7 +112,7 @@ class _OrderPageState extends State<OrderPage> {
                     onPressed: () async =>
                         await customerProvider.pickDeadline(context),
                     label: Text(customerProvider.getOrderInfo['deadline'] ??
-                        'pick a deadline'),
+                        AppLocalizations.of(context)!.pickDeadLine),
                     icon: const Icon(Icons.date_range),
                   ),
                 ),
@@ -140,7 +141,7 @@ class _OrderPageState extends State<OrderPage> {
                         customerId: widget.customerId,
                         targetOrder: foundOrder);
                   },
-                  label: Text(widget.orderId.isEmpty ?'Save' : 'Edit'),
+                  label: Text(widget.orderId.isEmpty ? AppLocalizations.of(context)!.save : AppLocalizations.of(context)!.edit),
                   icon: const Icon(Icons.save),
                 ),
                 const SizedBox(
@@ -151,7 +152,7 @@ class _OrderPageState extends State<OrderPage> {
                     customerProvider.onCancelOrder(
                         context: context, orderId: widget.orderId);
                   },
-                  label: const Text('Cancel'),
+                  label: Text(AppLocalizations.of(context)!.cancel),
                   icon: const Icon(Icons.cancel_outlined),
                 ),
               ],

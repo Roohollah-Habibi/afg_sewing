@@ -3,7 +3,7 @@ import 'package:afg_sewing/page_routing/rout_manager.dart';
 import 'package:afg_sewing/providers/sample_provider.dart';
 import 'package:afg_sewing/screens/samples/sample_src.dart';
 import 'package:afg_sewing/themes/app_colors_themes.dart';
-
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -68,7 +68,7 @@ class SamplePage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Samples'),
+        title: Text(AppLocalizations.of(context)!.samples),
       ),
       body: Center(
         child: ListView.builder(

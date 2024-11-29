@@ -1,5 +1,5 @@
-import 'package:afg_sewing/models_and_List/customer.dart';
-import 'package:afg_sewing/models_and_List/order.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:afg_sewing/providers/customer_provider.dart';
 import 'package:afg_sewing/themes/app_colors_themes.dart';
 import 'package:flutter/material.dart';
@@ -16,18 +16,23 @@ class ReportTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<CustomerProvider>(
       builder: (_, provider, __) {
-        List<Customer> getCustomers =
-            provider.getCustomers.where((foundCustomer) => _today.difference(foundCustomer.registerDate).inDays <= days).toList();
-        int numberOfLastWeekCustomers = getCustomers.length;
-        List<Order> getOrders = getCustomers.expand((element) => element.customerOrder).toList();
-        int numberOfLastWeekOrders = getOrders.where((foundOrder) => _today.difference(foundOrder.registeredDate).inDays <= days).toList().length;
+        final reportData = provider.reportInfoBaseDate(day: days);
+        int customersInDays = reportData['customers'] as int;
+        int ordersInDays = reportData['orders'] as int;
+        // List<Customer> getCustomers =
+        //     provider.getCustomers.where((foundCustomer) => _today.difference(foundCustomer.registerDate).inDays <= days).toList();
+        // int numberOfLastWeekCustomers = getCustomers.length;
+        // List<Order> getOrders = getCustomers.expand((element) => element.customerOrder).toList();
+        // int numberOfLastWeekOrders = getOrders.where((foundOrder) => _today.difference(foundOrder.registeredDate).inDays <= days).toList().length;
         return buildTabContainer(
-            reportCustomerTxt: 'Customers: ',
-            reportOrderTxt: 'Orders: ',
-            reportCustomerData: '$numberOfLastWeekCustomers',
-            reportOrderData: '$numberOfLastWeekOrders',
+            reportCustomerTxt: AppLocalizations.of(context)!.customers,
+            reportOrderTxt: AppLocalizations.of(context)!.orders,
+            reportCustomerData: '$customersInDays',
+            reportOrderData: '$ordersInDays',
             reportTitleColor: AppColorsAndThemes.secondaryColor,
-            reportContentColor: Colors.black);
+            reportContentColor: Colors.black,
+          context: context,
+        );
       },
     );
   }
@@ -40,6 +45,7 @@ Container buildTabContainer({
   required String reportOrderData,
   Color? reportTitleColor,
   Color? reportContentColor,
+  required BuildContext context,
 }) {
   return Container(
     color: Colors.black12,
@@ -48,8 +54,10 @@ Container buildTabContainer({
       children: [
         _buildRowReports(text: reportCustomerTxt, content: reportCustomerData, reportDataColor: reportContentColor, reportTitleColor: reportTitleColor),
         _buildRowReports(text: reportOrderTxt, content: reportOrderData, reportDataColor: reportContentColor, reportTitleColor: reportTitleColor),
-        _buildRowReports(text: 'Employees: ', content: 'Coming soon', reportDataColor: reportContentColor, reportTitleColor: reportTitleColor),
-        _buildRowReports(text: 'Last Backup: ', content: 'Coming soon', reportDataColor: reportContentColor, reportTitleColor: reportTitleColor),
+        _buildRowReports(text: AppLocalizations.of(context)!.employees, content: 'Coming soon', reportDataColor: reportContentColor, reportTitleColor:
+        reportTitleColor),
+        _buildRowReports(text: AppLocalizations.of(context)!.lastBackup, content: 'Coming soon', reportDataColor: reportContentColor, reportTitleColor:
+        reportTitleColor),
       ],
     ),
   );
