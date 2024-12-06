@@ -27,7 +27,6 @@ class _AddCustomerPanelState extends State<AddCustomerPanel> {
   final List<String> _status = ['Active', 'Inactive'];
   late final List<DropdownMenuItem<String>> userStatus;
   final String _todayStr = DateFormat('yyyy-MM-dd').format(DateTime.now());
-  late final DateTime _today;
 
   DateTime? providerShowDateTime(BuildContext context) => context.watch<CustomerProvider>().getCustomerRegisterDate;
 
@@ -42,7 +41,6 @@ class _AddCustomerPanelState extends State<AddCustomerPanel> {
   @override
   void initState() {
     super.initState();
-    _today = DateFormat('yyyy-MM-dd').parse(_todayStr);
     nameController = TextEditingController(text: widget.customer?.firstName);
     lastNameController = TextEditingController(text: widget.customer?.lastName);
     phoneOneController =
