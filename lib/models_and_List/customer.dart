@@ -89,6 +89,7 @@ class Customer extends HiveObject with EquatableMixin {
   }
 
 
+
   @override
   List<Object?> get props =>
       [

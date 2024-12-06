@@ -5,11 +5,9 @@ import 'package:afg_sewing/models_and_List/customer.dart';
 import 'package:afg_sewing/providers/customer_provider.dart';
 import 'package:afg_sewing/themes/app_colors_themes.dart';
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-
-const String appDb = 'SwingDb';
 
 class AddCustomerPanel extends StatefulWidget {
   final Customer? customer;
@@ -21,7 +19,6 @@ class AddCustomerPanel extends StatefulWidget {
 }
 
 class _AddCustomerPanelState extends State<AddCustomerPanel> {
-  final Box swingDB = Hive.box(appDb);
   late TextEditingController nameController;
   late TextEditingController lastNameController;
   late TextEditingController phoneOneController;
@@ -95,7 +92,7 @@ class _AddCustomerPanelState extends State<AddCustomerPanel> {
                       providerValue.selectRegisterDate(context: context);
                     },
                     label:
-                       Text(Constants.formatMyDate(myDate: providerValue.getCustomerRegisterDate, returnAsDate: false) as String),
+                    Text(Constants.formatMyDate(myDate: providerValue.getCustomerRegisterDate, returnAsDate: false) as String),
                     icon: const Icon(Icons.date_range),
                     style: Theme.of(context).textButtonTheme.style,
                   ),
